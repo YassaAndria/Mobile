@@ -7,7 +7,9 @@
     "newArchEnabled": true,
     "scheme": "rabta",
     "linking": {
-      "prefixes": ["rabta://"],
+      "prefixes": [
+        "rabta://"
+      ],
       "config": {
         "screens": {
           "group/invite/[inviteToken]": "group/invite/:inviteToken"
@@ -41,7 +43,10 @@
               "pathPrefix": "/group/invite"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "adaptiveIcon": {
@@ -68,7 +73,8 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "tsconfigPaths": true

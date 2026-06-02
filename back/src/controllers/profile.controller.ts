@@ -5,6 +5,7 @@ import { AppError } from '../utils/AppError';
 import Job from '../models/Job';
 import Chat from '../models/chat';
 import mongoose from 'mongoose';
+import { parsePhoneNumberFromString, CountryCode } from 'libphonenumber-js';
 
 // 1. جلب بيانات البروفايل الشخصي (لليوزر اللي عامل لوجين)
 export const getMyProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -433,3 +434,52 @@ export const addConnection = catchAsync(async (req: Request, res: Response, next
     data: { user: updatedUser }
   });
 });
+
+// 14. Sync Contacts (Match phonebook contacts with registered users)
+export const syncContacts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { contacts, regionCode } = req.body;
+
+  if (!contacts || !Array.isArray(contacts)) {
+    return next(new AppError('Please provide an array of contacts.', 400));
+  }
+
+  const defaultRegion = (regionCode || 'EG') as CountryCode;
+  
+  const standardizedNumbers: string[] = [];
+  const rawToStandardizedMap = new Map<string, string>();
+
+  // Sanitize and format each number to E.164
+  contacts.forEach((phone: string) => {
+    const phoneNumber = parsePhoneNumberFromString(phone, defaultRegion);
+    if (phoneNumber && phoneNumber.isValid()) {
+      const e164 = phoneNumber.format('E.164');
+      if (!standardizedNumbers.includes(e164)) {
+        standardizedNumbers.push(e164);
+        rawToStandardizedMap.set(e164, phone); // Store raw mapping for display
+      }
+    }
+  });
+
+  // Query database for matched standardized numbers
+  const registeredUsers = await User.find({
+    phoneNumber: { $in: standardizedNumbers }
+  }).select('fullName avatar phoneNumber jobTitle status role');
+
+  const registeredNumbers = registeredUsers.map(user => user.phoneNumber as string);
+
+  // Unregistered numbers are those not found in the DB (return original format for display)
+  const unregisteredNumbers = standardizedNumbers
+    .filter(num => !registeredNumbers.includes(num))
+    .map(num => ({
+      originalNumber: rawToStandardizedMap.get(num) || num,
+      standardizedNumber: num
+    }));
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      registeredContacts: registeredUsers,
+      unregisteredNumbers: unregisteredNumbers
+    }
+  });
+});

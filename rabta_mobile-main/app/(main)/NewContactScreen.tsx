@@ -4,6 +4,7 @@ import {
   StyleSheet, ActivityIndicator, Image, Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppSelector } from '../../src/store/hooks';
 import axiosInstance from '../../src/api/axiosInstance';
@@ -57,6 +58,8 @@ export default function NewContactScreen() {
     email: { fontSize: (Typography.caption?.fontSize || 11), color: colors.textMuted, marginTop: 2 },
     msgBtn: { backgroundColor: colors.purple10, borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs },
     msgText: { color: colors.purple, fontWeight: '600', fontSize: (Typography.bodySmall?.fontSize || 13) },
+    syncBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.purple10, borderRadius: Radius.md, paddingVertical: Spacing.md, marginTop: Spacing.md, gap: Spacing.sm },
+    syncBtnText: { color: colors.purple, fontWeight: '600', fontSize: (Typography.bodySmall?.fontSize || 14) },
   });
 
   return (
@@ -74,6 +77,10 @@ export default function NewContactScreen() {
           onChangeText={setQuery}
           autoFocus
         />
+        <TouchableOpacity style={s.syncBtn} onPress={() => router.push('/(main)/contacts-sync')}>
+          <MaterialIcons name="sync" size={20} color={colors.purple} />
+          <Text style={s.syncBtnText}>Sync Phone Contacts</Text>
+        </TouchableOpacity>
       </View>
       {loading ? (
         <ActivityIndicator color={colors.purple} style={{ marginTop: 32 }} />

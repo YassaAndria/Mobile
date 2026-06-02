@@ -24,6 +24,7 @@ import {
   getRecentContacts,
   findByPhone,
   addConnection,
+  syncContacts,
 } from "../controllers/profile.controller";
 import {
   toggleBlockUser,
@@ -142,6 +143,7 @@ router.get("/users/my-contacts", protect, getMyContacts);
 router.get("/users/recent-contacts", protect, getRecentContacts);
 router.get("/users/find-by-phone", protect, findByPhone);
 router.post("/users/add-connection", protect, addConnection);
+router.post("/users/sync-contacts", protect, syncContacts);
 router.get("/users/saved-items", protect, getSavedItems);
 router.delete("/users/saved-items/clear", protect, clearSavedItems);
 router.post(
