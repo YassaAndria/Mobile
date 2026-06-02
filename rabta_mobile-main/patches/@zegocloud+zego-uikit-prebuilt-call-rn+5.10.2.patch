@@ -1,0 +1,1110 @@
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/.classpath b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/.classpath
+new file mode 100644
+index 0000000..bbe97e5
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/.classpath
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<classpath>
++	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17/"/>
++	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
++	<classpathentry kind="output" path="bin/default"/>
++</classpath>
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/.project b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/.project
+new file mode 100644
+index 0000000..400a43c
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/.project
+@@ -0,0 +1,34 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<projectDescription>
++	<name>zegocloud_zego-uikit-prebuilt-call-rn</name>
++	<comment>Project zegocloud_zego-uikit-prebuilt-call-rn created by Buildship.</comment>
++	<projects>
++	</projects>
++	<buildSpec>
++		<buildCommand>
++			<name>org.eclipse.jdt.core.javabuilder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++		<buildCommand>
++			<name>org.eclipse.buildship.core.gradleprojectbuilder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++	</buildSpec>
++	<natures>
++		<nature>org.eclipse.jdt.core.javanature</nature>
++		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
++	</natures>
++	<filteredResources>
++		<filter>
++			<id>1780085224699</id>
++			<name></name>
++			<type>30</type>
++			<matcher>
++				<id>org.eclipse.core.resources.regexFilterMatcher</id>
++				<arguments>node_modules|\.git|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
++			</matcher>
++		</filter>
++	</filteredResources>
++</projectDescription>
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/.settings/org.eclipse.buildship.core.prefs b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/.settings/org.eclipse.buildship.core.prefs
+index ebed8d3..a47982b 100644
+--- a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/.settings/org.eclipse.buildship.core.prefs
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/.settings/org.eclipse.buildship.core.prefs
+@@ -2,7 +2,7 @@ arguments=--init-script /var/folders/lt/0170hp7915jdjcxl3dwr32y80000gp/T/db3b08f
+ auto.sync=false
+ build.scans.enabled=false
+ connection.gradle.distribution=GRADLE_DISTRIBUTION(WRAPPER)
+-connection.project.dir=
++connection.project.dir=../../../../android
+ eclipse.preferences.version=1
+ gradle.user.home=
+ java.home=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/.transforms/f8812af7110f57956bf5f8af5d6e8263/results.bin b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/.transforms/f8812af7110f57956bf5f8af5d6e8263/results.bin
+new file mode 100644
+index 0000000..0d259dd
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/.transforms/f8812af7110f57956bf5f8af5d6e8263/results.bin
+@@ -0,0 +1 @@
++o/classes
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/.transforms/f8812af7110f57956bf5f8af5d6e8263/transformed/classes/classes_dex/classes.dex b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/.transforms/f8812af7110f57956bf5f8af5d6e8263/transformed/classes/classes_dex/classes.dex
+new file mode 100644
+index 0000000..5a33683
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/.transforms/f8812af7110f57956bf5f8af5d6e8263/transformed/classes/classes_dex/classes.dex differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/buildConfig/debug/com/zegouikitprebuiltcallrn/BuildConfig.java b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/buildConfig/debug/com/zegouikitprebuiltcallrn/BuildConfig.java
+new file mode 100644
+index 0000000..0860530
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/buildConfig/debug/com/zegouikitprebuiltcallrn/BuildConfig.java
+@@ -0,0 +1,12 @@
++/**
++ * Automatically generated file. DO NOT MODIFY
++ */
++package com.zegouikitprebuiltcallrn;
++
++public final class BuildConfig {
++  public static final boolean DEBUG = Boolean.parseBoolean("true");
++  public static final String LIBRARY_PACKAGE_NAME = "com.zegouikitprebuiltcallrn";
++  public static final String BUILD_TYPE = "debug";
++  // Field from default config.
++  public static final boolean IS_NEW_ARCHITECTURE_ENABLED = true;
++}
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/CMakeLists.txt b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/CMakeLists.txt
+new file mode 100644
+index 0000000..67df538
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/CMakeLists.txt
+@@ -0,0 +1,28 @@
++# Copyright (c) Meta Platforms, Inc. and affiliates.
++#
++# This source code is licensed under the MIT license found in the
++# LICENSE file in the root directory of this source tree.
++
++cmake_minimum_required(VERSION 3.13)
++set(CMAKE_VERBOSE_MAKEFILE on)
++
++file(GLOB react_codegen_SRCS CONFIGURE_DEPENDS *.cpp react/renderer/components/ZegoUIKitPrebuiltCall/*.cpp)
++
++add_library(
++  react_codegen_ZegoUIKitPrebuiltCall
++  OBJECT
++  ${react_codegen_SRCS}
++)
++
++target_include_directories(react_codegen_ZegoUIKitPrebuiltCall PUBLIC . react/renderer/components/ZegoUIKitPrebuiltCall)
++
++target_link_libraries(
++  react_codegen_ZegoUIKitPrebuiltCall
++  fbjni
++  jsi
++  # We need to link different libraries based on whether we are building rncore or not, that's necessary
++  # because we want to break a circular dependency between react_codegen_rncore and reactnative
++  reactnative
++)
++
++target_compile_reactnative_options(react_codegen_ZegoUIKitPrebuiltCall PRIVATE)
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/ZegoUIKitPrebuiltCall-generated.cpp b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/ZegoUIKitPrebuiltCall-generated.cpp
+new file mode 100644
+index 0000000..d6f68a8
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/ZegoUIKitPrebuiltCall-generated.cpp
+@@ -0,0 +1,22 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleJniCpp.js
++ */
++
++#include "ZegoUIKitPrebuiltCall.h"
++
++namespace facebook::react {
++
++
++
++std::shared_ptr<TurboModule> ZegoUIKitPrebuiltCall_ModuleProvider(const std::string &moduleName, const JavaTurboModule::InitParams &params) {
++
++  return nullptr;
++}
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/ZegoUIKitPrebuiltCall.h b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/ZegoUIKitPrebuiltCall.h
+new file mode 100644
+index 0000000..54458cd
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/ZegoUIKitPrebuiltCall.h
+@@ -0,0 +1,24 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleJniH.js
++ */
++
++#pragma once
++
++#include <ReactCommon/JavaTurboModule.h>
++#include <ReactCommon/TurboModule.h>
++#include <jsi/jsi.h>
++
++namespace facebook::react {
++
++
++
++JSI_EXPORT
++std::shared_ptr<TurboModule> ZegoUIKitPrebuiltCall_ModuleProvider(const std::string &moduleName, const JavaTurboModule::InitParams &params);
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ComponentDescriptors.cpp b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ComponentDescriptors.cpp
+new file mode 100644
+index 0000000..6eb496e
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ComponentDescriptors.cpp
+@@ -0,0 +1,22 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateComponentDescriptorCpp.js
++ */
++
++#include <react/renderer/components/ZegoUIKitPrebuiltCall/ComponentDescriptors.h>
++#include <react/renderer/core/ConcreteComponentDescriptor.h>
++#include <react/renderer/componentregistry/ComponentDescriptorProviderRegistry.h>
++
++namespace facebook::react {
++
++void ZegoUIKitPrebuiltCall_registerComponentDescriptorsFromCodegen(
++  std::shared_ptr<const ComponentDescriptorProviderRegistry> registry) {
++
++}
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ComponentDescriptors.h b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ComponentDescriptors.h
+new file mode 100644
+index 0000000..8525784
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ComponentDescriptors.h
+@@ -0,0 +1,24 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateComponentDescriptorH.js
++ */
++
++#pragma once
++
++#include <react/renderer/components/ZegoUIKitPrebuiltCall/ShadowNodes.h>
++#include <react/renderer/core/ConcreteComponentDescriptor.h>
++#include <react/renderer/componentregistry/ComponentDescriptorProviderRegistry.h>
++
++namespace facebook::react {
++
++
++
++void ZegoUIKitPrebuiltCall_registerComponentDescriptorsFromCodegen(
++  std::shared_ptr<const ComponentDescriptorProviderRegistry> registry);
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/EventEmitters.cpp b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/EventEmitters.cpp
+new file mode 100644
+index 0000000..f8dad17
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/EventEmitters.cpp
+@@ -0,0 +1,16 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateEventEmitterCpp.js
++ */
++
++#include <react/renderer/components/ZegoUIKitPrebuiltCall/EventEmitters.h>
++
++
++namespace facebook::react {
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/EventEmitters.h b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/EventEmitters.h
+new file mode 100644
+index 0000000..2845a63
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/EventEmitters.h
+@@ -0,0 +1,17 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateEventEmitterH.js
++ */
++#pragma once
++
++#include <react/renderer/components/view/ViewEventEmitter.h>
++
++
++namespace facebook::react {
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/Props.cpp b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/Props.cpp
+new file mode 100644
+index 0000000..f458379
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/Props.cpp
+@@ -0,0 +1,19 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GeneratePropsCpp.js
++ */
++
++#include <react/renderer/components/ZegoUIKitPrebuiltCall/Props.h>
++#include <react/renderer/core/PropsParserContext.h>
++#include <react/renderer/core/propsConversions.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/Props.h b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/Props.h
+new file mode 100644
+index 0000000..870864b
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/Props.h
+@@ -0,0 +1,18 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GeneratePropsH.js
++ */
++#pragma once
++
++
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ShadowNodes.cpp b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ShadowNodes.cpp
+new file mode 100644
+index 0000000..58af165
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ShadowNodes.cpp
+@@ -0,0 +1,17 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateShadowNodeCpp.js
++ */
++
++#include <react/renderer/components/ZegoUIKitPrebuiltCall/ShadowNodes.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ShadowNodes.h b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ShadowNodes.h
+new file mode 100644
+index 0000000..b336d9d
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ShadowNodes.h
+@@ -0,0 +1,23 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateShadowNodeH.js
++ */
++
++#pragma once
++
++#include <react/renderer/components/ZegoUIKitPrebuiltCall/EventEmitters.h>
++#include <react/renderer/components/ZegoUIKitPrebuiltCall/Props.h>
++#include <react/renderer/components/ZegoUIKitPrebuiltCall/States.h>
++#include <react/renderer/components/view/ConcreteViewShadowNode.h>
++#include <jsi/jsi.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/States.cpp b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/States.cpp
+new file mode 100644
+index 0000000..9febf25
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/States.cpp
+@@ -0,0 +1,16 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateStateCpp.js
++ */
++#include <react/renderer/components/ZegoUIKitPrebuiltCall/States.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/States.h b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/States.h
+new file mode 100644
+index 0000000..2e55bce
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/States.h
+@@ -0,0 +1,20 @@
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateStateH.js
++ */
++#pragma once
++
++#include <react/renderer/core/StateData.h>
++#ifdef RN_SERIALIZABLE_STATE
++#include <folly/dynamic.h>
++#endif
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ZegoUIKitPrebuiltCallJSI.h b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ZegoUIKitPrebuiltCallJSI.h
+new file mode 100644
+index 0000000..ec16260
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/jni/react/renderer/components/ZegoUIKitPrebuiltCall/ZegoUIKitPrebuiltCallJSI.h
+@@ -0,0 +1,19 @@
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleH.js
++ */
++
++#pragma once
++
++#include <ReactCommon/TurboModule.h>
++#include <react/bridging/Bridging.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/schema.json b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/schema.json
+new file mode 100644
+index 0000000..c845b54
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/generated/source/codegen/schema.json
+@@ -0,0 +1 @@
++{"libraryName":"","modules":{}}
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+new file mode 100644
+index 0000000..a64db35
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+@@ -0,0 +1,34 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.zegouikitprebuiltcallrn" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++    <!-- Permissions required by the SDK -->
++    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
++    <uses-permission android:name="android.permission.RECORD_AUDIO" />
++    <uses-permission android:name="android.permission.INTERNET" />
++    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
++    <uses-permission android:name="android.permission.CAMERA" />
++    <uses-permission android:name="android.permission.BLUETOOTH" />
++    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
++    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
++    <uses-permission android:name="android.permission.WAKE_LOCK" />
++    <uses-permission android:name="android.permission.VIBRATE" />
++    <uses-permission android:name="android.permission.GET_TASKS" />
++    <uses-permission android:name="android.permission.REORDER_TASKS" />
++    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
++    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
++    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
++    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
++    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
++
++    <!-- Permissions required by the App -->
++    <application>
++        <service
++            android:name="com.zegouikitprebuiltcallrn.OffLineCallNotificationService"
++            android:foregroundServiceType="dataSync" >
++        </service>
++    </application>
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+new file mode 100644
+index 0000000..77d22a4
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+@@ -0,0 +1,18 @@
++{
++  "version": 3,
++  "artifactType": {
++    "type": "AAPT_FRIENDLY_MERGED_MANIFESTS",
++    "kind": "Directory"
++  },
++  "applicationId": "com.zegouikitprebuiltcallrn",
++  "variantName": "debug",
++  "elements": [
++    {
++      "type": "SINGLE",
++      "filters": [],
++      "attributes": [],
++      "outputFile": "AndroidManifest.xml"
++    }
++  ],
++  "elementType": "File"
++}
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+new file mode 100644
+index 0000000..1211b1e
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+@@ -0,0 +1,6 @@
++aarFormatVersion=1.0
++aarMetadataVersion=1.0
++minCompileSdk=1
++minCompileSdkExtension=0
++minAndroidGradlePluginVersion=1.0.0
++coreLibraryDesugaringEnabled=false
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+new file mode 100644
+index 0000000..9e26dfe
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+@@ -0,0 +1 @@
++{}
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
+new file mode 100644
+index 0000000..f1bc49e
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
+new file mode 100644
+index 0000000..0d26fda
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+new file mode 100644
+index 0000000..7ba68d4
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+@@ -0,0 +1 @@
++#Fri May 29 23:15:59 EEST 2026
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+new file mode 100644
+index 0000000..004d567
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\debug\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug" generated-set="debug$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\debug\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\build\generated\res\resValues\debug"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\build\generated\res\resValues\debug"/></dataSet><mergedItems/></merger>
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/mergeDebugAssets/merger.xml b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+new file mode 100644
+index 0000000..bfc1934
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\assets"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\debug\assets"/></dataSet><dataSet config="generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\build\intermediates\shader_assets\debug\compileDebugShaders\out"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+new file mode 100644
+index 0000000..7a86659
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\jniLibs"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\debug\jniLibs"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/mergeDebugShaders/merger.xml b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+new file mode 100644
+index 0000000..015e11f
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\shaders"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\debug\shaders"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/AudioUtils.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/AudioUtils.class
+new file mode 100644
+index 0000000..76ec35c
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/AudioUtils.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/BuildConfig.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/BuildConfig.class
+new file mode 100644
+index 0000000..eec3c84
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/BuildConfig.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/CallNotificationManager$Holder.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/CallNotificationManager$Holder.class
+new file mode 100644
+index 0000000..3c9000f
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/CallNotificationManager$Holder.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/CallNotificationManager.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/CallNotificationManager.class
+new file mode 100644
+index 0000000..8d3bcdd
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/CallNotificationManager.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/OffLineCallNotificationService$1.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/OffLineCallNotificationService$1.class
+new file mode 100644
+index 0000000..4e4c6d9
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/OffLineCallNotificationService$1.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/OffLineCallNotificationService.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/OffLineCallNotificationService.class
+new file mode 100644
+index 0000000..f23cade
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/OffLineCallNotificationService.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule$1.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule$1.class
+new file mode 100644
+index 0000000..a0d871b
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule$1.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule$2.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule$2.class
+new file mode 100644
+index 0000000..26dc1a1
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule$2.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule$3.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule$3.class
+new file mode 100644
+index 0000000..49e27b2
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule$3.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule.class
+new file mode 100644
+index 0000000..50a1942
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNModule.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNPackage.class b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNPackage.class
+new file mode 100644
+index 0000000..e74f1ee
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/zegouikitprebuiltcallrn/ZegoUIKitPrebuiltCallRNPackage.class differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+new file mode 100644
+index 0000000..78ac5b8
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+@@ -0,0 +1,2 @@
++R_DEF: Internal format may change without notice
++local
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+new file mode 100644
+index 0000000..b40ecb4
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+@@ -0,0 +1,72 @@
++1<?xml version="1.0" encoding="utf-8"?>
++2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++3    package="com.zegouikitprebuiltcallrn" >
++4
++5    <uses-sdk android:minSdkVersion="24" />
++6
++7    <!-- Permissions required by the SDK -->
++8    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
++8-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:5:5-76
++8-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:5:22-73
++9    <uses-permission android:name="android.permission.RECORD_AUDIO" />
++9-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:6:5-71
++9-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:6:22-68
++10    <uses-permission android:name="android.permission.INTERNET" />
++10-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:7:5-67
++10-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:7:22-64
++11    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
++11-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:8:5-79
++11-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:8:22-76
++12    <uses-permission android:name="android.permission.CAMERA" />
++12-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:9:5-65
++12-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:9:22-62
++13    <uses-permission android:name="android.permission.BLUETOOTH" />
++13-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:10:5-68
++13-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:10:22-65
++14    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
++14-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:11:5-80
++14-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:11:22-77
++15    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
++15-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:12:5-81
++15-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:12:22-78
++16    <uses-permission android:name="android.permission.WAKE_LOCK" />
++16-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:13:5-68
++16-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:13:22-65
++17    <uses-permission android:name="android.permission.VIBRATE" />
++17-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:14:5-66
++17-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:14:22-63
++18    <uses-permission android:name="android.permission.GET_TASKS" />
++18-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:16:5-68
++18-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:16:22-65
++19    <uses-permission android:name="android.permission.REORDER_TASKS" />
++19-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:17:5-72
++19-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:17:22-69
++20    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
++20-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:19:5-77
++20-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:19:22-74
++21    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
++21-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:20:5-77
++21-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:20:22-74
++22    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
++22-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:21:5-87
++22-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:21:22-84
++23    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
++23-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:22:5-78
++23-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:22:22-75
++24    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
++24-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:23:5-80
++24-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:23:22-77
++25
++26    <!-- Permissions required by the App -->
++27    <application>
++27-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:25:5-30:19
++28        <service
++28-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:26:7-28:17
++29            android:name="com.zegouikitprebuiltcallrn.OffLineCallNotificationService"
++29-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:26:16-62
++30            android:foregroundServiceType="dataSync" >
++30-->E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:27:9-49
++31        </service>
++32    </application>
++33
++34</manifest>
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+new file mode 100644
+index 0000000..a64db35
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+@@ -0,0 +1,34 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.zegouikitprebuiltcallrn" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++    <!-- Permissions required by the SDK -->
++    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
++    <uses-permission android:name="android.permission.RECORD_AUDIO" />
++    <uses-permission android:name="android.permission.INTERNET" />
++    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
++    <uses-permission android:name="android.permission.CAMERA" />
++    <uses-permission android:name="android.permission.BLUETOOTH" />
++    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
++    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
++    <uses-permission android:name="android.permission.WAKE_LOCK" />
++    <uses-permission android:name="android.permission.VIBRATE" />
++    <uses-permission android:name="android.permission.GET_TASKS" />
++    <uses-permission android:name="android.permission.REORDER_TASKS" />
++    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
++    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
++    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
++    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
++    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
++
++    <!-- Permissions required by the App -->
++    <application>
++        <service
++            android:name="com.zegouikitprebuiltcallrn.OffLineCallNotificationService"
++            android:foregroundServiceType="dataSync" >
++        </service>
++    </application>
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+new file mode 100644
+index 0000000..0637a08
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+@@ -0,0 +1 @@
++[]
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+new file mode 100644
+index 0000000..08f4ebe
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+@@ -0,0 +1 @@
++0 Warning/Error
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar
+new file mode 100644
+index 0000000..ce397c8
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+new file mode 100644
+index 0000000..dc7859c
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+@@ -0,0 +1 @@
++com.zegouikitprebuiltcallrn
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/outputs/logs/manifest-merger-debug-report.txt
+new file mode 100644
+index 0000000..8e3dccb
+--- /dev/null
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/outputs/logs/manifest-merger-debug-report.txt
+@@ -0,0 +1,93 @@
++-- Merging decision tree log ---
++manifest
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:1:1-32:12
++INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:1:1-32:12
++	package
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:2:11-48
++		INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml
++	xmlns:android
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:1:11-69
++uses-permission#android.permission.ACCESS_WIFI_STATE
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:5:5-76
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:5:22-73
++uses-permission#android.permission.RECORD_AUDIO
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:6:5-71
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:6:22-68
++uses-permission#android.permission.INTERNET
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:7:5-67
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:7:22-64
++uses-permission#android.permission.ACCESS_NETWORK_STATE
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:8:5-79
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:8:22-76
++uses-permission#android.permission.CAMERA
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:9:5-65
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:9:22-62
++uses-permission#android.permission.BLUETOOTH
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:10:5-68
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:10:22-65
++uses-permission#android.permission.MODIFY_AUDIO_SETTINGS
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:11:5-80
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:11:22-77
++uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:12:5-81
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:12:22-78
++uses-permission#android.permission.WAKE_LOCK
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:13:5-68
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:13:22-65
++uses-permission#android.permission.VIBRATE
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:14:5-66
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:14:22-63
++uses-permission#android.permission.GET_TASKS
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:16:5-68
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:16:22-65
++uses-permission#android.permission.REORDER_TASKS
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:17:5-72
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:17:22-69
++uses-permission#android.permission.POST_NOTIFICATIONS
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:19:5-77
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:19:22-74
++uses-permission#android.permission.FOREGROUND_SERVICE
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:20:5-77
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:20:22-74
++uses-permission#android.permission.FOREGROUND_SERVICE_DATA_SYNC
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:21:5-87
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:21:22-84
++uses-permission#android.permission.SYSTEM_ALERT_WINDOW
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:22:5-78
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:22:22-75
++uses-permission#android.permission.SYSTEM_OVERLAY_WINDOW
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:23:5-80
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:23:22-77
++application
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:25:5-30:19
++service#com.zegouikitprebuiltcallrn.OffLineCallNotificationService
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:26:7-28:17
++	android:foregroundServiceType
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:27:9-49
++	android:name
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml:26:16-62
++uses-sdk
++INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml reason: use-sdk injection requested
++INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml
++INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml
++	android:targetSdkVersion
++		INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml
++	android:minSdkVersion
++		INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\@zegocloud\zego-uikit-prebuilt-call-rn\android\src\main\AndroidManifest.xml
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
+new file mode 100644
+index 0000000..c15a921
+Binary files /dev/null and b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/call/ZegoUIKitPrebuiltCallFloatingMinimizedView.js b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/call/ZegoUIKitPrebuiltCallFloatingMinimizedView.js
+index fca7c91..e0b5a28 100644
+--- a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/call/ZegoUIKitPrebuiltCallFloatingMinimizedView.js
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/call/ZegoUIKitPrebuiltCallFloatingMinimizedView.js
+@@ -110,7 +110,10 @@ function ZegoUIKitPrebuiltCallFloatingMinimizedView(props) {
+           onWindowMinimized();
+           _minimizing_helper.default.getInstance().setIsMinimizeSwitch(true);
+           setTimeout(() => {
+-            _zegoUikitRn.default.forceRenderVideoView();
++            const zego = _zegoUikitRn.default || _zegoUikitRn;
++            if (zego && typeof zego.forceRenderVideoView === 'function') {
++              zego.forceRenderVideoView();
++            }
+           }, 100);
+         }
+       });
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/call/index.js b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/call/index.js
+index 29a1e8f..947a821 100644
+--- a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/call/index.js
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/call/index.js
+@@ -28,6 +28,9 @@ function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e
+ function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+ function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+ function ZegoUIKitPrebuiltCall(props, ref) {
++  if (!_zegoUikitRn.default) {
++    _zegoUikitRn.default = _zegoUikitRn;
++  }
+   const navigation = (0, _native.useNavigation)();
+   const isMinimizeSwitch = _minimizing_helper.default.getInstance().getIsMinimizeSwitch();
+   !isMinimizeSwitch && _minimizing_helper.default.getInstance().notifyEntryNormal();
+@@ -327,7 +330,9 @@ function ZegoUIKitPrebuiltCall(props, ref) {
+       _prebuilt_helper.default.getInstance().clearNotify();
+       _minimizing_helper.default.getInstance().setIsMinimizeSwitch(false);
+       _minimizing_helper.default.getInstance().notifyEntryNormal();
+-      _reactNativeKeepAwake.default.deactivate();
++      if (_reactNativeKeepAwake.default && typeof _reactNativeKeepAwake.default.deactivate === 'function') {
++        _reactNativeKeepAwake.default.deactivate();
++      }
+     });
+     _zegoUikitRn.default.init(appID, appSign, {
+       userID: userID,
+@@ -353,7 +358,9 @@ function ZegoUIKitPrebuiltCall(props, ref) {
+     navigation.setOptions({
+       gestureEnabled: false
+     });
+-    _reactNativeKeepAwake.default.activate();
++    if (_reactNativeKeepAwake.default && typeof _reactNativeKeepAwake.default.activate === 'function') {
++      _reactNativeKeepAwake.default.activate();
++    }
+ 
+     // Initialize after use
+     _minimizing_helper.default.getInstance().setIsMinimizeSwitch(false);
+@@ -369,7 +376,9 @@ function ZegoUIKitPrebuiltCall(props, ref) {
+         _prebuilt_helper.default.getInstance().clearState();
+         _prebuilt_helper.default.getInstance().clearRouteParams();
+         _prebuilt_helper.default.getInstance().clearNotify();
+-        _reactNativeKeepAwake.default.deactivate();
++        if (_reactNativeKeepAwake.default && typeof _reactNativeKeepAwake.default.deactivate === 'function') {
++          _reactNativeKeepAwake.default.deactivate();
++        }
+       }
+       destroyCallTimingTimer(false);
+       _reactNative.BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/utils/logger.js b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/utils/logger.js
+index dc4584d..4194a3f 100644
+--- a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/utils/logger.js
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/commonjs/utils/logger.js
+@@ -7,15 +7,27 @@ exports.zlogwarning = exports.zloginfo = exports.zlogerror = void 0;
+ var _zegoUikitRn = _interopRequireDefault(require("@zegocloud/zego-uikit-rn"));
+ function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+ const zloginfo = (...msg) => {
+-  _zegoUikitRn.default.kitLogInfo('PrebuiltCall', ...msg);
++  if (_zegoUikitRn.default && typeof _zegoUikitRn.default.kitLogInfo === 'function') {
++    _zegoUikitRn.default.kitLogInfo('PrebuiltCall', ...msg);
++  } else {
++    console.log('[ZegoPrebuiltCall Info]', ...msg);
++  }
+ };
+ exports.zloginfo = zloginfo;
+ const zlogwarning = (...msg) => {
+-  _zegoUikitRn.default.kitLogWarning('PrebuiltCall', ...msg);
++  if (_zegoUikitRn.default && typeof _zegoUikitRn.default.kitLogWarning === 'function') {
++    _zegoUikitRn.default.kitLogWarning('PrebuiltCall', ...msg);
++  } else {
++    console.warn('[ZegoPrebuiltCall Warning]', ...msg);
++  }
+ };
+ exports.zlogwarning = zlogwarning;
+ const zlogerror = (...msg) => {
+-  _zegoUikitRn.default.kitLogError('PrebuiltCall', ...msg);
++  if (_zegoUikitRn.default && typeof _zegoUikitRn.default.kitLogError === 'function') {
++    _zegoUikitRn.default.kitLogError('PrebuiltCall', ...msg);
++  } else {
++    console.error('[ZegoPrebuiltCall Error]', ...msg);
++  }
+ };
+ exports.zlogerror = zlogerror;
+ //# sourceMappingURL=logger.js.map
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/call/ZegoUIKitPrebuiltCallFloatingMinimizedView.js b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/call/ZegoUIKitPrebuiltCallFloatingMinimizedView.js
+index 9d2f9b8..a135c05 100644
+--- a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/call/ZegoUIKitPrebuiltCallFloatingMinimizedView.js
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/call/ZegoUIKitPrebuiltCallFloatingMinimizedView.js
+@@ -101,7 +101,10 @@ export default function ZegoUIKitPrebuiltCallFloatingMinimizedView(props) {
+           onWindowMinimized();
+           MinimizingHelper.getInstance().setIsMinimizeSwitch(true);
+           setTimeout(() => {
+-            ZegoUIKit.forceRenderVideoView();
++            const zego = ZegoUIKit || {};
++            if (typeof zego.forceRenderVideoView === 'function') {
++              zego.forceRenderVideoView();
++            }
+           }, 100);
+         }
+       });
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/call/index.js b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/call/index.js
+index 0c59f93..90aaccf 100644
+--- a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/call/index.js
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/call/index.js
+@@ -20,6 +20,9 @@ import { useKeyboard } from '../utils/keyboard';
+ import { ZegoCallEndReason } from '../services/defines';
+ import { zloginfo } from '../utils/logger';
+ function ZegoUIKitPrebuiltCall(props, ref) {
++  const ZegoUIKitResolved = ZegoUIKit || require('@zegocloud/zego-uikit-rn');
++  const ZegoUIKitActual = ZegoUIKitResolved.default || ZegoUIKitResolved;
++  const ZegoUIKit = ZegoUIKitActual;
+   const navigation = useNavigation();
+   const isMinimizeSwitch = MinimizingHelper.getInstance().getIsMinimizeSwitch();
+   !isMinimizeSwitch && MinimizingHelper.getInstance().notifyEntryNormal();
+@@ -319,7 +322,9 @@ function ZegoUIKitPrebuiltCall(props, ref) {
+       PrebuiltHelper.getInstance().clearNotify();
+       MinimizingHelper.getInstance().setIsMinimizeSwitch(false);
+       MinimizingHelper.getInstance().notifyEntryNormal();
+-      KeepAwake.deactivate();
++      if (KeepAwake && typeof KeepAwake.deactivate === 'function') {
++        KeepAwake.deactivate();
++      }
+     });
+     ZegoUIKit.init(appID, appSign, {
+       userID: userID,
+@@ -345,7 +350,9 @@ function ZegoUIKitPrebuiltCall(props, ref) {
+     navigation.setOptions({
+       gestureEnabled: false
+     });
+-    KeepAwake.activate();
++    if (KeepAwake && typeof KeepAwake.activate === 'function') {
++      KeepAwake.activate();
++    }
+ 
+     // Initialize after use
+     MinimizingHelper.getInstance().setIsMinimizeSwitch(false);
+@@ -361,7 +368,9 @@ function ZegoUIKitPrebuiltCall(props, ref) {
+         PrebuiltHelper.getInstance().clearState();
+         PrebuiltHelper.getInstance().clearRouteParams();
+         PrebuiltHelper.getInstance().clearNotify();
+-        KeepAwake.deactivate();
++        if (KeepAwake && typeof KeepAwake.deactivate === 'function') {
++          KeepAwake.deactivate();
++        }
+       }
+       destroyCallTimingTimer(false);
+       BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/utils/logger.js b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/utils/logger.js
+index 1fe4393..93eda62 100644
+--- a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/utils/logger.js
++++ b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/lib/module/utils/logger.js
+@@ -1,11 +1,23 @@
+ import ZegoUIKit from '@zegocloud/zego-uikit-rn';
+ export const zloginfo = (...msg) => {
+-  ZegoUIKit.kitLogInfo('PrebuiltCall', ...msg);
++  if (ZegoUIKit && typeof ZegoUIKit.kitLogInfo === 'function') {
++    ZegoUIKit.kitLogInfo('PrebuiltCall', ...msg);
++  } else {
++    console.log('[ZegoPrebuiltCall Info]', ...msg);
++  }
+ };
+ export const zlogwarning = (...msg) => {
+-  ZegoUIKit.kitLogWarning('PrebuiltCall', ...msg);
++  if (ZegoUIKit && typeof ZegoUIKit.kitLogWarning === 'function') {
++    ZegoUIKit.kitLogWarning('PrebuiltCall', ...msg);
++  } else {
++    console.warn('[ZegoPrebuiltCall Warning]', ...msg);
++  }
+ };
+ export const zlogerror = (...msg) => {
+-  ZegoUIKit.kitLogError('PrebuiltCall', ...msg);
++  if (ZegoUIKit && typeof ZegoUIKit.kitLogError === 'function') {
++    ZegoUIKit.kitLogError('PrebuiltCall', ...msg);
++  } else {
++    console.error('[ZegoPrebuiltCall Error]', ...msg);
++  }
+ };
+ //# sourceMappingURL=logger.js.map
+\ No newline at end of file
+diff --git a/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/src/index.js b/node_modules/@zegocloud/zego-uikit-prebuilt-call-rn/src/index.js
+new file mode 100644
+index 0000000..e69de29

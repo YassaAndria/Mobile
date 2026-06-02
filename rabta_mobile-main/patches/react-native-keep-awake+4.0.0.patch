@@ -1,0 +1,392 @@
+diff --git a/node_modules/react-native-keep-awake/android/.classpath b/node_modules/react-native-keep-awake/android/.classpath
+new file mode 100644
+index 0000000..bbe97e5
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/.classpath
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<classpath>
++	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17/"/>
++	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
++	<classpathentry kind="output" path="bin/default"/>
++</classpath>
+diff --git a/node_modules/react-native-keep-awake/android/.gradle/8.9/checksums/checksums.lock b/node_modules/react-native-keep-awake/android/.gradle/8.9/checksums/checksums.lock
+new file mode 100644
+index 0000000..6ca98ab
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/.gradle/8.9/checksums/checksums.lock differ
+diff --git a/node_modules/react-native-keep-awake/android/.gradle/8.9/checksums/md5-checksums.bin b/node_modules/react-native-keep-awake/android/.gradle/8.9/checksums/md5-checksums.bin
+new file mode 100644
+index 0000000..628c7b1
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/.gradle/8.9/checksums/md5-checksums.bin differ
+diff --git a/node_modules/react-native-keep-awake/android/.gradle/8.9/checksums/sha1-checksums.bin b/node_modules/react-native-keep-awake/android/.gradle/8.9/checksums/sha1-checksums.bin
+new file mode 100644
+index 0000000..9f35ddd
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/.gradle/8.9/checksums/sha1-checksums.bin differ
+diff --git a/node_modules/react-native-keep-awake/android/.gradle/8.9/dependencies-accessors/gc.properties b/node_modules/react-native-keep-awake/android/.gradle/8.9/dependencies-accessors/gc.properties
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-keep-awake/android/.gradle/8.9/fileChanges/last-build.bin b/node_modules/react-native-keep-awake/android/.gradle/8.9/fileChanges/last-build.bin
+new file mode 100644
+index 0000000..f76dd23
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/.gradle/8.9/fileChanges/last-build.bin differ
+diff --git a/node_modules/react-native-keep-awake/android/.gradle/8.9/fileHashes/fileHashes.lock b/node_modules/react-native-keep-awake/android/.gradle/8.9/fileHashes/fileHashes.lock
+new file mode 100644
+index 0000000..2052405
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/.gradle/8.9/fileHashes/fileHashes.lock differ
+diff --git a/node_modules/react-native-keep-awake/android/.gradle/8.9/gc.properties b/node_modules/react-native-keep-awake/android/.gradle/8.9/gc.properties
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-keep-awake/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock b/node_modules/react-native-keep-awake/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+new file mode 100644
+index 0000000..4744663
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock differ
+diff --git a/node_modules/react-native-keep-awake/android/.gradle/buildOutputCleanup/cache.properties b/node_modules/react-native-keep-awake/android/.gradle/buildOutputCleanup/cache.properties
+new file mode 100644
+index 0000000..6361898
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/.gradle/buildOutputCleanup/cache.properties
+@@ -0,0 +1,2 @@
++#Fri May 29 23:16:10 EEST 2026
++gradle.version=8.9
+diff --git a/node_modules/react-native-keep-awake/android/.gradle/vcs-1/gc.properties b/node_modules/react-native-keep-awake/android/.gradle/vcs-1/gc.properties
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-keep-awake/android/.project b/node_modules/react-native-keep-awake/android/.project
+new file mode 100644
+index 0000000..ff9d286
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/.project
+@@ -0,0 +1,34 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<projectDescription>
++	<name>react-native-keep-awake</name>
++	<comment>Project react-native-keep-awake created by Buildship.</comment>
++	<projects>
++	</projects>
++	<buildSpec>
++		<buildCommand>
++			<name>org.eclipse.jdt.core.javabuilder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++		<buildCommand>
++			<name>org.eclipse.buildship.core.gradleprojectbuilder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++	</buildSpec>
++	<natures>
++		<nature>org.eclipse.jdt.core.javanature</nature>
++		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
++	</natures>
++	<filteredResources>
++		<filter>
++			<id>1780085224614</id>
++			<name></name>
++			<type>30</type>
++			<matcher>
++				<id>org.eclipse.core.resources.regexFilterMatcher</id>
++				<arguments>node_modules|\.git|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
++			</matcher>
++		</filter>
++	</filteredResources>
++</projectDescription>
+diff --git a/node_modules/react-native-keep-awake/android/.settings/org.eclipse.buildship.core.prefs b/node_modules/react-native-keep-awake/android/.settings/org.eclipse.buildship.core.prefs
+new file mode 100644
+index 0000000..1675490
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/.settings/org.eclipse.buildship.core.prefs
+@@ -0,0 +1,2 @@
++connection.project.dir=../../../android
++eclipse.preferences.version=1
+diff --git a/node_modules/react-native-keep-awake/android/build.gradle b/node_modules/react-native-keep-awake/android/build.gradle
+index ba4dfe7..b04f116 100644
+--- a/node_modules/react-native-keep-awake/android/build.gradle
++++ b/node_modules/react-native-keep-awake/android/build.gradle
+@@ -1,7 +1,7 @@
+ buildscript {
+     repositories {
+         google()
+-        jcenter()
++        mavenCentral()
+     }
+ 
+     dependencies {
+diff --git a/node_modules/react-native-keep-awake/android/build/.transforms/4fc65a92c48d0c540683757db64b7762/results.bin b/node_modules/react-native-keep-awake/android/build/.transforms/4fc65a92c48d0c540683757db64b7762/results.bin
+new file mode 100644
+index 0000000..0d259dd
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/.transforms/4fc65a92c48d0c540683757db64b7762/results.bin
+@@ -0,0 +1 @@
++o/classes
+diff --git a/node_modules/react-native-keep-awake/android/build/.transforms/4fc65a92c48d0c540683757db64b7762/transformed/classes/classes_dex/classes.dex b/node_modules/react-native-keep-awake/android/build/.transforms/4fc65a92c48d0c540683757db64b7762/transformed/classes/classes_dex/classes.dex
+new file mode 100644
+index 0000000..138ab36
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/build/.transforms/4fc65a92c48d0c540683757db64b7762/transformed/classes/classes_dex/classes.dex differ
+diff --git a/node_modules/react-native-keep-awake/android/build/generated/source/buildConfig/debug/com/corbt/keepawake/BuildConfig.java b/node_modules/react-native-keep-awake/android/build/generated/source/buildConfig/debug/com/corbt/keepawake/BuildConfig.java
+new file mode 100644
+index 0000000..3ddb6c9
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/generated/source/buildConfig/debug/com/corbt/keepawake/BuildConfig.java
+@@ -0,0 +1,10 @@
++/**
++ * Automatically generated file. DO NOT MODIFY
++ */
++package com.corbt.keepawake;
++
++public final class BuildConfig {
++  public static final boolean DEBUG = Boolean.parseBoolean("true");
++  public static final String LIBRARY_PACKAGE_NAME = "com.corbt.keepawake";
++  public static final String BUILD_TYPE = "debug";
++}
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml b/node_modules/react-native-keep-awake/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+new file mode 100644
+index 0000000..b01e33e
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.corbt.keepawake" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json b/node_modules/react-native-keep-awake/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+new file mode 100644
+index 0000000..17f7fef
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+@@ -0,0 +1,18 @@
++{
++  "version": 3,
++  "artifactType": {
++    "type": "AAPT_FRIENDLY_MERGED_MANIFESTS",
++    "kind": "Directory"
++  },
++  "applicationId": "com.corbt.keepawake",
++  "variantName": "debug",
++  "elements": [
++    {
++      "type": "SINGLE",
++      "filters": [],
++      "attributes": [],
++      "outputFile": "AndroidManifest.xml"
++    }
++  ],
++  "elementType": "File"
++}
+\ No newline at end of file
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties b/node_modules/react-native-keep-awake/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+new file mode 100644
+index 0000000..1211b1e
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+@@ -0,0 +1,6 @@
++aarFormatVersion=1.0
++aarMetadataVersion=1.0
++minCompileSdk=1
++minCompileSdkExtension=0
++minAndroidGradlePluginVersion=1.0.0
++coreLibraryDesugaringEnabled=false
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json b/node_modules/react-native-keep-awake/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+new file mode 100644
+index 0000000..9e26dfe
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+@@ -0,0 +1 @@
++{}
+\ No newline at end of file
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/react-native-keep-awake/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
+new file mode 100644
+index 0000000..eb4c744
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/react-native-keep-awake/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
+new file mode 100644
+index 0000000..c602a32
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar differ
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt b/node_modules/react-native-keep-awake/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties b/node_modules/react-native-keep-awake/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+new file mode 100644
+index 0000000..46951cb
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+@@ -0,0 +1 @@
++#Fri May 29 23:15:58 EEST 2026
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml b/node_modules/react-native-keep-awake/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+new file mode 100644
+index 0000000..68cecce
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\debug\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug" generated-set="debug$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\debug\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\build\generated\res\resValues\debug"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\build\generated\res\resValues\debug"/></dataSet><mergedItems/></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/incremental/mergeDebugAssets/merger.xml b/node_modules/react-native-keep-awake/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+new file mode 100644
+index 0000000..590e805
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\assets"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\debug\assets"/></dataSet><dataSet config="generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\build\intermediates\shader_assets\debug\compileDebugShaders\out"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml b/node_modules/react-native-keep-awake/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+new file mode 100644
+index 0000000..65bfed5
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\jniLibs"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\debug\jniLibs"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/incremental/mergeDebugShaders/merger.xml b/node_modules/react-native-keep-awake/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+new file mode 100644
+index 0000000..3ba8051
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\shaders"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\debug\shaders"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/BuildConfig.class b/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/BuildConfig.class
+new file mode 100644
+index 0000000..a49a838
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/BuildConfig.class differ
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwake$1.class b/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwake$1.class
+new file mode 100644
+index 0000000..3f91693
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwake$1.class differ
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwake$2.class b/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwake$2.class
+new file mode 100644
+index 0000000..a7198ad
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwake$2.class differ
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwake.class b/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwake.class
+new file mode 100644
+index 0000000..1a38e76
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwake.class differ
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwakePackage.class b/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwakePackage.class
+new file mode 100644
+index 0000000..4bb9bd9
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/corbt/keepawake/KCKeepAwakePackage.class differ
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt b/node_modules/react-native-keep-awake/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+new file mode 100644
+index 0000000..78ac5b8
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+@@ -0,0 +1,2 @@
++R_DEF: Internal format may change without notice
++local
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt b/node_modules/react-native-keep-awake/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+new file mode 100644
+index 0000000..f062ca6
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+@@ -0,0 +1,7 @@
++1<?xml version="1.0" encoding="utf-8"?>
++2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++3    package="com.corbt.keepawake" >
++4
++5    <uses-sdk android:minSdkVersion="24" />
++6
++7</manifest>
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml b/node_modules/react-native-keep-awake/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+new file mode 100644
+index 0000000..b01e33e
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.corbt.keepawake" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json b/node_modules/react-native-keep-awake/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+new file mode 100644
+index 0000000..0637a08
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+@@ -0,0 +1 @@
++[]
+\ No newline at end of file
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt b/node_modules/react-native-keep-awake/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+new file mode 100644
+index 0000000..08f4ebe
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+@@ -0,0 +1 @@
++0 Warning/Error
+\ No newline at end of file
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar b/node_modules/react-native-keep-awake/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar
+new file mode 100644
+index 0000000..a90f5e5
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar differ
+diff --git a/node_modules/react-native-keep-awake/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/react-native-keep-awake/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+new file mode 100644
+index 0000000..628ffe1
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+@@ -0,0 +1 @@
++com.corbt.keepawake
+diff --git a/node_modules/react-native-keep-awake/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/react-native-keep-awake/android/build/outputs/logs/manifest-merger-debug-report.txt
+new file mode 100644
+index 0000000..4d41ad1
+--- /dev/null
++++ b/node_modules/react-native-keep-awake/android/build/outputs/logs/manifest-merger-debug-report.txt
+@@ -0,0 +1,17 @@
++-- Merging decision tree log ---
++manifest
++ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\AndroidManifest.xml:2:1-4:12
++INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\AndroidManifest.xml:2:1-4:12
++	package
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\AndroidManifest.xml:3:5-34
++		INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\AndroidManifest.xml
++	xmlns:android
++		ADDED from E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\AndroidManifest.xml:2:11-69
++uses-sdk
++INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\AndroidManifest.xml reason: use-sdk injection requested
++INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\AndroidManifest.xml
++INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\AndroidManifest.xml
++	android:targetSdkVersion
++		INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\AndroidManifest.xml
++	android:minSdkVersion
++		INJECTED from E:\mobile- aya\rabta_mobile-main\node_modules\react-native-keep-awake\android\src\main\AndroidManifest.xml
+diff --git a/node_modules/react-native-keep-awake/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/react-native-keep-awake/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
+new file mode 100644
+index 0000000..68d1266
+Binary files /dev/null and b/node_modules/react-native-keep-awake/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
+diff --git a/node_modules/react-native-keep-awake/index.js b/node_modules/react-native-keep-awake/index.js
+index 1ccd146..d889aa1 100644
+--- a/node_modules/react-native-keep-awake/index.js
++++ b/node_modules/react-native-keep-awake/index.js
+@@ -5,13 +5,21 @@ import { NativeModules } from 'react-native';
+ 
+ let mounted = 0;
+ 
+-export default class KeepAwake extends Component<{}> {
++export default class KeepAwake extends Component {
+   static activate() {
+-    NativeModules.KCKeepAwake.activate();
++    if (NativeModules.KCKeepAwake && typeof NativeModules.KCKeepAwake.activate === 'function') {
++      NativeModules.KCKeepAwake.activate();
++    } else {
++      console.warn('[KeepAwake] NativeModules.KCKeepAwake is not available.');
++    }
+   }
+ 
+   static deactivate() {
+-    NativeModules.KCKeepAwake.deactivate();
++    if (NativeModules.KCKeepAwake && typeof NativeModules.KCKeepAwake.deactivate === 'function') {
++      NativeModules.KCKeepAwake.deactivate();
++    } else {
++      console.warn('[KeepAwake] NativeModules.KCKeepAwake is not available.');
++    }
+   }
+ 
+   componentDidMount() {

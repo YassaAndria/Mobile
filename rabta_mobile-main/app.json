@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "Rabta",
+    "slug": "rabta",
+    "owner": "aya_elhenawey",
+    "version": "1.0.0",
+    "newArchEnabled": true,
+    "scheme": "rabta",
+    "orientation": "default",
+    "icon": "./assets/rabta-icon1.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.yassaandria.rabta",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/rabta-icon1.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-web-browser",
+      "expo-audio",
+      "expo-video",
+      "expo-secure-store",
+      "@react-native-google-signin/google-signin",
+      "expo-asset",
+      "expo-image",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "extra": {
+      "apiBaseUrl": "EXPO_PUBLIC_API_BASE_URL",
+      "zegoAppId": "EXPO_PUBLIC_ZEGO_APP_ID",
+      "eas": {
+        "projectId": "efd9bc7e-d285-45a4-a4e2-1316dbbebdcb"
+      }
+    }
+  }
+}
