@@ -1,9 +1,12 @@
 import { Redirect, Stack, useSegments, useRouter } from "expo-router";
 import React, { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../src/store/store";
 import { useTheme } from "../../src/theme/ThemeContext";
 import { MainLayout } from "../../src/components/layout/MainLayout";
+
+const PENDING_INVITE_KEY = "pendingGroupInviteToken";
 
 export default function MainGroupLayout() {
   const isAuthenticated = useSelector((s: RootState) => s.auth.isAuthenticated);
@@ -25,6 +28,17 @@ export default function MainGroupLayout() {
       router.replace("/login");
     }
   }, [isAuthenticated, isAuthRoute]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    (async () => {
+      const pending = await AsyncStorage.getItem(PENDING_INVITE_KEY);
+      if (pending) {
+        await AsyncStorage.removeItem(PENDING_INVITE_KEY);
+        router.push(`/group/invite/${pending}` as never);
+      }
+    })();
+  }, [isAuthenticated, router]);
 
   if (!isAuthenticated && !isAuthRoute) {
     return null;

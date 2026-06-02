@@ -15,6 +15,9 @@ import {
   deleteCommunity,
   getCommunityFeed,
   getCommunityChat,
+  generateInviteLink,
+  previewInviteGroup,
+  joinGroupViaInviteLink,
 } from "../controllers/community.controller";
 
 const router = Router();
@@ -24,7 +27,10 @@ router.use(protect);
 router.get("/", listCommunities);
 router.get("/search", searchCommunities);
 router.post("/", createCommunity);
+router.get("/invite/:token", previewInviteGroup);
+router.post("/invite/:token/join", joinGroupViaInviteLink);
 router.get("/:id", getCommunity);
+router.post("/:id/invite-link", generateInviteLink);
 router.post("/:id/join", joinCommunity);
 router.post("/:id/leave", leaveCommunity);
 router.post("/:id/members", addCommunityMember);

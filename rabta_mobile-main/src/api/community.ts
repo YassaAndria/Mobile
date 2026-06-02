@@ -19,6 +19,21 @@ export const searchCommunities = (q: string) =>
 export const getCommunity = (id: string) =>
   axiosInstance.get(`/groups/${id}`);
 
+/** Alias for group details screen */
+export const fetchGroupDetails = (groupId: string) => getCommunity(groupId);
+
+/** Member: generate a unique invite token for deep linking */
+export const generateInviteLink = (groupId: string) =>
+  axiosInstance.post(`/groups/${groupId}/invite-link`);
+
+/** Preview group info from invite token (join confirmation screen) */
+export const previewInviteGroup = (inviteToken: string) =>
+  axiosInstance.get(`/groups/invite/${inviteToken}`);
+
+/** Join group when user opens rabta://group/invite/:token */
+export const joinGroupViaLink = (inviteToken: string) =>
+  axiosInstance.post(`/groups/invite/${inviteToken}/join`);
+
 // ─── Join / Leave ────────────────────────────────────────────────────────────
 
 /** Join a public community (or send a request for a private one) */

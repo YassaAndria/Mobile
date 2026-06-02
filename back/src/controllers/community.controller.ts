@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import Community from "../models/Community";
+import GroupInviteToken from "../models/GroupInviteToken";
 import Post from "../models/Post";
 import Message from "../models/Message";
 import Chat from "../models/chat";
@@ -628,6 +629,177 @@ export const getCommunityChat = catchAsync(
         chatId,
         communityName: community.name,
         messages,
+      },
+    });
+  },
+);
+
+// ==========================================
+// 🔗 Generate shareable invite deep-link token
+// ==========================================
+export const generateInviteLink = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const communityId = String(req.params.id);
+    const userId = (req.user as any)._id.toString();
+
+    const community = await Community.findById(communityId);
+    if (!community) return next(new AppError("Community not found", 404));
+
+    const isMember = community.members.some((m) => m.toString() === userId);
+    if (!isMember) {
+      return next(
+        new AppError("Only members can generate invite links", 403),
+      );
+    }
+
+    await GroupInviteToken.updateMany(
+      { communityId, createdBy: userId, isActive: true },
+      { isActive: false },
+    );
+
+    const inviteDoc = await GroupInviteToken.create({
+      communityId,
+      createdBy: userId,
+    });
+
+    res.status(201).json({
+      status: "success",
+      data: {
+        inviteToken: inviteDoc.token,
+        expiresAt: inviteDoc.expiresAt,
+      },
+    });
+  },
+);
+
+// ==========================================
+// 👀 Preview group from invite token (join screen)
+// ==========================================
+export const previewInviteGroup = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = String(req.params.token).trim();
+    const invite = await GroupInviteToken.findOne({
+      token,
+      isActive: true,
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!invite) {
+      return next(new AppError("Invite link is invalid or expired", 404));
+    }
+
+    if (
+      invite.maxUses != null &&
+      invite.uses >= invite.maxUses
+    ) {
+      return next(new AppError("Invite link has reached its usage limit", 410));
+    }
+
+    const community = await Community.findById(invite.communityId)
+      .populate("owner", "fullName avatar")
+      .select(
+        "name description avatar members isPublic owner createdAt",
+      );
+
+    if (!community) {
+      return next(new AppError("Community no longer exists", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        community: {
+          _id: community._id,
+          name: community.name,
+          description: community.description,
+          avatar: community.avatar,
+          memberCount: community.members.length,
+          isPublic: community.isPublic,
+          owner: community.owner,
+        },
+        inviteToken: token,
+      },
+    });
+  },
+);
+
+// ==========================================
+// ✅ Join community via invite deep link
+// ==========================================
+export const joinGroupViaInviteLink = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = String(req.params.token).trim();
+    const userId = (req.user as any)._id;
+
+    const invite = await GroupInviteToken.findOne({
+      token,
+      isActive: true,
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!invite) {
+      return next(new AppError("Invite link is invalid or expired", 404));
+    }
+
+    if (
+      invite.maxUses != null &&
+      invite.uses >= invite.maxUses
+    ) {
+      return next(new AppError("Invite link has reached its usage limit", 410));
+    }
+
+    const community = await Community.findById(invite.communityId);
+    if (!community) {
+      return next(new AppError("Community not found", 404));
+    }
+
+    const userIdStr = userId.toString();
+
+    if (community.members.some((m) => m.toString() === userIdStr)) {
+      return res.status(200).json({
+        status: "success",
+        message: "You are already a member of this group",
+        data: { alreadyMember: true, communityId: community._id },
+      });
+    }
+
+    community.invitedUsers = (community.invitedUsers || []).filter(
+      (id) => id.toString() !== userIdStr,
+    );
+    community.members.push(userId);
+    await community.save();
+
+    if (community.chatId) {
+      await Chat.findByIdAndUpdate(community.chatId, {
+        $addToSet: { users: userId },
+      });
+      await upsertChatClearState(
+        community.chatId.toString(),
+        userIdStr,
+      );
+    }
+
+    invite.uses += 1;
+    await invite.save();
+
+    const populatedCommunity = await populateCommunityForClient(
+      community._id.toString(),
+    );
+
+    const io = req.app.get("io");
+    if (io && populatedCommunity) {
+      io.to(userIdStr).emit("added-to-community", {
+        community: populatedCommunity,
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Joined group successfully",
+      data: {
+        alreadyMember: false,
+        community: populatedCommunity,
+        communityId: community._id,
       },
     });
   },

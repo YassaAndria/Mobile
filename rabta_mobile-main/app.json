@@ -6,6 +6,14 @@
     "version": "1.0.0",
     "newArchEnabled": true,
     "scheme": "rabta",
+    "linking": {
+      "prefixes": ["rabta://"],
+      "config": {
+        "screens": {
+          "group/invite/[inviteToken]": "group/invite/:inviteToken"
+        }
+      }
+    },
     "orientation": "default",
     "icon": "./assets/rabta-icon1.png",
     "userInterfaceStyle": "light",
@@ -22,6 +30,20 @@
     },
     "android": {
       "package": "com.yassaandria.rabta",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": false,
+          "data": [
+            {
+              "scheme": "rabta",
+              "host": "*",
+              "pathPrefix": "/group/invite"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/rabta-icon1.png",
         "backgroundColor": "#ffffff"
