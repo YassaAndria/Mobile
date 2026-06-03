@@ -9,10 +9,16 @@ import {
   TextInput,
   Alert,
   RefreshControl,
+  Linking,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useTheme } from "../../src/theme/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 import {
   addPostComment,
   createCommunityPost,
@@ -27,6 +33,7 @@ type Post = {
   _id: string;
   content?: string;
   authorId?: { _id?: string; fullName?: string };
+  media?: { fileUrl: string; fileType: string }[];
   likes?: string[];
   comments?: { userId?: { fullName?: string }; commentText?: string }[];
   createdAt?: string;
@@ -52,6 +59,67 @@ export default function CommunityFeedScreen() {
   const [newPost, setNewPost] = useState("");
   const [posting, setPosting] = useState(false);
   const [commentDraft, setCommentDraft] = useState<Record<string, string>>({});
+  const [attachedFiles, setAttachedFiles] = useState<any[]>([]);
+
+  const resolveMediaUrl = (path?: string): string => {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    const base = process.env.EXPO_PUBLIC_API_BASE_URL || "http://192.168.1.3:5000/api/v1";
+    try {
+      const origin = new URL(base).origin;
+      return `${origin}${path.startsWith("/") ? "" : "/"}${path}`;
+    } catch {
+      return path;
+    }
+  };
+
+  const handlePickImage = async () => {
+    try {
+      const res = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: false,
+        quality: 1,
+        allowsMultipleSelection: true,
+      });
+      if (!res.canceled && res.assets) {
+        const picked = res.assets.map((asset) => {
+          const uri = asset.uri;
+          const name = uri.split("/").pop() || "image.jpg";
+          const type = asset.mimeType || "image/jpeg";
+          return { uri, name, type, isImage: true };
+        });
+        setAttachedFiles((prev) => [...prev, ...picked]);
+      }
+    } catch (err) {
+      console.error("[CommunityFeed] Image pick failed:", err);
+    }
+  };
+
+  const handlePickDocument = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: "*/*",
+        copyToCacheDirectory: true,
+        multiple: true,
+      });
+      if (!res.canceled && res.assets) {
+        const picked = res.assets.map((asset) => {
+          const uri = asset.uri;
+          const name = asset.name || uri.split("/").pop() || "file";
+          const type = asset.mimeType || "application/octet-stream";
+          const isImage = type.startsWith("image/");
+          return { uri, name, type, isImage };
+        });
+        setAttachedFiles((prev) => [...prev, ...picked]);
+      }
+    } catch (err) {
+      console.error("[CommunityFeed] Document pick failed:", err);
+    }
+  };
+
+  const removeAttachedFile = (index: number) => {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const load = useCallback(
     async (silent = false) => {
@@ -76,11 +144,13 @@ export default function CommunityFeedScreen() {
 
   const handleCreatePost = async () => {
     const text = newPost.trim();
-    if (!text || !communityId) return;
+    if (!text && attachedFiles.length === 0) return;
+    if (!communityId) return;
     setPosting(true);
     try {
-      await createCommunityPost(communityId, text);
+      await createCommunityPost(communityId, text, attachedFiles);
       setNewPost("");
+      setAttachedFiles([]);
       await load(true);
     } catch (e) {
       Alert.alert("Error", getApiErrorMessage(e, "Could not post."));
@@ -136,6 +206,55 @@ export default function CommunityFeedScreen() {
           {time}
         </Text>
         <Text style={{ color: colors.text, lineHeight: 20 }}>{item.content}</Text>
+
+        {/* Post Media / Attachments Display */}
+        {item.media && item.media.length > 0 && (
+          <View style={{ marginTop: 12, gap: 10 }}>
+            {item.media.map((med, idx) => {
+              const url = resolveMediaUrl(med.fileUrl);
+              const isImg = med.fileType?.startsWith("image/") || /\.(jpe?g|png|gif|webp|bmp|svg)(\?|$)/i.test(url);
+              if (isImg) {
+                return (
+                  <TouchableOpacity key={idx} onPress={() => Linking.openURL(url).catch(e => console.error(e))}>
+                    <Image
+                      source={{ uri: url }}
+                      style={{
+                        width: "100%",
+                        height: 200,
+                        borderRadius: 10,
+                        backgroundColor: isDark ? "#2D2D2D" : "#E5E7EB",
+                      }}
+                      contentFit="cover"
+                    />
+                  </TouchableOpacity>
+                );
+              }
+              const label = url.split("/").pop() || "Attachment";
+              return (
+                <TouchableOpacity
+                  key={idx}
+                  onPress={() => Linking.openURL(url).catch(e => console.error(e))}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: 12,
+                    borderRadius: 10,
+                    backgroundColor: isDark ? "#1E1E1E" : "#F9FAFB",
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                  }}
+                >
+                  <Ionicons name="document-text-outline" size={22} color={colors.purple} />
+                  <Text style={{ color: colors.text, fontSize: 13, flex: 1, fontWeight: "500" }} numberOfLines={1}>
+                    {label}
+                  </Text>
+                  <Ionicons name="download-outline" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
 
         <View style={styles.postActions}>
           <TouchableOpacity onPress={() => handleLike(item._id)}>
@@ -198,13 +317,86 @@ export default function CommunityFeedScreen() {
           onChangeText={setNewPost}
           multiline
         />
-        <TouchableOpacity
-          style={[styles.postBtn, { backgroundColor: colors.purple, opacity: posting ? 0.6 : 1 }]}
-          onPress={handleCreatePost}
-          disabled={posting}
-        >
-          <Text style={{ color: "#fff", fontWeight: "700" }}>Post</Text>
-        </TouchableOpacity>
+
+        {/* Attached Files Preview Grid/List */}
+        {attachedFiles.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }}>
+            <View style={{ flexDirection: "row", gap: 10, paddingVertical: 4 }}>
+              {attachedFiles.map((file, idx) => (
+                <View
+                  key={idx}
+                  style={{
+                    width: 70,
+                    height: 70,
+                    borderRadius: 8,
+                    backgroundColor: isDark ? "#2D2D2D" : "#E5E7EB",
+                    position: "relative",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                  }}
+                >
+                  {file.isImage ? (
+                    <Image source={{ uri: file.uri }} style={{ width: "100%", height: "100%", borderRadius: 8 }} />
+                  ) : (
+                    <View style={{ padding: 4, alignItems: "center" }}>
+                      <Ionicons name="document-text" size={24} color={colors.purple} />
+                      <Text style={{ fontSize: 9, color: colors.text, marginTop: 2, textAlign: "center" }} numberOfLines={1}>
+                        {file.name}
+                      </Text>
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    onPress={() => removeAttachedFile(idx)}
+                    style={{
+                      position: "absolute",
+                      top: -6,
+                      right: -6,
+                      backgroundColor: "#EF4444",
+                      width: 20,
+                      height: 20,
+                      borderRadius: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      elevation: 2,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 1,
+                    }}
+                  >
+                    <Ionicons name="close" size={14} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        )}
+
+        {/* Action Bar */}
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 4 }}>
+          <View style={{ flexDirection: "row", gap: 16 }}>
+            <TouchableOpacity onPress={handlePickImage} style={{ padding: 6 }}>
+              <Ionicons name="image-outline" size={24} color={colors.purple} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handlePickDocument} style={{ padding: 6 }}>
+              <Ionicons name="document-attach-outline" size={24} color={colors.purple} />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={[styles.postBtn, { backgroundColor: colors.purple, opacity: posting ? 0.6 : 1 }]}
+            onPress={handleCreatePost}
+            disabled={posting}
+          >
+            {posting ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Post</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loading ? (

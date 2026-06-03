@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // 1. المحرك الأساسي لتوليد الردود (الـ Agent)
-export const llm = initChatModel("gpt-4o-mini", {
+export const llm = initChatModel("gpt-5-mini", {
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -15,6 +15,6 @@ export const embeddingsModel = new OpenAIEmbeddings({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const WHISPER_MODEL = "whisper-1";
+export const OPENAI_STT_MODEL = "gpt-4o-mini-transcribe";
 // المحرك الأساسي لتحويل الصوت إلى نص (Deepgram)
 export const DEEPGRAM_MODEL = "nova-3";

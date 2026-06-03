@@ -9,6 +9,7 @@ interface AttachmentModalProps {
   onSelectLibrary: () => void;
   onSelectCamera: () => void;
   onSelectDocument: () => void;
+  onSelectStt?: () => void;
 }
 
 export default function AttachmentModal({
@@ -17,6 +18,7 @@ export default function AttachmentModal({
   onSelectLibrary,
   onSelectCamera,
   onSelectDocument,
+  onSelectStt,
 }: AttachmentModalProps) {
   const { colors, isDark } = useTheme();
   
@@ -42,6 +44,13 @@ export default function AttachmentModal({
       color: '#3b82f6', // blue
       onPress: onSelectDocument,
     },
+    ...(onSelectStt ? [{
+      id: 'stt',
+      icon: 'keyboard-voice',
+      label: 'AI Speech-to-Text',
+      color: '#a855f7', // purple-500
+      onPress: onSelectStt,
+    }] : []),
   ];
 
   return (

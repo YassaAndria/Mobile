@@ -26,146 +26,112 @@ export const processAndStoreGlobalData = async (sampleData: { text: string; meta
 };
 
 export const askGlobalKnowledge = async (question: string) => {
-  try {
-    const client = mongoose.connection.getClient() as any;
-    const collection = client.db(process.env.DB_NAME || "RabtaDB").collection("global_vectors");
+  const client = mongoose.connection.getClient() as any;
+  const collection = client.db(process.env.DB_NAME || "RabtaDB").collection("global_vectors");
 
-    const vectorStore = new MongoDBAtlasVectorSearch(embeddingsModel, {
-      collection: collection,
-      indexName: "global_vector_index",
-      textKey: "text",
-      embeddingKey: "embedding",
-    });
+  const vectorStore = new MongoDBAtlasVectorSearch(embeddingsModel, {
+    collection: collection,
+    indexName: "global_vector_index",
+    textKey: "text",
+    embeddingKey: "embedding",
+  });
 
-    const searchResults = await vectorStore.similaritySearch(question, 5);
+  const searchResults = await vectorStore.similaritySearch(question, 5);
 
-    let context = "No document context available.";
-    if (searchResults && searchResults.length > 0) {
-      context = searchResults.map(doc => doc.pageContent).join("\n");
-    }
-
-    const resolvedModel = await llm;
-    const chain = globalAiPromptTemplate.pipe(resolvedModel).pipe(new StringOutputParser());
-
-    const answer = await chain.invoke({
-      context,
-      question,
-    } as any);
-
-    return answer;
-  } catch (error: any) {
-    console.log("❌ [LangChain askGlobalKnowledge] OpenAI Error (Gracefully handled):", error.message || error);
-    if (error?.message?.includes("quota") || error?.message?.includes("429") || error?.status === 429) {
-      return `🤖 *[Rabta AI - Local Demo Mode]*
-
-Hello! I am running in **Demo Mode** because your OpenAI API Key has no active billing credits (429 Quota Exceeded).
-
-Here is how I can help you once billing is active:
-1. **Smart Search**: I can answer detailed questions about your direct chats and group channels.
-2. **Community RAG**: I can search public community posts and summarize technical discussions.
-3. **Smart Replies**: Suggest quick, contextual replies to save you time.
-
-*💡 Quick Tip: To enable full dynamic AI capabilities, simply add a $5 credit to your account at: https://platform.openai.com/settings/organization/billing*`;
-    }
-    return `⚠️ [Rabta AI Error]: ${error?.message || "An unexpected AI error occurred."}`;
+  let context = "No document context available.";
+  if (searchResults && searchResults.length > 0) {
+    context = searchResults.map(doc => doc.pageContent).join("\n");
   }
+
+  const resolvedModel = await llm;
+  const chain = globalAiPromptTemplate.pipe(resolvedModel).pipe(new StringOutputParser());
+
+  const answer = await chain.invoke({
+    context,
+    question,
+  } as any);
+
+  return answer;
 };
 
 export const semanticSearchMessages = async (query: string, userId: string, chatId: string, currentUserName: string) => {
-  try {
-    const client = mongoose.connection.getClient() as any;
-    const collection = client.db(process.env.DB_NAME || "RabtaDB").collection("communitychunks");
+  const client = mongoose.connection.getClient() as any;
+  const collection = client.db(process.env.DB_NAME || "RabtaDB").collection("communitychunks");
 
-    const vectorStore = new MongoDBAtlasVectorSearch(embeddingsModel, {
-      collection: collection,
-      indexName: "vector_index",
-      textKey: "content",
-      embeddingKey: "embedding",
-    });
+  const vectorStore = new MongoDBAtlasVectorSearch(embeddingsModel, {
+    collection: collection,
+    indexName: "vector_index",
+    textKey: "content",
+    embeddingKey: "embedding",
+  });
 
-    const filter = {
-      chatId: new mongoose.Types.ObjectId(chatId),
-      "metadata.sourceType": { $in: ["chat", "file", "pdf"] }
-    };
+  const filter = {
+    chatId: new mongoose.Types.ObjectId(chatId),
+    "metadata.sourceType": { $in: ["chat", "file", "pdf"] }
+  };
 
-    const searchResults = await vectorStore.similaritySearch(query, 10, filter);
+  const searchResults = await vectorStore.similaritySearch(query, 10, filter);
 
-    if (!searchResults || searchResults.length === 0) {
-      return "لم يتم العثور على رسائل أو ملفات مطابقة لبحثك في هذا الشات.";
-    }
-
-    const contextPromises = searchResults.map(async (doc) => {
-      const sourceType = doc.metadata?.sourceType || "chat";
-      const isFile = sourceType === "file" || sourceType === "pdf" || doc.pageContent.includes("Attached PDF Content");
-
-      let sender = doc.metadata?.senderName;
-
-      if (!sender || sender === "مستخدم في الشات") {
-        if (doc.metadata?.senderId) {
-          const userDoc = await User.findById(doc.metadata.senderId);
-          if (userDoc) {
-            sender = (userDoc as any).fullName || (userDoc as any).name;
-          }
-        }
-      }
-
-      if (!sender) {
-        sender = isFile ? "ملف مرفوع" : "عضو في الشات";
-      }
-
-      if (sender === currentUserName || sender === "أنت (You)") {
-        sender = "أنت";
-      }
-
-      // تنسيق الوقت بالكامل ليفهمه الـ AI بوضوح للإجابة على سؤال (أمتى)
-      // 🔥 حماية قراءة الوقت: لو مبعوت بأي صيغة، حوله لنص مقروء فوراً
-      let time = "غير محدد";
-      if (doc.metadata?.timestamp) {
-        try {
-          time = new Date(doc.metadata.timestamp).toLocaleTimeString('ar-EG', {
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-        } catch (e) {
-          console.error("❌ خطأ في تحويل الوقت:", e);
-        }
-      }
-
-      const cleanContent = doc.pageContent.replace(/\s+/g, ' ').trim();
-      const sourceTag = isFile ? `File content uploaded by ${sender}` : `Message from ${sender}`;
-
-      return `[Source: ${sourceTag} | Time: ${time}] -> ${cleanContent}`;
-    });
-
-    const contextArray = await Promise.all(contextPromises);
-    const context = contextArray.join("\n");
-
-    console.log("📊 Smart Context dynamically built:\n", context);
-
-    const resolvedModel = await llm;
-    const chain = smartSearchPromptTemplate.pipe(resolvedModel).pipe(new StringOutputParser());
-
-    const answer = await chain.invoke({
-      context,
-      question: query,
-      currentUserName: currentUserName
-    } as any);
-
-    return answer;
-  } catch (error: any) {
-    console.log("❌ [LangChain semanticSearchMessages] OpenAI Error (Gracefully handled):", error.message || error);
-    if (error?.message?.includes("quota") || error?.message?.includes("429") || error?.status === 429) {
-      return `🤖 *[Rabta AI Chat Search - Demo Mode]*
-
-I am running in **Chat Demo Mode** because your OpenAI API Key is out of billing credits.
-
-Once activated, here is a preview of the smart context search I can provide for this specific chat:
-- **Chat Context Analyzed**: I will scan your messages, PDFs, and shared links.
-- **Topic Clustering**: Identify key questions, answers, and shared links in this chat room.
-- **Precise Timelines**: Answer questions like *"When did we schedule the meeting?"* or *"Who shared the source files?"*.
-
-*💡 Quick Tip: To enable real-time message analysis, simply add a $5 credit to your OpenAI profile at: https://platform.openai.com/settings/organization/billing*`;
-    }
-    return `⚠️ [Rabta AI Error]: ${error?.message || "An unexpected AI error occurred."}`;
+  if (!searchResults || searchResults.length === 0) {
+    return "لم يتم العثور على رسائل أو ملفات مطابقة لبحثك في هذا الشات.";
   }
+
+  const contextPromises = searchResults.map(async (doc) => {
+    const sourceType = doc.metadata?.sourceType || "chat";
+    const isFile = sourceType === "file" || sourceType === "pdf" || doc.pageContent.includes("Attached PDF Content");
+
+    let sender = doc.metadata?.senderName;
+
+    if (!sender || sender === "مستخدم في الشات") {
+      if (doc.metadata?.senderId) {
+        const userDoc = await User.findById(doc.metadata.senderId);
+        if (userDoc) {
+          sender = (userDoc as any).fullName || (userDoc as any).name;
+        }
+      }
+    }
+
+    if (!sender) {
+      sender = isFile ? "ملف مرفوع" : "عضو في الشات";
+    }
+
+    if (sender === currentUserName || sender === "أنت (You)") {
+      sender = "أنت";
+    }
+
+    // تنسيق الوقت بالكامل ليفهمه الـ AI بوضوح للإجابة على سؤال (أمتى)
+    // 🔥 حماية قراءة الوقت: لو مبعوت بأي صيغة، حوله لنص مقروء فوراً
+    let time = "غير محدد";
+    if (doc.metadata?.timestamp) {
+      try {
+        time = new Date(doc.metadata.timestamp).toLocaleTimeString('ar-EG', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        console.error("❌ خطأ في تحويل الوقت:", e);
+      }
+    }
+
+    const cleanContent = doc.pageContent.replace(/\s+/g, ' ').trim();
+    const sourceTag = isFile ? `File content uploaded by ${sender}` : `Message from ${sender}`;
+
+    return `[Source: ${sourceTag} | Time: ${time}] -> ${cleanContent}`;
+  });
+
+  const contextArray = await Promise.all(contextPromises);
+  const context = contextArray.join("\n");
+
+  console.log("📊 Smart Context dynamically built:\n", context);
+
+  const resolvedModel = await llm;
+  const chain = smartSearchPromptTemplate.pipe(resolvedModel).pipe(new StringOutputParser());
+
+  const answer = await chain.invoke({
+    context,
+    question: query,
+    currentUserName: currentUserName
+  } as any);
+
+  return answer;
 };

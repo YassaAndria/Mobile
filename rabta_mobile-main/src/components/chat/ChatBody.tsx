@@ -10,9 +10,10 @@ import {
   Modal,
   SafeAreaView,
   Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { createAudioPlayer } from 'expo-audio';
@@ -29,6 +30,7 @@ interface ChatBodyProps {
   onReply?: (message: MessageType) => void;
   onForward?: (message: MessageType) => void;
   onReactLocal?: (messageId: string, emoji: string) => void;
+  onSmartReplies?: (message: MessageType) => void;
 }
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
@@ -68,6 +70,7 @@ export default function ChatBody({
   onReply,
   onForward,
   onReactLocal,
+  onSmartReplies,
 }: ChatBodyProps) {
   const { colors, isDark } = useTheme();
   const router = useRouter();
@@ -95,6 +98,40 @@ export default function ChatBody({
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const soundRef = useRef<any>(null);
+
+  // Translation states
+  const [translatedMessages, setTranslatedMessages] = useState<Record<string, { translatedText: string, originalText: string }>>({});
+  const [translatingMessageId, setTranslatingMessageId] = useState<string | null>(null);
+
+  const handleTranslateMessage = useCallback(async (msg: MessageType) => {
+    if (!msg.content) return;
+    setTranslatingMessageId(msg.id);
+    try {
+      const isArabic = /[\u0600-\u06FF]/.test(msg.content);
+      const targetLang = isArabic ? 'en' : 'ar';
+      const res = await axiosInstance.post(
+        '/api/ai/chat/translate',
+        { text: msg.content, targetLang },
+        { timeout: 60000 },
+      );
+      if (res.data?.status === 'success' && res.data?.data) {
+        setTranslatedMessages((prev) => ({
+          ...prev,
+          [msg.id]: {
+            translatedText: res.data.data,
+            originalText: msg.content || '',
+          },
+        }));
+      } else {
+        Alert.alert('Translation Failed', 'Failed to translate message.');
+      }
+    } catch (err: any) {
+      console.error('Error translating message:', err);
+      Alert.alert('Translation Error', err.response?.data?.message || 'Failed to translate message.');
+    } finally {
+      setTranslatingMessageId(null);
+    }
+  }, []);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -386,6 +423,62 @@ export default function ChatBody({
                   contentFit="cover"
                 />
               </TouchableOpacity>
+            ) : item.type === 'post' ? (
+              <View style={{
+                backgroundColor: isDark ? '#1F1F1F' : '#F9F9F9',
+                borderColor: isDark ? '#333333' : '#EAEAEA',
+                borderWidth: 1,
+                borderRadius: 16,
+                padding: 12,
+                marginBottom: 4,
+                width: 240,
+              }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, borderBottomWidth: 0.5, borderBottomColor: isDark ? '#333' : '#E0E0E0', paddingBottom: 8 }}>
+                  <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(124, 58, 237, 0.15)', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+                    <Ionicons name="document-text" size={15} color="#7C3AED" />
+                  </View>
+                  <View>
+                    <Text style={{ fontSize: 11, fontWeight: '700', color: isDark ? '#E5E5E5' : '#2D2D2D', textTransform: 'uppercase', letterSpacing: 0.3 }}>Shared a Post</Text>
+                    <Text style={{ fontSize: 9, color: colors.textMuted }}>Rabta Community</Text>
+                  </View>
+                </View>
+
+                {item.postId && typeof item.postId === 'object' && item.postId.media && item.postId.media.length > 0 ? (
+                  <Image
+                    source={{ uri: item.postId.media[0].fileUrl }}
+                    style={{ width: '100%', height: 110, borderRadius: 10, marginBottom: 8 }}
+                    contentFit="cover"
+                  />
+                ) : null}
+
+                <Text style={{ fontSize: 13, color: isDark ? '#F5F5F5' : '#1A1A1A', marginBottom: 10, lineHeight: 17 }} numberOfLines={3}>
+                  {item.content}
+                </Text>
+
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                    borderRadius: 10,
+                    paddingVertical: 8,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderWidth: 0.5,
+                    borderColor: 'rgba(124, 58, 237, 0.2)'
+                  }}
+                  onPress={() => {
+                    const postObj = item.postId;
+                    const commId = typeof postObj === 'object' ? postObj?.communityId : undefined;
+                    if (commId) {
+                      router.push({
+                        pathname: '/community-feed',
+                        params: { communityId: commId }
+                      });
+                    }
+                  }}
+                >
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: '#7C3AED' }}>View Full Post</Text>
+                </TouchableOpacity>
+              </View>
             ) : item.type === 'file' ? (
               <TouchableOpacity
                 style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.1)', padding: 8, borderRadius: 8, marginBottom: 4 }}
@@ -412,16 +505,60 @@ export default function ChatBody({
                 <Text style={{ color: isMine ? '#fff' : colors.text, fontSize: 12 }}>Audio</Text>
               </TouchableOpacity>
             ) : (
-              <Text
-                style={{
-                  color: isMine ? '#ffffff' : colors.text,
-                  fontSize: 15,
-                  lineHeight: 21,
-                  flexShrink: 1,
-                }}
-              >
-                {item.content ?? ''}
-              </Text>
+              <View style={{ gap: 4 }}>
+                {translatingMessageId === item.id ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 }}>
+                    <ActivityIndicator size="small" color={isMine ? '#fff' : colors.purple} />
+                    <Text style={{ fontStyle: 'italic', fontSize: 13, color: isMine ? 'rgba(255,255,255,0.7)' : colors.textMuted }}>
+                      Translating...
+                    </Text>
+                  </View>
+                ) : translatedMessages[item.id] ? (
+                  <View style={{ gap: 2 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <MaterialIcons name="g-translate" size={12} color={isMine ? 'rgba(255,255,255,0.8)' : colors.purple} />
+                      <Text style={{ fontSize: 11, fontWeight: '600', color: isMine ? 'rgba(255,255,255,0.8)' : colors.purple }}>
+                        Translated
+                      </Text>
+                    </View>
+                    <Text
+                      style={{
+                        color: isMine ? '#ffffff' : colors.text,
+                        fontSize: 15,
+                        lineHeight: 21,
+                        flexShrink: 1,
+                      }}
+                    >
+                      {translatedMessages[item.id].translatedText}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setTranslatedMessages((prev) => {
+                          const copy = { ...prev };
+                          delete copy[item.id];
+                          return copy;
+                        });
+                      }}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Text style={{ fontSize: 11, textDecorationLine: 'underline', color: isMine ? '#ffffff' : colors.purple, marginTop: 4 }}>
+                        Show Original
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <Text
+                    style={{
+                      color: isMine ? '#ffffff' : colors.text,
+                      fontSize: 15,
+                      lineHeight: 21,
+                      flexShrink: 1,
+                    }}
+                  >
+                    {item.content ?? ''}
+                  </Text>
+                )}
+              </View>
             )}
 
             {/* Timestamp + status row */}
@@ -520,6 +657,8 @@ export default function ChatBody({
         onPin={handlePin}
         onStar={(id) => console.log('Star:', id)}
         isGroup={isGroup}
+        onTranslate={handleTranslateMessage}
+        onSmartReplies={onSmartReplies}
       />
 
       {/* Fullscreen Image Modal */}

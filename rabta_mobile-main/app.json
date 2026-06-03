@@ -17,7 +17,7 @@
       }
     },
     "orientation": "default",
-    "icon": "./assets/rabta-icon1.png",
+    "icon": "./assets/icon1.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",

@@ -95,8 +95,22 @@ export const getCommunityFeed = (communityId: string) =>
   axiosInstance.get(`/groups/${communityId}/feed`);
 
 /** Create a post in a community's feed */
-export const createCommunityPost = (communityId: string, content: string) =>
-  axiosInstance.post('/posts', { content, communityId });
+export const createCommunityPost = (communityId: string, content: string, files?: any[]) => {
+  if (files && files.length > 0) {
+    const formData = new FormData();
+    formData.append("content", content);
+    formData.append("communityId", communityId);
+    files.forEach((file) => {
+      formData.append("media", file);
+    });
+    return axiosInstance.post("/posts", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  }
+  return axiosInstance.post("/posts", { content, communityId });
+};
 
 /** Toggle like on a post */
 export const togglePostLike = (postId: string) =>

@@ -30,6 +30,8 @@ interface MessageContextMenuProps {
   onPin: (messageId: string) => void;
   onStar?: (messageId: string) => void;
   isGroup?: boolean;
+  onTranslate?: (message: MessageType) => void;
+  onSmartReplies?: (message: MessageType) => void;
 }
 
 export default function MessageContextMenu({
@@ -44,6 +46,8 @@ export default function MessageContextMenu({
   onPin,
   onStar,
   isGroup,
+  onTranslate,
+  onSmartReplies,
 }: MessageContextMenuProps) {
   const { colors, isDark } = useTheme();
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -87,6 +91,18 @@ export default function MessageContextMenu({
       onPress: () => { onReply(message); onClose(); },
       iconLib: 'Ionicons',
     },
+    ...(onTranslate && (message.type === 'text' || !message.type) ? [{
+      icon: 'language-outline' as any,
+      label: 'Translate',
+      onPress: () => { onTranslate(message); onClose(); },
+      iconLib: 'Ionicons',
+    }] : []),
+    ...(onSmartReplies && !message.isMine ? [{
+      icon: 'bulb-outline' as any,
+      label: 'Smart Replies',
+      onPress: () => { onSmartReplies(message); onClose(); },
+      iconLib: 'Ionicons',
+    }] : []),
     {
       icon: 'share-outline' as any,
       label: 'Forward',

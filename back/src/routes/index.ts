@@ -61,6 +61,7 @@ router.use("/jobs", jobRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/admin", adminRoutes);
 router.use("/ai", aiRoutes);
+router.use("/api/ai", aiRoutes);
 
 // ==========================================
 // 🚀 المسارات (Routes)

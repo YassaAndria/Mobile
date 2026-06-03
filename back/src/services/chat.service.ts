@@ -249,7 +249,7 @@ export const createMessage = async (data: {
       select: "content senderId messageType attachments",
       populate: { path: "senderId", select: "fullName" },
     })
-    .populate("postId", "media content");
+    .populate("postId", "media content communityId");
 
   return populatedMessage;
 };
@@ -370,7 +370,7 @@ export const getChatMessages = async (
       select: "content senderId messageType attachments",
       populate: { path: "senderId", select: "fullName" },
     })
-    .populate("postId", "media content")
+    .populate("postId", "media content communityId")
     // Fetch newest first so limit returns the latest persisted messages
     .sort({ createdAt: -1 })
     .limit(safeLimit);
@@ -894,7 +894,7 @@ export const getUserChats = async (userId: string) => {
       path: "latestMessage",
       populate: [
         { path: "senderId", select: "fullName _id" },
-        { path: "postId", select: "media content" }
+        { path: "postId", select: "media content communityId" }
       ],
     })
     .populate("admins", "fullName avatar")
@@ -916,7 +916,7 @@ export const getUserChats = async (userId: string) => {
         const realLatestMessage = await Message.findOne(visibleFilter)
           .sort({ createdAt: -1 })
           .populate("senderId", "fullName _id")
-          .populate("postId", "media content");
+          .populate("postId", "media content communityId");
 
         latestMsg = realLatestMessage;
       }

@@ -14,6 +14,7 @@ const links: { path: string; label: string; icon: keyof typeof MaterialIcons.gly
   { path: "/admin/add-admin",     label: "Add Admin",     icon: "person-add"    },
   { path: "/admin/verifications", label: "Verifications", icon: "verified-user" },
   { path: "/admin/logs",          label: "Activity Logs", icon: "history"       },
+  { path: "/admin/ai-training",   label: "AI Training",   icon: "psychology"    },
 ];
 
 export function AdminSidebar({ closeMenu }: { closeMenu?: () => void }) {

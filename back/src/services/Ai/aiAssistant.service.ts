@@ -9,7 +9,7 @@ import {
 
 // استدعاء ملف الـ Prompts والمحرك الأساسي
 import { AI_ASSISTANT_PROMPTS } from "../Ai/prompts.ai";
-import { llm, WHISPER_MODEL, DEEPGRAM_MODEL } from "./core.ai.service";
+import { llm, OPENAI_STT_MODEL, DEEPGRAM_MODEL } from "./core.ai.service";
 
 dotenv.config(); // زي ما يوسف عامل بالظبط
 
@@ -79,9 +79,9 @@ export const translateMessage = async (text: string, targetLang: string) => {
 };
 
 // ==========================================
-// 🚀 Speech-to-Text (Whisper AI) - مؤجل لحين حل مشكلة الـ Key
+// 🚀 Speech-to-Text (OpenAI New Model)
 // ==========================================
-export const transcribeAudioWhisper = async (
+export const transcribeAudioOpenAI = async (
   audioBuffer: Buffer,
   mimetype: string,
   originalName: string,
@@ -91,7 +91,7 @@ export const transcribeAudioWhisper = async (
     const blob = new Blob([new Uint8Array(audioBuffer)], { type: mimetype });
 
     formData.append("file", blob, originalName || "audio.webm");
-    formData.append("model", WHISPER_MODEL);
+    formData.append("model", OPENAI_STT_MODEL); // 💡 استخدام الموديل الجديد
     formData.append("language", "ar");
 
     const response = await fetch(
@@ -107,20 +107,22 @@ export const transcribeAudioWhisper = async (
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("❌ [Whisper API] Transcription failed:", errorData);
-      throw new Error("Failed to transcribe audio. Please try again.");
+      console.error("❌ [OpenAI STT] Transcription failed:", errorData);
+      throw new Error("Failed to transcribe audio using OpenAI.");
     }
 
     const data = await response.json();
     return data.text;
   } catch (error) {
-    console.error("❌ [Whisper API] Unexpected error:", error);
-    throw new Error("An unexpected error occurred during audio processing.");
+    console.error("❌ [OpenAI STT] Unexpected error:", error);
+    throw new Error(
+      "An unexpected error occurred during OpenAI audio processing.",
+    );
   }
 };
 
 // ==========================================
-// 🚀 Speech-to-Text (Deepgram AI) - المستخدم حالياً للتجربة
+// 🚀 Speech-to-Text (Deepgram AI)
 // ==========================================
 export const transcribeAudioDeepgram = async (
   audioBuffer: Buffer,
@@ -141,15 +143,15 @@ export const transcribeAudioDeepgram = async (
     if (!response.ok) {
       const errorData = await response.json();
       console.error("❌ [Deepgram API] Transcription failed:", errorData);
-      throw new Error("Failed to transcribe audio. Please try again.");
+      throw new Error("Failed to transcribe audio using Deepgram.");
     }
 
     const data = await response.json();
-    const transcript =
-      data.results?.channels[0]?.alternatives[0]?.transcript || "";
-    return transcript;
+    return data.results?.channels[0]?.alternatives[0]?.transcript || "";
   } catch (error) {
     console.error("❌ [Deepgram API] Unexpected error:", error);
-    throw new Error("An unexpected error occurred during audio processing.");
+    throw new Error(
+      "An unexpected error occurred during Deepgram audio processing.",
+    );
   }
 };

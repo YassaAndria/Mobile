@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import Post from '../models/Post';
 import Message from '../models/Message';
+import Community from '../models/Community';
+import * as chatService from '../services/chat.service';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/AppError';
 
@@ -77,6 +79,33 @@ export const createPost = catchAsync(async (req: Request, res: Response) => {
     media,
     communityId: communityId || undefined
   });
+
+  // If this post belongs to a community, auto-generate a chat message in the community group chat
+  if (communityId) {
+    try {
+      const community = await Community.findById(communityId);
+      if (community && community.chatId) {
+        const savedMessage = await chatService.createMessage({
+          chatId: community.chatId.toString(),
+          senderId: authorId.toString(),
+          content: content || "Shared a post",
+          messageType: "post",
+          postId: post._id.toString(),
+          status: "sent",
+        });
+
+        if (savedMessage) {
+          const io = req.app.get("io");
+          if (io) {
+            io.to(community.chatId.toString()).emit("receiveMessage", savedMessage);
+            io.to(community.chatId.toString()).emit("receive-message", savedMessage);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[PostController] Failed to auto-post to group chat:', err);
+    }
+  }
 
   res.status(201).json({
     status: 'success',

@@ -40,7 +40,7 @@ export const calculateMatchScore = async (
 
     const llmModel = await llm;
     const response = await llmModel.invoke(formattedPrompt);
-    
+
     const content = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
 
     // Strip markdown code blocks (e.g. ```json ... ```)

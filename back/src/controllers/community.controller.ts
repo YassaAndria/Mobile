@@ -73,7 +73,7 @@ export const listCommunities = catchAsync(
                 finalLatestMessage = await Message.findOne(visibleFilter)
                   .sort({ createdAt: -1 })
                   .populate("senderId", "fullName _id")
-                  .populate("postId", "media content");
+                  .populate("postId", "media content communityId");
               }
             }
           }

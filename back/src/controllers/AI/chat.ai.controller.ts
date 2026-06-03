@@ -19,23 +19,31 @@ export const askChat = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?._id?.toString();
 
   if (!userId) {
-    res.status(401).json({ status: "error", message: "Unauthorized: No token provided." });
+    res
+      .status(401)
+      .json({ status: "error", message: "Unauthorized: No token provided." });
     return;
   }
 
   const chatDoc = await Chat.findById(chatId);
-  if (!chatDoc || !chatDoc.users.some((user: any) => user.toString() === userId)) {
-    res.status(403).json({ status: "error", message: "Forbidden: Access denied." });
+  if (
+    !chatDoc ||
+    !chatDoc.users.some((user: any) => user.toString() === userId)
+  ) {
+    res
+      .status(403)
+      .json({ status: "error", message: "Forbidden: Access denied." });
     return;
   }
 
-  const currentUserName = (req.user as any).fullName || (req.user as any).name || "مستخدم";
+  const currentUserName =
+    (req.user as any).fullName || (req.user as any).name || "مستخدم";
 
   const answer = await vectorStoreService.semanticSearchMessages(
     question,
     userId,
     chatId,
-    currentUserName
+    currentUserName,
   );
 
   res.status(200).json({ status: "success", data: answer });
@@ -46,7 +54,10 @@ export const summarizeChat = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?._id?.toString();
 
   const chatDoc = await Chat.findById(chatId);
-  if (!chatDoc || !chatDoc.users.some((user: any) => user.toString() === userId)) {
+  if (
+    !chatDoc ||
+    !chatDoc.users.some((user: any) => user.toString() === userId)
+  ) {
     res.status(403).json({ status: "error", message: "Unauthorized access." });
     return;
   }
@@ -58,7 +69,9 @@ export const summarizeChat = catchAsync(async (req: Request, res: Response) => {
     .limit(limit);
 
   if (lastMessages.length === 0) {
-    res.status(200).json({ status: "success", data: "لا توجد رسائل كافية لتلخيصها." });
+    res
+      .status(200)
+      .json({ status: "success", data: "لا توجد رسائل كافية لتلخيصها." });
     return;
   }
 
@@ -69,8 +82,14 @@ export const summarizeChat = catchAsync(async (req: Request, res: Response) => {
   lastMessages.reverse().forEach((msg: any) => {
     if (!msg.content || msg.content.trim() === "") return;
 
-    const currentSenderId = msg.senderId?._id?.toString() || msg.senderId?.toString() || "unknown";
-    const timeStr = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : "غير محدد";
+    const currentSenderId =
+      msg.senderId?._id?.toString() || msg.senderId?.toString() || "unknown";
+    const timeStr = msg.createdAt
+      ? new Date(msg.createdAt).toLocaleTimeString("ar-EG", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "غير محدد";
 
     let senderName = "الطرف الآخر";
     if (currentSenderId === userId) {
@@ -83,7 +102,9 @@ export const summarizeChat = catchAsync(async (req: Request, res: Response) => {
       compressedMessages[compressedMessages.length - 1] +=
         ` . ${msg.content.trim()}`;
     } else {
-      compressedMessages.push(`[${senderName} في تمام الساعة ${timeStr}]: ${msg.content.trim()}`);
+      compressedMessages.push(
+        `[${senderName} في تمام الساعة ${timeStr}]: ${msg.content.trim()}`,
+      );
       lastSenderId = currentSenderId;
     }
   });
@@ -94,37 +115,54 @@ export const summarizeChat = catchAsync(async (req: Request, res: Response) => {
   res.status(200).json({ status: "success", data: summary });
 });
 
-export const answerQuestion = catchAsync(async (req: Request, res: Response) => {
-  const { chatId, question } = req.body;
-  const answer = await aiAssistantService.answerWithContext(chatId, question);
-  res.status(200).json({ status: "success", data: answer });
-});
+export const answerQuestion = catchAsync(
+  async (req: Request, res: Response) => {
+    const { chatId, question } = req.body;
+    const answer = await aiAssistantService.answerWithContext(chatId, question);
+    res.status(200).json({ status: "success", data: answer });
+  },
+);
 
-export const generateChatReplies = catchAsync(async (req: Request, res: Response) => {
-  const { chatId } = req.body;
-  const lastMessages = await Message.find({ chatId }).sort({ createdAt: -1 }).limit(3);
+export const generateChatReplies = catchAsync(
+  async (req: Request, res: Response) => {
+    const { chatId } = req.body;
+    const lastMessages = await Message.find({ chatId })
+      .sort({ createdAt: -1 })
+      .limit(3);
 
-  if (lastMessages.length === 0) {
-    res.status(200).json({ status: "success", data: ["مرحباً بك", "كيف يمكنني المساعدة؟"] });
-    return;
-  }
+    if (lastMessages.length === 0) {
+      res.status(200).json({
+        status: "success",
+        data: ["مرحباً بك", "كيف يمكنني المساعدة؟"],
+      });
+      return;
+    }
 
-  const messagesText = lastMessages.reverse().map((msg: any) => msg.content).join("\n");
-  const result = await aiAssistantService.generateSmartReplies(messagesText);
+    const messagesText = lastMessages
+      .reverse()
+      .map((msg: any) => msg.content)
+      .join("\n");
+    const result = await aiAssistantService.generateSmartReplies(messagesText);
 
-  let parsedReplies;
-  try { parsedReplies = JSON.parse(result as string); } catch (e) { parsedReplies = [result]; }
+    let parsedReplies;
+    try {
+      parsedReplies = JSON.parse(result as string);
+    } catch (e) {
+      parsedReplies = [result];
+    }
 
-  res.status(200).json({ status: "success", data: parsedReplies });
-});
+    res.status(200).json({ status: "success", data: parsedReplies });
+  },
+);
 
-export const translateMessage = catchAsync(async (req: Request, res: Response) => {
-  const { text, targetLang } = req.body;
-  const result = await aiAssistantService.translateMessage(text, targetLang);
-  res.status(200).json({ status: "success", data: result });
-});
-
-// 🎙️ ميزة زميلك الجديدة (Speech-to-Text Controller) تم دمجها بنجاح
+export const translateMessage = catchAsync(
+  async (req: Request, res: Response) => {
+    const { text, targetLang } = req.body;
+    const result = await aiAssistantService.translateMessage(text, targetLang);
+    res.status(200).json({ status: "success", data: result });
+  },
+);
+// 🎙️ ميزة زميلك الجديدة (Speech-to-Text Controller) مجهزة لتدعم البروفايدرين
 export const speechToText = catchAsync(async (req: Request, res: Response) => {
   if (!req.file) {
     console.warn("⚠️ [SpeechToText] No audio file provided in the request.");
@@ -135,14 +173,26 @@ export const speechToText = catchAsync(async (req: Request, res: Response) => {
     return;
   }
 
-  // استخدام Deepgram المفعّل في الـ Service
-  const transcribedText = await aiAssistantService.transcribeAudioDeepgram(
-    req.file.buffer,
-    req.file.mimetype,
-  );
+  // 💡 نحدد البروفايدر من المتغيرات البيئية (الافتراضي openai)
+  const sttProvider = process.env.STT_PROVIDER || "openai";
+  let transcribedText = "";
+
+  if (sttProvider === "openai") {
+    transcribedText = await aiAssistantService.transcribeAudioOpenAI(
+      req.file.buffer,
+      req.file.mimetype,
+      req.file.originalname,
+    );
+  } else {
+    transcribedText = await aiAssistantService.transcribeAudioDeepgram(
+      req.file.buffer,
+      req.file.mimetype,
+    );
+  }
 
   res.status(200).json({
     status: "success",
+    provider: sttProvider,
     data: transcribedText,
   });
 });

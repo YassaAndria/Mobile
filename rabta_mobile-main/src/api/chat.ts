@@ -18,8 +18,7 @@ export const uploadChatAudio = async (
   formData: FormData,
 ): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
-  const baseURL =
-    process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.1.3:5000/api/v1';
+  const baseURL = axiosInstance.defaults.baseURL || 'http://192.168.1.5:5000/api/v1';
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();

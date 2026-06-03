@@ -10,6 +10,7 @@ import {
   TextInput,
   Share,
   Platform,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -18,6 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Clipboard from "expo-clipboard";
 import Toast from "react-native-toast-message";
+import axiosInstance from "../../src/api/axiosInstance";
 import {
   fetchGroupDetails,
   generateInviteLink,
@@ -99,6 +101,55 @@ export default function GroupDetailsScreen() {
   const [searchResults, setSearchResults] = useState<Member[]>([]);
   const [searching, setSearching] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
+
+  // States for shared media, links, and documents
+  const [sharedMedia, setSharedMedia] = useState<{ media: any[]; files: any[]; links: any[] }>({
+    media: [],
+    files: [],
+    links: [],
+  });
+  const [loadingShared, setLoadingShared] = useState(false);
+  const [sharedCategory, setSharedCategory] = useState<"media" | "files" | "links">("media");
+
+  const resolveMediaUrl = (path?: string): string => {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    const base = process.env.EXPO_PUBLIC_API_BASE_URL || "http://192.168.1.3:5000/api/v1";
+    try {
+      const origin = new URL(base).origin;
+      return `${origin}${path.startsWith("/") ? "" : "/"}${path}`;
+    } catch {
+      return path;
+    }
+  };
+
+  useEffect(() => {
+    if (!resolvedChatId) return;
+    let active = true;
+    (async () => {
+      setLoadingShared(true);
+      try {
+        const res = await axiosInstance.get(`/chats/${resolvedChatId}/shared`, {
+          params: { category: "all" },
+        });
+        if (active && res.data?.status === "success") {
+          const sh = res.data.data?.shared || res.data.data;
+          setSharedMedia({
+            media: Array.isArray(sh?.media) ? sh.media : [],
+            files: Array.isArray(sh?.files) ? sh.files : [],
+            links: Array.isArray(sh?.links) ? sh.links : [],
+          });
+        }
+      } catch (err) {
+        console.error("[GroupDetails] Failed to load shared files:", err);
+      } finally {
+        if (active) setLoadingShared(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [resolvedChatId]);
 
   const loadGroupDetails = useCallback(async () => {
     if (!communityId) return;
@@ -577,6 +628,190 @@ export default function GroupDetailsScreen() {
                 );
               })}
             </GlassCard>
+
+            {/* Shared Media, Links & Docs */}
+            {resolvedChatId ? (
+              <>
+                <Text style={styles.sectionLabel}>Shared Media, Links & Docs</Text>
+                <GlassCard styles={styles}>
+                  {/* Sub-tab selection header */}
+                  <View style={{
+                    flexDirection: "row",
+                    backgroundColor: mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "#F3F4F6",
+                    borderRadius: 10,
+                    padding: 4,
+                    marginBottom: 16,
+                  }}>
+                    <TouchableOpacity
+                      onPress={() => setSharedCategory("media")}
+                      style={{
+                        flex: 1,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        alignItems: "center",
+                        backgroundColor: sharedCategory === "media" ? (mode === "dark" ? "#2D2D2D" : "#FFFFFF") : "transparent",
+                      }}
+                    >
+                      <Text style={{ fontSize: 13, fontWeight: "600", color: sharedCategory === "media" ? C.accent : C.textMuted }}>
+                        Media ({sharedMedia.media.filter(item => /\.(jpe?g|png|gif|webp|bmp|heic)(\?|$)/i.test(item.url || "")).length})
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() => setSharedCategory("files")}
+                      style={{
+                        flex: 1,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        alignItems: "center",
+                        backgroundColor: sharedCategory === "files" ? (mode === "dark" ? "#2D2D2D" : "#FFFFFF") : "transparent",
+                      }}
+                    >
+                      <Text style={{ fontSize: 13, fontWeight: "600", color: sharedCategory === "files" ? C.accent : C.textMuted }}>
+                        Files ({sharedMedia.files.length})
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() => setSharedCategory("links")}
+                      style={{
+                        flex: 1,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        alignItems: "center",
+                        backgroundColor: sharedCategory === "links" ? (mode === "dark" ? "#2D2D2D" : "#FFFFFF") : "transparent",
+                      }}
+                    >
+                      <Text style={{ fontSize: 13, fontWeight: "600", color: sharedCategory === "links" ? C.accent : C.textMuted }}>
+                        Links ({sharedMedia.links.filter(item => !/cloudinary/i.test(item.url || "")).length})
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Sub-tab Content List */}
+                  {loadingShared ? (
+                    <ActivityIndicator color={C.accent} style={{ marginVertical: 20 }} />
+                  ) : (
+                    <View style={{ minHeight: 80 }}>
+                      {sharedCategory === "media" && (
+                        (() => {
+                          const imagesOnly = sharedMedia.media.filter(item => 
+                            /\.(jpe?g|png|gif|webp|bmp|heic)(\?|$)/i.test(item.url || "")
+                          );
+                          if (imagesOnly.length === 0) {
+                            return (
+                              <Text style={{ textAlign: "center", color: C.textMuted, marginVertical: 20, fontSize: 14 }}>
+                                No media found in this group
+                              </Text>
+                            );
+                          }
+                          return (
+                            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                              {imagesOnly.map((item, idx) => {
+                                const resolvedUrl = resolveMediaUrl(item.url);
+                                return (
+                                  <TouchableOpacity
+                                    key={idx}
+                                    onPress={() => Linking.openURL(resolvedUrl).catch((err) => console.error(err))}
+                                    style={{
+                                      width: "31%",
+                                      aspectRatio: 1,
+                                      borderRadius: 8,
+                                      backgroundColor: mode === "dark" ? "#2D2D2D" : "#E5E7EB",
+                                      overflow: "hidden",
+                                    }}
+                                  >
+                                    <Image source={{ uri: resolvedUrl }} style={{ width: "100%", height: "100%" }} />
+                                  </TouchableOpacity>
+                                );
+                              })}
+                            </View>
+                          );
+                        })()
+                      )}
+
+                      {sharedCategory === "files" && (
+                        sharedMedia.files.length === 0 ? (
+                          <Text style={{ textAlign: "center", color: C.textMuted, marginVertical: 20, fontSize: 14 }}>
+                            No documents found in this group
+                          </Text>
+                        ) : (
+                          <View style={{ gap: 10 }}>
+                            {sharedMedia.files.map((item, idx) => {
+                              const resolvedUrl = resolveMediaUrl(item.url);
+                              const label = item.name || resolvedUrl.split("/").pop() || "Document";
+                              return (
+                                <TouchableOpacity
+                                  key={idx}
+                                  onPress={() => Linking.openURL(resolvedUrl).catch((err) => console.error(err))}
+                                  style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    gap: 12,
+                                    padding: 12,
+                                    borderRadius: 10,
+                                    backgroundColor: mode === "dark" ? "#1E1E1E" : "#F9FAFB",
+                                    borderWidth: 1,
+                                    borderColor: C.glassBorder,
+                                  }}
+                                >
+                                  <Ionicons name="document-text-outline" size={24} color={C.accent} />
+                                  <View style={{ flex: 1 }}>
+                                    <Text style={{ fontSize: 14, fontWeight: "600", color: C.textPrimary }} numberOfLines={1}>
+                                      {label}
+                                    </Text>
+                                    <Text style={{ fontSize: 11, color: C.textMuted }}>
+                                      Tap to open document
+                                    </Text>
+                                  </View>
+                                  <Ionicons name="download-outline" size={20} color={C.textMuted} />
+                                </TouchableOpacity>
+                              );
+                            })}
+                          </View>
+                        )
+                      )}
+
+                      {sharedCategory === "links" && (
+                        (() => {
+                          const webLinksOnly = sharedMedia.links.filter(item => 
+                            !/cloudinary/i.test(item.url || "")
+                          );
+                          if (webLinksOnly.length === 0) {
+                            return (
+                              <Text style={{ textAlign: "center", color: C.textMuted, marginVertical: 20, fontSize: 14 }}>
+                                No links found in this group
+                              </Text>
+                            );
+                          }
+                          return (
+                            <View style={{ gap: 10 }}>
+                              {webLinksOnly.map((item, idx) => (
+                                <TouchableOpacity
+                                  key={idx}
+                                  onPress={() => Linking.openURL(item.url).catch((err) => console.error(err))}
+                                  style={{
+                                    padding: 12,
+                                    borderRadius: 10,
+                                    backgroundColor: mode === "dark" ? "#1E1E1E" : "#F9FAFB",
+                                    borderWidth: 1,
+                                    borderColor: C.glassBorder,
+                                  }}
+                                >
+                                  <Text style={{ fontSize: 14, color: C.accent, fontWeight: "500" }} numberOfLines={2}>
+                                    {item.url}
+                                  </Text>
+                                </TouchableOpacity>
+                              ))}
+                            </View>
+                          );
+                        })()
+                      )}
+                    </View>
+                  )}
+                </GlassCard>
+              </>
+            ) : null}
 
             {/* Danger zone */}
             <Text style={[styles.sectionLabel, { color: C.mahoganyLight }]}>

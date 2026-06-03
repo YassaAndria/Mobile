@@ -29,7 +29,7 @@ export default function GlobalAiChatScreen() {
   const [messages, setMessages] = useState<AiMessage[]>([
     {
       id: "1",
-      text: "Hello! I am Rabta AI Assistant. How can I help you today?",
+      text: "Hello! I am your Rabta AI Guide. Ask me anything about project guidelines, platform rules, or details about communities and jobs! How can I help you today?",
       sender: "ai",
     },
   ]);

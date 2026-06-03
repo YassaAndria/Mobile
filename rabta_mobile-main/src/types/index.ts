@@ -67,7 +67,7 @@ export interface Reaction {
 
 export interface MessageType {
   id: string;
-  type: 'text' | 'file' | 'image' | 'audio';
+  type: 'text' | 'file' | 'image' | 'audio' | 'post';
   content: string;
   time: string;
   createdAt?: string;
@@ -84,6 +84,7 @@ export interface MessageType {
   isForwarded?: boolean;
   attachments?: { fileUrl: string; fileType: string; fileSize: number }[];
   status?: 'sending' | 'sent' | 'delivered' | 'read';
+  postId?: any;
 }
 
 export interface Attachment {
