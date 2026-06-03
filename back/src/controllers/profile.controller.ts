@@ -475,10 +475,16 @@ export const syncContacts = catchAsync(async (req: Request, res: Response, next:
       standardizedNumber: num
     }));
 
+  // Attach originalNumber to registered users so frontend can map them back to local phonebook
+  const registeredContacts = registeredUsers.map(user => ({
+    ...user.toObject(),
+    originalNumber: rawToStandardizedMap.get(user.phoneNumber as string) || user.phoneNumber
+  }));
+
   res.status(200).json({
     status: 'success',
     data: {
-      registeredContacts: registeredUsers,
+      registeredContacts: registeredContacts,
       unregisteredNumbers: unregisteredNumbers
     }
   });

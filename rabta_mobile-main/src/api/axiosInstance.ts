@@ -1,7 +1,5 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { store } from "../store/store";
-import { logout } from "../store/slices/authSlice";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 
@@ -40,6 +38,10 @@ axiosInstance.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       console.log("[TRACE] Axios 401 Unauthorized intercepted.");
       await AsyncStorage.multiRemove(["token", "user"]);
+      
+      // Dynamically import to break require cycle
+      const { store } = require("../store/store");
+      const { logout } = require("../store/slices/authSlice");
       store.dispatch(logout());
       
       let retryCount = 0;
