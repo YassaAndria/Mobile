@@ -332,15 +332,6 @@ export default function GroupDetailsScreen() {
     );
   };
 
-  const handleRequest = async (userId: string, action: "accept" | "reject") => {
-    if (!communityId) return;
-    try {
-      await manageJoinRequest(communityId, userId, action);
-      await loadGroupDetails();
-    } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e, "Could not update request."));
-    }
-  };
 
   const handleRemoveMember = (userId: string, displayName: string) => {
     if (!communityId) return;
