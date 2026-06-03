@@ -28,7 +28,6 @@ import {
 import Toast from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { AiAssistant } from '../../src/components/shared/AiAssistant';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useSelector } from 'react-redux';
@@ -106,7 +105,24 @@ export default function ChatWindowScreen() {
   // ── NEW: tracks whether we are fetching the Zego token ───────────────────
   const [callLoading, setCallLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const isHoldingMicRef = useRef(false);
+  const isActuallyRecordingRef = useRef(false);
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setRecordingSeconds(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRecording]);
 
   // ── NEW: Contact Details & Media Buckets Logic ─────────────────────────────
   const [mediaSubTab, setMediaSubTab] = useState<'media' | 'files' | 'links'>('media');
@@ -819,6 +835,7 @@ export default function ChatWindowScreen() {
   };
 
   const startRecording = useCallback(async () => {
+    isHoldingMicRef.current = true;
     try {
       const perm = await requestRecordingPermissionsAsync();
       if (perm.status !== 'granted') {
@@ -826,41 +843,57 @@ export default function ChatWindowScreen() {
           'Permission needed',
           'Microphone access is required to record voice notes.',
         );
+        isHoldingMicRef.current = false;
         return;
       }
+
+      if (!isHoldingMicRef.current) return;
 
       await setAudioModeAsync({
         allowsRecording: true,
         playsInSilentMode: true,
       });
 
-      setIsRecording(true);
+      if (!isHoldingMicRef.current) return;
 
-      // If the recorder is already in a recording/prepared state, stop it first
+      // If the recorder is already in a recording state, stop it first
       if (recorder.isRecording) {
         await recorder.stop();
       }
+
+      if (!isHoldingMicRef.current) return;
 
       try {
         await recorder.prepareToRecordAsync();
       } catch (prepErr: any) {
-        // "already prepared" — safe to continue straight to record()
         console.warn('[ChatWindow] prepareToRecordAsync skipped:', prepErr?.message);
       }
 
+      if (!isHoldingMicRef.current) return;
+
+      setIsRecording(true);
+      isActuallyRecordingRef.current = true;
       recorder.record();
     } catch (e) {
       console.error('[ChatWindow] Failed to start recording', e);
       setIsRecording(false);
+      isActuallyRecordingRef.current = false;
+      isHoldingMicRef.current = false;
     }
   }, [recorder]);
 
   const stopRecording = useCallback(async () => {
+    isHoldingMicRef.current = false;
     setIsRecording(false);
+    
     try {
-      if (recorder.isRecording) {
-        await recorder.stop();
+      if (!isActuallyRecordingRef.current) {
+        // If it wasn't recording, we don't need to do anything
+        return;
       }
+      isActuallyRecordingRef.current = false;
+
+      await recorder.stop();
 
       const uri = recorder.uri;
       console.log('[ChatWindow] Recording stopped, uri:', uri);
@@ -1365,28 +1398,18 @@ export default function ChatWindowScreen() {
               </View>
             ) : null}
 
-            {/* AI Assistant button — sits inline above the input bar */}
-            {chatId ? (
-              <View style={{
-                alignItems: 'flex-end',
-                paddingHorizontal: 16,
-                paddingBottom: 4,
-                backgroundColor: colors.bg,
-              }}>
-                <AiAssistant chatId={chatId} />
-              </View>
-            ) : null}
             <ChatInputBar
               value={messageText}
               onChangeText={handleTextChange}
               onSend={handleSend}
               onAttach={() => setAttachmentVisible(true)}
-              onCamera={handleSelectCamera}
               onMicPressIn={startRecording}
               onMicPressOut={stopRecording}
               isRecording={isRecording}
+              recordingTime={`${Math.floor(recordingSeconds / 60).toString().padStart(2, '0')}:${(recordingSeconds % 60).toString().padStart(2, '0')}`}
               replyingTo={replyingTo}
               onCancelReply={() => setReplyingTo(null)}
+              chatId={chatId}
             />
           </>
         )}

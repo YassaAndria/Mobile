@@ -23,11 +23,13 @@ import { useRouter } from "expo-router";
 interface AiAssistantProps {
   chatId: string;
   placeholder?: string;
+  variant?: "fab" | "icon";
 }
 
 export const AiAssistant: React.FC<AiAssistantProps> = ({
   chatId,
   placeholder = "Search past messages, details or files...",
+  variant = "fab",
 }) => {
   const { colors, isDark } = useTheme();
   const router = useRouter();
@@ -154,21 +156,31 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        onPress={() => setShowAiSheet(true)}
-        style={[styles.fab, { shadowColor: colors.purple }]}
-        activeOpacity={0.8}
-      >
-        <LinearGradient
-          colors={["#7C3AED", "#6366F1"]}
-          style={styles.fabGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+      {/* Floating Action Button or Icon */}
+      {variant === "icon" ? (
+        <TouchableOpacity
+          onPress={() => setShowAiSheet(true)}
+          activeOpacity={0.7}
+          style={{ alignItems: "center", justifyContent: "center", padding: 4 }}
         >
-          <MaterialIcons name="auto-awesome" size={22} color="#fff" />
-        </LinearGradient>
-      </TouchableOpacity>
+          <MaterialIcons name="auto-awesome" size={22} color={colors.purple} />
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          onPress={() => setShowAiSheet(true)}
+          style={[styles.fab, { shadowColor: colors.purple }]}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={["#7C3AED", "#6366F1"]}
+            style={styles.fabGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <MaterialIcons name="auto-awesome" size={22} color="#fff" />
+          </LinearGradient>
+        </TouchableOpacity>
+      )}
 
       {/* Bottom Sheet Modal */}
       <Modal

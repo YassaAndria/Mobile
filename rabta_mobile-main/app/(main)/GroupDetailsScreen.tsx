@@ -39,8 +39,10 @@ import {
   getGroupDetailsPalette,
   type GroupDetailsPalette,
 } from "../../src/theme/groupDetailsTheme";
+import * as ImagePicker from 'expo-image-picker';
+import { useSyncContacts } from '../../src/hooks/useSyncContacts';
 
-type Member = { _id: string; fullName?: string; avatar?: string };
+type Member = { _id: string; fullName?: string; avatar?: string; user?: { _id: string, id: string } };
 type JoinRequest = {
   _id?: string;
   userId: Member | string;
@@ -101,6 +103,9 @@ export default function GroupDetailsScreen() {
   const [searchResults, setSearchResults] = useState<Member[]>([]);
   const [searching, setSearching] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
+
+  // Sync Contacts state
+  const { unifiedContacts, syncContacts, loading: syncLoading } = useSyncContacts();
 
   // States for shared media, links, and documents
   const [sharedMedia, setSharedMedia] = useState<{ media: any[]; files: any[]; links: any[] }>({
@@ -174,6 +179,7 @@ export default function GroupDetailsScreen() {
           _id: normalizeId(m._id ?? m),
           fullName: m.fullName ?? "Member",
           avatar: m.avatar,
+          user: m.user
         })),
       );
       setJoinRequests(
@@ -230,6 +236,39 @@ export default function GroupDetailsScreen() {
     return "Member";
   };
 
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  const handleRequest = async (userId: string, action: "accept" | "reject") => {
+    if (!communityId) return;
+    try {
+      await manageJoinRequest(communityId, userId, action);
+      await loadGroupDetails();
+    } catch (e) {
+      Alert.alert("Error", getApiErrorMessage(e, "Could not update request."));
+    }
+  };
+
+  const initiateZegoCall = useCallback(
+    async (type: 'voice' | 'video') => {
+      if (!resolvedChatId) {
+        Alert.alert('Error', 'Cannot start a call before the chat is loaded.');
+        return;
+      }
+      router.push({
+        pathname: '/call',
+        params: {
+          callType: type,
+          recipientId: communityId ?? resolvedChatId,
+          recipientName: name,
+          currentUserId: myId || '',
+          currentUserName: (authUser as any)?.fullName || '',
+          callId: resolvedChatId,
+        },
+      } as any);
+    },
+    [resolvedChatId, communityId, name, myId, authUser, router],
+  );
+
   const handleCopyLink = async () => {
     if (!inviteLink) return;
     await Clipboard.setStringAsync(inviteLink);
@@ -248,81 +287,15 @@ export default function GroupDetailsScreen() {
     }
   };
 
-  const openChat = () => {
-    if (!resolvedChatId) return;
-    router.push({
-      pathname: "/ChatWindowScreen",
-      params: {
-        chatId: resolvedChatId,
-        chatName: name,
-        isGroup: "true",
-        communityId: communityId ?? "",
-        avatar: avatar ?? "",
-      },
-    } as never);
-  };
-
-  const handleSearchInvite = async () => {
-    if (!inviteQuery.trim()) return;
-    setSearching(true);
-    try {
-      const res = await searchUsers(inviteQuery.trim());
-      const users = res.data?.data?.users ?? res.data?.users ?? [];
-      setSearchResults(
-        users.map((u: Record<string, unknown>) => ({
-          _id: normalizeId(u._id ?? u.id),
-          fullName: String(u.fullName ?? "User"),
-          avatar: u.avatar as string | undefined,
-        })),
-      );
-    } catch {
-      setSearchResults([]);
-    } finally {
-      setSearching(false);
-    }
-  };
-
   const handleInvite = async (userId: string) => {
     if (!communityId) return;
     try {
       await inviteCommunityMember(communityId, userId);
       Toast.show({ type: "success", text1: "Invitation sent" });
-      setInviteQuery("");
-      setSearchResults([]);
-      setShowAddMember(false);
       await loadGroupDetails();
     } catch (e) {
       Alert.alert("Error", getApiErrorMessage(e, "Could not invite user."));
     }
-  };
-
-  const handleRequest = async (userId: string, action: "accept" | "reject") => {
-    if (!communityId) return;
-    try {
-      await manageJoinRequest(communityId, userId, action);
-      await loadGroupDetails();
-    } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e, "Could not update request."));
-    }
-  };
-
-  const handleRemoveMember = (userId: string, displayName: string) => {
-    if (!communityId) return;
-    Alert.alert("Remove member", `Remove ${displayName} from the group?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await removeCommunityMember(communityId, userId);
-            await loadGroupDetails();
-          } catch (e) {
-            Alert.alert("Error", getApiErrorMessage(e, "Could not remove member."));
-          }
-        },
-      },
-    ]);
   };
 
   const handleLeave = () => {
@@ -357,6 +330,35 @@ export default function GroupDetailsScreen() {
       "Thank you. Our team will review this group.",
       [{ text: "OK" }],
     );
+  };
+
+  const handleRequest = async (userId: string, action: "accept" | "reject") => {
+    if (!communityId) return;
+    try {
+      await manageJoinRequest(communityId, userId, action);
+      await loadGroupDetails();
+    } catch (e) {
+      Alert.alert("Error", getApiErrorMessage(e, "Could not update request."));
+    }
+  };
+
+  const handleRemoveMember = (userId: string, displayName: string) => {
+    if (!communityId) return;
+    Alert.alert("Remove member", `Remove ${displayName} from the group?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await removeCommunityMember(communityId, userId);
+            await loadGroupDetails();
+          } catch (e) {
+            Alert.alert("Error", getApiErrorMessage(e, "Could not remove member."));
+          }
+        },
+      },
+    ]);
   };
 
   const requestUser = (r: JoinRequest): Member | null => {
@@ -406,7 +408,6 @@ export default function GroupDetailsScreen() {
             contentContainerStyle={styles.scroll}
             showsVerticalScrollIndicator={false}
           >
-            {/* Hero */}
             <View style={styles.hero}>
               {avatar ? (
                 <Image source={{ uri: avatar }} style={styles.heroAvatar} />
@@ -424,12 +425,11 @@ export default function GroupDetailsScreen() {
               ) : null}
             </View>
 
-            {/* Action row */}
             <View style={styles.actionRow}>
               <ActionChip
                 icon="call-outline"
                 label="Call"
-                onPress={openChat}
+                onPress={() => initiateZegoCall('voice')}
                 disabled={!resolvedChatId}
                 C={C}
                 styles={styles}
@@ -437,7 +437,7 @@ export default function GroupDetailsScreen() {
               <ActionChip
                 icon="videocam-outline"
                 label="Video"
-                onPress={openChat}
+                onPress={() => initiateZegoCall('video')}
                 disabled={!resolvedChatId}
                 C={C}
                 styles={styles}
@@ -445,7 +445,14 @@ export default function GroupDetailsScreen() {
               <ActionChip
                 icon="person-add-outline"
                 label="Add"
-                onPress={() => setShowAddMember((v) => !v)}
+                onPress={() => {
+                  setShowAddMember((v) => {
+                    if (!v) {
+                      syncContacts();
+                    }
+                    return !v;
+                  });
+                }}
                 C={C}
                 styles={styles}
               />
@@ -463,37 +470,58 @@ export default function GroupDetailsScreen() {
 
             {showAddMember && isAdmin && (
               <GlassCard style={{ marginBottom: 16 }} styles={styles}>
-                <Text style={styles.sectionLabel}>Invite by name</Text>
-                <View style={styles.searchRow}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Search users..."
-                    placeholderTextColor={C.textMuted}
-                    value={inviteQuery}
-                    onChangeText={setInviteQuery}
-                    onSubmitEditing={handleSearchInvite}
-                  />
-                  <TouchableOpacity
-                    style={styles.goBtn}
-                    onPress={handleSearchInvite}
-                  >
-                    {searching ? (
-                      <ActivityIndicator color="#fff" size="small" />
-                    ) : (
-                      <Text style={styles.goBtnText}>Go</Text>
-                    )}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <Text style={[styles.sectionLabel, { marginTop: 0, marginBottom: 0 }]}>Add from Contacts</Text>
+                  <TouchableOpacity onPress={() => setShowAddMember(false)} hitSlop={10}>
+                    <Ionicons name="close" size={20} color={C.textMuted} />
                   </TouchableOpacity>
                 </View>
-                {searchResults.map((u) => (
-                  <TouchableOpacity
-                    key={u._id}
-                    style={styles.inviteRow}
-                    onPress={() => handleInvite(u._id)}
-                  >
-                    <Text style={styles.memberName}>{u.fullName}</Text>
-                    <Text style={styles.inviteAction}>Invite</Text>
-                  </TouchableOpacity>
-                ))}
+
+                {syncLoading ? (
+                  <ActivityIndicator color={C.accent} style={{ marginVertical: 10 }} />
+                ) : unifiedContacts.filter(c => c.isRegistered).length === 0 ? (
+                  <Text style={{ color: C.textMuted, fontSize: 13, textAlign: 'center', marginVertical: 10 }}>
+                    No registered contacts found on Rabta.
+                  </Text>
+                ) : (
+                  <ScrollView style={{ maxHeight: 300 }}>
+                    {unifiedContacts.filter(c => c.isRegistered).map(c => {
+                      const cId = c.userId;
+                      if (!cId) return null;
+                      
+                      // Skip if already in the group
+                      const isMember = members.some(m => (m.user?._id || m.user?.id || m._id) === cId);
+                      if (isMember) return null;
+
+                      const cName = c.name || 'Unknown';
+                      const cAvatar = c.avatar;
+
+                      return (
+                        <View key={c.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: C.border }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.surface, justifyContent: 'center', alignItems: 'center', marginRight: 10, overflow: 'hidden' }}>
+                              {cAvatar ? (
+                                <Image 
+                                  source={{ uri: cAvatar.startsWith('http') ? cAvatar : `${process.env.EXPO_PUBLIC_API_BASE_URL?.replace('/api/v1', '')}${cAvatar}` }} 
+                                  style={{ width: '100%', height: '100%' }} 
+                                />
+                              ) : (
+                                <Text style={{ color: C.accent, fontWeight: 'bold' }}>{cName[0]?.toUpperCase()}</Text>
+                              )}
+                            </View>
+                            <Text style={{ color: C.text, fontSize: 15, fontWeight: '500' }}>{cName}</Text>
+                          </View>
+                          <TouchableOpacity
+                            style={{ backgroundColor: C.accent, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}
+                            onPress={() => inviteCommunityMember(cId)}
+                          >
+                            <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>Add</Text>
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })}
+                  </ScrollView>
+                )}
               </GlassCard>
             )}
 

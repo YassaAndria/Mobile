@@ -2,12 +2,13 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 import axiosInstance from "../../../src/api/axiosInstance";
 import { useTheme } from "../../../src/theme/ThemeContext";
 import { Button } from "../../../src/components/ui/Button";
 import { typography } from "../../../src/theme/typography";
+import { MatchScoreBadge } from "../../../src/components/shared/MatchScoreBadge";
 
 export default function ManageProjectScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,6 +18,7 @@ export default function ManageProjectScreen() {
   const [project, setProject] = useState<any>(null);
   const [applicants, setApplicants] = useState<any[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [sortByScore, setSortByScore] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -67,41 +69,117 @@ export default function ManageProjectScreen() {
     );
   }
 
+  const sortedApplicants = [...applicants].sort((a, b) => {
+    if (sortByScore) {
+      const scoreA = a.matchScore || 0;
+      const scoreB = b.matchScore || 0;
+      return scoreB - scoreA;
+    }
+    return new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime();
+  });
+
   return (
-    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: 24 }}>
+    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: 24, paddingBottom: 60 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 16, marginBottom: 24 }}>
         <Pressable onPress={() => router.push("/employer-dashboard")} style={[styles.back, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <MaterialIcons name="arrow-back" size={22} color={colors.text} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[typography.h1, { color: colors.text }]}>{project.title}</Text>
-          <Text style={[typography.bodySmall, { color: colors.textMuted, fontWeight: "500" }]}>Project Management Dashboard</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={[typography.h1, { color: colors.text }]} numberOfLines={1}>{project.title}</Text>
+          </View>
+          <Text style={[typography.bodySmall, { color: colors.textMuted, fontWeight: "500", marginTop: 4 }]}>Project Management Dashboard</Text>
         </View>
       </View>
 
-      <Text style={[typography.h2, { color: colors.text, marginBottom: 16 }]}>Applicants ({applicants.length})</Text>
-      {applicants.map((a, i) => (
-        <View key={a._id || i} style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[typography.body, { color: colors.text, fontWeight: "700" }]}>{a.freelancerId?.fullName || "Applicant"}</Text>
-          <Text style={[typography.bodySmall, { color: colors.textSubtle }]} numberOfLines={2}>
-            {a.proposal || a.note || ""}
-          </Text>
-        </View>
-      ))}
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[typography.h3, { color: colors.text, marginBottom: 8 }]}>Details</Text>
+        <Text style={[typography.body, { color: colors.textSubtle, lineHeight: 22 }]}>{project.description}</Text>
 
-      <Button
-        title="Edit Project"
-        variant="primary"
-        onPress={() => router.push(`/edit-project/${id}`)}
-        style={{ marginTop: 24 }}
-      />
-      <Button
-        title="Delete Project"
-        variant="danger"
-        onPress={handleDelete}
-        isLoading={isDeleting}
-        style={{ marginTop: 12 }}
-      />
+        <View style={{ flexDirection: 'row', gap: 12, marginTop: 24 }}>
+          <Button
+            title="Edit Project"
+            variant="secondary"
+            onPress={() => router.push(`/edit-project/${id}`)}
+            style={{ flex: 1 }}
+          />
+          <Button
+            title="Delete"
+            variant="danger"
+            onPress={handleDelete}
+            isLoading={isDeleting}
+            style={{ flex: 1 }}
+          />
+        </View>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.headerRow}>
+          <Text style={[typography.h3, { color: colors.text }]}>Applicants ({applicants.length})</Text>
+          {applicants.length > 0 && (
+            <Pressable 
+              onPress={() => setSortByScore(!sortByScore)}
+              style={[
+                styles.sortBtn, 
+                { 
+                  backgroundColor: sortByScore ? `${colors.purple}20` : colors.surface2,
+                  borderColor: sortByScore ? `${colors.purple}50` : colors.border
+                }
+              ]}
+            >
+              <MaterialIcons name="sort" size={16} color={sortByScore ? colors.purple : colors.textSubtle} />
+              <Text style={[typography.caption, { color: sortByScore ? colors.purple : colors.textSubtle, fontWeight: 'bold' }]}>
+                Sort by Match
+              </Text>
+            </Pressable>
+          )}
+        </View>
+
+        {applicants.length === 0 ? (
+          <Text style={[typography.body, { color: colors.textSubtle, textAlign: 'center', padding: 24 }]}>
+            No applicants yet.
+          </Text>
+        ) : (
+          sortedApplicants.map((applicant: any) => {
+            const user = applicant.userId;
+            if (!user) return null;
+            
+            return (
+              <View key={applicant._id || user._id} style={[styles.applicantRow, { borderBottomColor: colors.border }]}>
+                <View style={styles.applicantHeader}>
+                  <View style={[styles.avatar, { backgroundColor: `${colors.purple}20` }]}>
+                    {user.avatar ? (
+                      <Image source={{ uri: user.avatar }} style={styles.avatarImg} />
+                    ) : (
+                      <Text style={[typography.h3, { color: colors.purple }]}>{user.fullName?.charAt(0) || '?'}</Text>
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[typography.body, { color: colors.text, fontWeight: "700" }]}>{user.fullName}</Text>
+                    <Text style={[typography.caption, { color: colors.textSubtle }]}>{user.jobTitle || 'Freelancer'}</Text>
+                  </View>
+                </View>
+                
+                <View style={styles.applicantActions}>
+                  <View style={{ alignItems: 'flex-start' }}>
+                    <MatchScoreBadge score={applicant.matchScore} reason={applicant.matchReason} />
+                    <Text style={[typography.caption, { color: colors.textSubtle, marginTop: 4, marginLeft: 4 }]}>
+                      Applied {new Date(applicant.appliedAt).toLocaleDateString()}
+                    </Text>
+                  </View>
+                  <Button
+                    title="View Profile"
+                    size="sm"
+                    variant="secondary"
+                    onPress={() => router.push(`/freelancer-profile/${user._id}`)}
+                    style={{ marginTop: 12, width: '100%' }}
+                  />
+                </View>
+              </View>
+            );
+          })
+        )}
+      </View>
     </ScrollView>
   );
 }
@@ -109,5 +187,12 @@ export default function ManageProjectScreen() {
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   back: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center", borderWidth: 1 },
-  row: { padding: 16, borderRadius: 12, borderWidth: 1, marginBottom: 12, gap: 8 },
+  card: { padding: 20, borderRadius: 16, borderWidth: 1, marginBottom: 16 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  sortBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1 },
+  applicantRow: { paddingVertical: 16, borderBottomWidth: 1 },
+  applicantHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+  avatar: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  avatarImg: { width: '100%', height: '100%', resizeMode: 'cover' },
+  applicantActions: { marginTop: 4 },
 });

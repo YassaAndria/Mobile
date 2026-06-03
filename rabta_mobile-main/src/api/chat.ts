@@ -18,39 +18,34 @@ export const uploadChatAudio = async (
   formData: FormData,
 ): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
-  const baseURL = axiosInstance.defaults.baseURL || 'http://192.168.1.5:5000/api/v1';
+  const baseURL = axiosInstance.defaults.baseURL || 'http://192.168.1.3:5000/api/v1';
 
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${baseURL}/chats/${chatId}/audio`);
-    if (token) {
-      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-    }
-    xhr.timeout = AUDIO_TIMEOUT_MS;
+  try {
+    const res = await fetch(`${baseURL}/chats/${chatId}/audio`, {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        // Do not set Content-Type here, let fetch handle the boundary
+      },
+      body: formData,
+    });
 
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          resolve(JSON.parse(xhr.responseText));
-        } catch {
-          resolve({ status: 'success', data: {} });
-        }
-      } else {
-        let msg = `Server error ${xhr.status}`;
-        try {
-          const body = JSON.parse(xhr.responseText);
-          msg = body?.message || msg;
-        } catch { /* ignore */ }
-        reject(new Error(msg));
+    if (!res.ok) {
+      let errorMsg = `Server error ${res.status}`;
+      try {
+        const errBody = await res.json();
+        errorMsg = errBody.message || errorMsg;
+      } catch {
+        const errText = await res.text();
+        errorMsg = errText || errorMsg;
       }
-    };
-
-    xhr.onerror = () => reject(new Error('Network Error'));
-    xhr.ontimeout = () => reject(new Error(`Upload timed out after ${AUDIO_TIMEOUT_MS / 1000}s`));
-
-    // DO NOT set Content-Type — React Native will add multipart boundary automatically
-    xhr.send(formData);
-  });
+      throw new Error(errorMsg);
+    }
+    return await res.json();
+  } catch (error: any) {
+    console.error('Fetch upload error:', error.message);
+    throw new Error(error.message || 'Network Error');
+  }
 };
 
 /** Mark all messages in a chat as read for the current user */

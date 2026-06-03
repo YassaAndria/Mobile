@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import * as Contacts from 'expo-contacts';
+import * as Contacts from 'expo-contacts/legacy';
 import * as Localization from 'expo-localization';
 import axiosInstance from '../api/axiosInstance';
 import { Alert } from 'react-native';

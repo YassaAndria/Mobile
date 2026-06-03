@@ -11,6 +11,7 @@ import {
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import EmojiPicker, { EmojiType } from 'rn-emoji-keyboard';
 import { useTheme } from '../../theme/ThemeContext';
+import { AiAssistant } from '../shared/AiAssistant';
 import type { MessageType } from '../../types';
 
 interface ChatInputBarProps {
@@ -18,13 +19,14 @@ interface ChatInputBarProps {
   onChangeText: (text: string) => void;
   onSend: () => void;
   onAttach?: () => void;
-  onCamera?: () => void;
   onMicPressIn?: () => void;
   onMicPressOut?: () => void;
   isRecording?: boolean;
+  recordingTime?: string;
   placeholder?: string;
   replyingTo?: MessageType | null;
   onCancelReply?: () => void;
+  chatId?: string | null;
 }
 
 export default function ChatInputBar({
@@ -32,13 +34,14 @@ export default function ChatInputBar({
   onChangeText,
   onSend,
   onAttach,
-  onCamera,
   onMicPressIn,
   onMicPressOut,
   isRecording = false,
+  recordingTime = '00:00',
   placeholder = 'Message',
   replyingTo,
   onCancelReply,
+  chatId,
 }: ChatInputBarProps) {
   const { colors, isDark } = useTheme();
   const [showEmoji, setShowEmoji] = useState(false);
@@ -106,12 +109,12 @@ export default function ChatInputBar({
           <TouchableOpacity onPress={() => setShowEmoji(true)} style={styles.iconBtn} hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}>
             <Ionicons name="happy-outline" size={22} color={iconColor} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={onCamera} style={styles.iconBtn} hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}>
-            <MaterialIcons name="photo-camera" size={22} color={iconColor} />
-          </TouchableOpacity>
           <TouchableOpacity onPress={onAttach} style={styles.iconBtn} hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}>
             <MaterialIcons name="attach-file" size={22} color={iconColor} />
           </TouchableOpacity>
+          {chatId ? (
+            <AiAssistant chatId={chatId} variant="icon" />
+          ) : null}
         </View>
 
         {/* Text Input Capsule */}
@@ -119,7 +122,7 @@ export default function ChatInputBar({
           {isRecording ? (
             <View style={styles.recordingContainer}>
               <View style={styles.recordingDot} />
-              <Text style={[styles.recordingText, { color: colors.text }]}>Recording...</Text>
+              <Text style={[styles.recordingText, { color: colors.text }]}>Recording... {recordingTime}</Text>
             </View>
           ) : (
             <TextInput

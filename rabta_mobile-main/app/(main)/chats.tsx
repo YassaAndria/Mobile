@@ -24,6 +24,7 @@ export default function ChatsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchMode, setIsSearchMode] = useState(false);
 
   const fetchChats = useCallback(async (isRefresh = false) => {
     try {
@@ -209,36 +210,52 @@ export default function ChatsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <Stack.Screen options={{ headerShown: false }} />
-      
-      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <View style={styles.headerTop}>
-          <Text style={[typography.h2, { color: colors.text }]}>Chats</Text>
-          <TouchableOpacity
-            onPress={() => router.push('/contacts')}
-            activeOpacity={0.7}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="add" size={28} color={colors.purple} />
-          </TouchableOpacity>
-        </View>
-        
-        <View style={[styles.searchContainer, { backgroundColor: isDark ? '#262626' : '#F3F4F6' }]}>
-          <Ionicons name="search" size={20} color={colors.textMuted} style={styles.searchIcon} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search conversations..."
-            placeholderTextColor={colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerBackVisible: false,
+          headerTitle: '',
+          headerStyle: { backgroundColor: colors.bg },
+          headerShadowVisible: false,
+          headerLeft: () =>
+            isSearchMode ? (
+              <View style={[styles.searchBarContainer, { backgroundColor: isDark ? '#262626' : '#F3F4F6' }]}>
+                <Ionicons name="search" size={20} color={isDark ? '#888' : '#9CA3AF'} style={{ marginLeft: 10 }} />
+                <TextInput
+                  autoFocus
+                  style={[styles.searchInput, { color: colors.text }]}
+                  placeholder="Search conversations..."
+                  placeholderTextColor={isDark ? '#888' : '#9CA3AF'}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+                <TouchableOpacity
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  onPress={() => {
+                    setIsSearchMode(false);
+                    setSearchQuery('');
+                  }}
+                >
+                  <Ionicons name="close-circle" size={20} color={isDark ? '#888' : '#9CA3AF'} style={{ marginRight: 10 }} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 5 }}>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Chats</Text>
+                <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} onPress={() => setIsSearchMode(true)}>
+                  <Ionicons name="search" size={22} color={colors.text} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  onPress={() => router.push('/contacts')}
+                  style={[styles.addBtn, { backgroundColor: '#7C3AED' }]}
+                >
+                  <Ionicons name="add" size={22} color="#FFF" />
+                </TouchableOpacity>
+              </View>
+            ),
+        }}
+      />
 
       <FlatList
         data={filteredChats}
@@ -270,6 +287,9 @@ export default function ChatsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  headerTitle: { fontSize: 28, fontWeight: '700', letterSpacing: -0.5 },
+  searchBarContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', borderRadius: 20, height: 40 },
+  addBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   header: { 
     paddingHorizontal: 20, 
     paddingTop: 20,
@@ -297,6 +317,7 @@ const styles = StyleSheet.create({
   searchIcon: { marginRight: 8 },
   searchInput: {
     flex: 1,
+    paddingHorizontal: 10,
     fontSize: 15,
     height: '100%',
   },

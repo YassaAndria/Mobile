@@ -71,18 +71,20 @@ export default function PostJobScreen() {
     }
   };
 
-  if (user?.role === "employer" && !user?.isVerified) {
-    if (user?.verificationLink) {
+  if (user?.role === "employer" && user?.verificationStatus !== "approved") {
+    if (user?.verificationStatus === "pending" || user?.verificationLink) {
       return (
         <View style={[styles.center, { backgroundColor: colors.bg, padding: 24 }]}>
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <MaterialIcons name="hourglass-empty" size={48} color={colors.purple} />
-            <Text style={[typography.h2, { color: colors.text, marginTop: 8 }]}>Verification Pending</Text>
+            <View style={[styles.iconCircle, { backgroundColor: '#FFF3E0' }]}>
+              <MaterialIcons name="hourglass-empty" size={32} color="#F57C00" />
+            </View>
+            <Text style={[typography.h2, { color: colors.text, marginTop: 16 }]}>Verification Pending</Text>
             <Text style={[typography.body, { color: colors.textSubtle, textAlign: "center", marginVertical: 16 }]}>
               Thank you! Your link has been submitted for review.
             </Text>
             <Button
-              title="Back to Dashboard"
+              title="Return to Dashboard"
               variant="secondary"
               onPress={() => router.push("/employer-dashboard")}
               style={{ width: "100%" }}
@@ -94,17 +96,22 @@ export default function PostJobScreen() {
     return (
       <ScrollView contentContainerStyle={[styles.center, { backgroundColor: colors.bg, padding: 24 }]}>
         <View style={[styles.card, { backgroundColor: colors.surface }]}>
-          <Text style={[typography.h2, { color: colors.text, marginBottom: 8 }]}>Company Verification</Text>
-          <Text style={[typography.body, { color: colors.textSubtle, marginBottom: 16 }]}>Submit a link to verify your company.</Text>
+          <View style={[styles.iconCircle, { backgroundColor: `${colors.purple}20` }]}>
+            <MaterialIcons name="verified-user" size={32} color={colors.purple} />
+          </View>
+          <Text style={[typography.h2, { color: colors.text, marginTop: 16, marginBottom: 8, textAlign: 'center' }]}>Account Verification Required</Text>
+          <Text style={[typography.body, { color: colors.textSubtle, marginBottom: 24, textAlign: 'center' }]}>
+            Welcome to Rabta! To maintain the quality of opportunities for our youth, please provide us with your company's website or LinkedIn page to verify your account. Verification usually takes less than 24 hours.
+          </Text>
           <TextInput
             value={verificationLink}
             onChangeText={setVerificationLink}
-            placeholder="https://..."
+            placeholder="https://linkedin.com/company/..."
             placeholderTextColor={colors.textSubtle}
             style={[styles.input, { color: colors.text, borderColor: colors.borderStrong, backgroundColor: colors.surface2, marginBottom: 16 }]}
           />
           <Button
-            title="Submit Link"
+            title="Submit for Verification"
             onPress={handleVerificationSubmit}
             isLoading={isSubmittingLink}
             style={{ width: "100%" }}
@@ -149,4 +156,5 @@ const styles = StyleSheet.create({
   center: { flexGrow: 1, justifyContent: "center" },
   card: { borderRadius: 16, padding: 32, alignItems: "center", maxWidth: 400, width: "100%", alignSelf: "center" },
   input: { borderWidth: 1, borderRadius: 12, padding: 12, width: "100%" },
+  iconCircle: { width: 64, height: 64, borderRadius: 32, alignItems: "center", justifyContent: "center", marginBottom: 8 },
 });
