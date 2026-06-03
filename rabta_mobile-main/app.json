@@ -50,7 +50,7 @@
         }
       ],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/rabta-icon1.png",
+        "foregroundImage": "./assets/icon1.png",
         "backgroundColor": "#ffffff"
       }
     },
@@ -74,7 +74,8 @@
           }
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "./withZegoRingtone.js"
     ],
     "experiments": {
       "tsconfigPaths": true
