@@ -73,7 +73,7 @@ export const listCommunities = catchAsync(
                 finalLatestMessage = await Message.findOne(visibleFilter)
                   .sort({ createdAt: -1 })
                   .populate("senderId", "fullName _id")
-                  .populate("postId", "media content communityId");
+                  .populate("postId", "media content");
               }
             }
           }
@@ -93,6 +93,28 @@ export const listCommunities = catchAsync(
       data: { communities: communitiesWithUnread },
     });
   },
+);
+
+// ==========================================
+// 🔎 Get Community By ID (for invite links)
+// ==========================================
+export const getCommunityById = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const community = await Community.findById(req.params.id)
+      .populate("owner", "fullName avatar")
+      .populate("members", "fullName avatar")
+      .populate("admins", "fullName avatar")
+      .populate("joinRequests.userId", "fullName avatar");
+
+    if (!community) {
+      return next(new AppError("Community not found", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: { community },
+    });
+  }
 );
 
 // ==========================================
@@ -549,34 +571,6 @@ export const deleteCommunity = catchAsync(
 );
 
 // ==========================================
-// 🔍 جلب Community واحدة بالـ ID
-// ==========================================
-export const getCommunity = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const community = await Community.findById(req.params.id)
-      .populate("owner", "fullName avatar")
-      .populate("admins", "fullName avatar")
-      .populate("members", "fullName avatar")
-      .populate("invitedUsers", "fullName avatar")
-      .populate("joinRequests.userId", "fullName avatar")
-      .populate({
-        path: "chatId",
-        populate: {
-          path: "latestMessage",
-          populate: { path: "senderId", select: "fullName" },
-        },
-      });
-
-    if (!community) return next(new AppError("Community not found", 404));
-
-    res.status(200).json({
-      status: "success",
-      data: { community },
-    });
-  },
-);
-
-// ==========================================
 // 📰 جلب الـ Feed بتاع الـ Community
 // ==========================================
 export const getCommunityFeed = catchAsync(
@@ -591,7 +585,6 @@ export const getCommunityFeed = catchAsync(
     });
   },
 );
-
 
 // ==========================================
 // 💬 جلب الشات المرتبط بالـ Community

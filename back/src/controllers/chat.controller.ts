@@ -10,6 +10,7 @@ import { isUserOnline } from "../server";
 import { embeddingsModel } from "../services/Ai/core.ai.service";
 import { autoIngestSingleMessage } from "../services/Ai/chat.ai.service"; // اتأكدي من مسار الملف الصح عندك
 import { uploadBufferToCloudinary } from "../services/cloudinary.service";
+import { moderateMessage } from "../services/Ai/moderator.ai.service";
 // ==========================================
 // 💬 كنترولر الشات والرسائل والجروبات والمجتمعات
 // ==========================================
@@ -425,6 +426,7 @@ export const sendMessage = catchAsync(
       audioUrl,
       duration,
       attachments,
+      postId,
     } = req.body;
     const id = req.params.id as string;
     const senderId = (req.user as any)._id.toString();
@@ -459,7 +461,8 @@ export const sendMessage = catchAsync(
         duration,
         attachments,
         status: initialStatus,
-        embedding: messageEmbedding // دلوقتي الكود شايف الأرقام صح وهيبعتها
+        embedding: messageEmbedding, // دلوقتي الكود شايف الأرقام صح وهيبعتها
+        postId,
       });
     } catch (error) {
       console.error("Validation Error in sendMessage:", error);
@@ -490,6 +493,9 @@ export const sendMessage = catchAsync(
     const senderName = (req.user as any).fullName || (req.user as any).name || "مستخدم في الشات";
     autoIngestSingleMessage(savedMsg, senderName);
 
+    // AI Moderator
+    moderateMessage(savedMsg, io);
+
     // الرد الطبيعي لليوزر
     res.status(201).json({
       status: "success",
@@ -505,15 +511,12 @@ export const sendAudioMessage = catchAsync(
     const id = req.params.id as string;
     const senderId = (req.user as any)._id.toString();
 
-    console.log(`[sendAudioMessage] chatId=${id} senderId=${senderId} file=${req.file?.originalname}`);
-
     if (!req.file) {
       return next(new AppError("Audio file is required", 400));
     }
 
-    // Construct URL for the uploaded file (multer-storage-cloudinary sets req.file.path)
+    // Construct URL for the uploaded file
     const fileUrl = req.file.path;
-    console.log(`[sendAudioMessage] Cloudinary URL: ${fileUrl}`);
 
     let message;
     try {
@@ -575,7 +578,7 @@ export const sendFileMessage = catchAsync(
       message = await chatService.createMessage({
         chatId: id,
         senderId,
-        content: "", // DO NOT save the file path in plain text content
+        content: req.body.content || "", // Use provided content as caption, else empty string
         messageType,
         replyTo: req.body.replyTo,
         attachments: [
@@ -600,6 +603,9 @@ export const sendFileMessage = catchAsync(
     // 🔥 Trigger automatic background AI ingestion for the uploaded file
     const senderName = (req.user as any).fullName || (req.user as any).name || "User";
     autoIngestSingleMessage(message, senderName);
+
+    // AI Moderator
+    moderateMessage(message, io);
     
     res.status(201).json({
       status: "success",

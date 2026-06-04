@@ -5,6 +5,11 @@ export interface IAdminLog extends Document {
   adminName: string;
   actionType: string;
   targetName: string;
+  category?: 'Manual' | 'AI';
+  aiReason?: string;
+  targetUserId?: mongoose.Types.ObjectId;
+  relatedMessageContent?: string;
+  isReverted?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +32,25 @@ const adminLogSchema = new Schema<IAdminLog>(
     targetName: {
       type: String,
       required: true,
+    },
+    category: {
+      type: String,
+      enum: ['Manual', 'AI'],
+      default: 'Manual',
+    },
+    aiReason: {
+      type: String,
+    },
+    targetUserId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    relatedMessageContent: {
+      type: String,
+    },
+    isReverted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

@@ -14,6 +14,8 @@ export interface IUser extends Document {
   verificationStatus?: 'pending' | 'approved' | 'rejected';
   rejectionReason?: string;
   isBanned?: boolean;
+  aiStrikes?: number;
+  banExpiresAt?: Date;
   blockedUsers?: mongoose.Types.ObjectId[];
   // Common fields
   jobTitle?: string;
@@ -76,6 +78,17 @@ export interface IUser extends Document {
   showOnlineStatus: boolean;
   savedProjects?: mongoose.Types.ObjectId[];
   status: 'online' | 'offline' | 'busy';
+  tokenUsage?: {
+    voiceToText: number;
+    chatSummarization: number;
+    smartSearch: number;
+    fileSummarization: number;
+    suggestedReplies: number;
+    translation: number;
+    appChatbot: number;
+    employerMatching: number;
+  };
+  totalTokensUsed: number;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
   createdAt: Date;
@@ -130,6 +143,13 @@ const UserSchema: Schema = new Schema({
   isBanned: {
     type: Boolean,
     default: false
+  },
+  aiStrikes: {
+    type: Number,
+    default: 0
+  },
+  banExpiresAt: {
+    type: Date
   },
   profileComplete: {
     type: Boolean,
@@ -246,6 +266,17 @@ const UserSchema: Schema = new Schema({
     type: String,
     default: ""
   },
+  tokenUsage: {
+    voiceToText: { type: Number, default: 0 },
+    chatSummarization: { type: Number, default: 0 },
+    smartSearch: { type: Number, default: 0 },
+    fileSummarization: { type: Number, default: 0 },
+    suggestedReplies: { type: Number, default: 0 },
+    translation: { type: Number, default: 0 },
+    appChatbot: { type: Number, default: 0 },
+    employerMatching: { type: Number, default: 0 }
+  },
+  totalTokensUsed: { type: Number, default: 0 },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
   blockedUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],

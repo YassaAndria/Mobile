@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { embeddingsModel, llm } from "./core.ai.service";
 import { smartSearchPromptTemplate, globalAiPromptTemplate } from "./prompts.ai";
 import { User } from "../../models/user";
+import { logTokenUsage } from "../token.service";
 
 export const processAndStoreGlobalData = async (sampleData: { text: string; metadata?: any }[]) => {
   const texts = sampleData.map((item) => item.text);
@@ -36,12 +37,37 @@ export const askGlobalKnowledge = async (question: string) => {
     embeddingKey: "embedding",
   });
 
-  const searchResults = await vectorStore.similaritySearch(question, 5);
+  let searchResults: any[] = [];
+  try {
+    searchResults = await vectorStore.similaritySearch(question, 5);
+  } catch (err) {
+    console.error("⚠️ Atlas similaritySearch failed in askGlobalKnowledge:", err);
+  }
+
+  if (!searchResults || searchResults.length === 0) {
+    try {
+      // Fallback regex search using MongoDB native driver
+      const keywordMatches = await collection.find({
+        text: { $regex: question.split(" ").filter((w: string) => w.length > 2).join("|"), $options: "i" }
+      }).limit(5).toArray();
+
+      if (keywordMatches && keywordMatches.length > 0) {
+        searchResults = keywordMatches.map((doc: any) => ({
+          pageContent: doc.text,
+          metadata: doc.metadata
+        }));
+      }
+    } catch (fallbackErr) {
+      console.error("❌ Mongoose keyword fallback search failed in askGlobalKnowledge:", fallbackErr);
+    }
+  }
 
   let context = "No document context available.";
   if (searchResults && searchResults.length > 0) {
     context = searchResults.map(doc => doc.pageContent).join("\n");
   }
+
+  console.log("📊 Global Knowledge Context dynamically built:\n", context);
 
   const resolvedModel = await llm;
   const chain = globalAiPromptTemplate.pipe(resolvedModel).pipe(new StringOutputParser());
@@ -54,7 +80,7 @@ export const askGlobalKnowledge = async (question: string) => {
   return answer;
 };
 
-export const semanticSearchMessages = async (query: string, userId: string, chatId: string, currentUserName: string) => {
+export const semanticSearchMessages = async (query: string, userId: string, chatId: string, currentUserName: string, filesList: any[] = []) => {
   const client = mongoose.connection.getClient() as any;
   const collection = client.db(process.env.DB_NAME || "RabtaDB").collection("communitychunks");
 
@@ -70,10 +96,34 @@ export const semanticSearchMessages = async (query: string, userId: string, chat
     "metadata.sourceType": { $in: ["chat", "file", "pdf"] }
   };
 
-  const searchResults = await vectorStore.similaritySearch(query, 10, filter);
+  let searchResults: any[] = [];
+  try {
+    searchResults = await vectorStore.similaritySearch(query, 10, filter);
+  } catch (err) {
+    console.error("⚠️ Atlas similaritySearch failed, using Mongoose fallback:", err);
+  }
 
   if (!searchResults || searchResults.length === 0) {
-    return "لم يتم العثور على رسائل أو ملفات مطابقة لبحثك في هذا الشات.";
+    try {
+      const CommunityChunkModel = mongoose.model("CommunityChunk");
+      const keywordMatches = await CommunityChunkModel.find({
+        chatId: new mongoose.Types.ObjectId(chatId),
+        content: { $regex: query, $options: "i" }
+      }).limit(10);
+
+      if (keywordMatches && keywordMatches.length > 0) {
+        searchResults = keywordMatches.map((doc: any) => ({
+          pageContent: doc.content,
+          metadata: doc.metadata
+        }));
+      }
+    } catch (fallbackErr) {
+      console.error("❌ Mongoose keyword fallback search failed:", fallbackErr);
+    }
+  }
+
+  if (!searchResults || searchResults.length === 0) {
+    return "لم أجد معلومات بخصوص هذا الموضوع في الشات حالياً.";
   }
 
   const contextPromises = searchResults.map(async (doc) => {
@@ -102,9 +152,11 @@ export const semanticSearchMessages = async (query: string, userId: string, chat
     // تنسيق الوقت بالكامل ليفهمه الـ AI بوضوح للإجابة على سؤال (أمتى)
     // 🔥 حماية قراءة الوقت: لو مبعوت بأي صيغة، حوله لنص مقروء فوراً
     let time = "غير محدد";
-    if (doc.metadata?.timestamp) {
+    const rawTime = doc.metadata?.timestamp || (doc as any).createdAt || doc.metadata?.createdAt;
+    
+    if (rawTime) {
       try {
-        time = new Date(doc.metadata.timestamp).toLocaleTimeString('ar-EG', {
+        time = new Date(rawTime).toLocaleTimeString('ar-EG', {
           hour: '2-digit',
           minute: '2-digit'
         });
@@ -132,6 +184,11 @@ export const semanticSearchMessages = async (query: string, userId: string, chat
     question: query,
     currentUserName: currentUserName
   } as any);
+
+  const tokens = Math.ceil((answer?.length || 0) / 4);
+  if (tokens > 0 && userId) {
+    await logTokenUsage(userId, 'smartSearch', tokens);
+  }
 
   return answer;
 };

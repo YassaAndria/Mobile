@@ -20,6 +20,15 @@ export const loginUser = async (email: string, password: string) => {
   if (!user || !(await user.comparePassword(password, user.password as string))) {
     throw new AppError('Invalid email or password. Please try again.', 401);
   }
+
+  if (user.isBanned) {
+    throw new AppError('Your account has been permanently banned.', 403);
+  }
+
+  if (user.banExpiresAt && user.banExpiresAt > new Date()) {
+    throw new AppError(`Your account is temporarily banned until ${user.banExpiresAt.toLocaleString()}.`, 403);
+  }
+
   const token = signToken(user._id.toString());
   const profileComplete = user.profileComplete;
   user.password = undefined;
@@ -30,6 +39,15 @@ export const registerUser = async (userData: any) => {
   // Registration Shield: Prevent malicious role injection
   if (userData.role === 'admin' || !['freelancer', 'employer'].includes(userData.role)) {
     userData.role = 'freelancer'; // Default safe fallback
+  }
+
+  const BannedContact = require('../models/BannedContact').BannedContact;
+  const bannedContactQuery: any[] = [{ email: userData.email }];
+  if (userData.phoneNumber) bannedContactQuery.push({ phoneNumber: userData.phoneNumber });
+  
+  const isBannedContact = await BannedContact.findOne({ $or: bannedContactQuery });
+  if (isBannedContact) {
+    throw new AppError('This email or phone number is permanently banned from registering.', 403);
   }
 
   const query: any[] = [{ email: userData.email }];

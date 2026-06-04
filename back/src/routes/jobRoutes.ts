@@ -10,7 +10,8 @@ import {
   getApplicants,
   updateJob,
   deleteJob,
-  getAppliedJobs
+  getAppliedJobs,
+  reEvaluateApplicantMatch
 } from '../controllers/job.controller';
 
 const router = Router();
@@ -25,5 +26,6 @@ router.post('/', restrictTo('employer'), createJob);
 router.patch('/:id', restrictTo('employer'), updateJob);
 router.delete('/:id', restrictTo('employer'), deleteJob);
 router.get('/:id/applicants', restrictTo('employer'), getApplicants);
+router.post('/:id/applicants/:userId/re-evaluate', restrictTo('employer'), reEvaluateApplicantMatch);
 
 export default router;

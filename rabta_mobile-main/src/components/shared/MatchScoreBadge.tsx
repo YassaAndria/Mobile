@@ -10,7 +10,7 @@ interface MatchScoreBadgeProps {
 }
 
 export const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({ score, reason }) => {
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
   if (score === undefined || score === null) {
@@ -25,9 +25,9 @@ export const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({ score, reason 
   }
 
   // Determine colors and icon based on score
-  let bgColor = `${colors.error}20`; // Light red
-  let borderColor = `${colors.error}40`;
-  let textColor = colors.error;
+  let bgColor = colors.errorBg; // Light red
+  let borderColor = colors.errorBorder;
+  let textColor = colors.errorText;
   let icon: keyof typeof MaterialIcons.glyphMap = "warning";
 
   if (score >= 80) {
@@ -36,16 +36,17 @@ export const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({ score, reason 
     textColor = colors.successText;
     icon = "check-circle";
   } else if (score >= 50) {
-    bgColor = `${colors.warning}20`; // Light orange (assuming colors.warning exists, else fallback to orange hex)
-    borderColor = `${colors.warning}40`;
-    textColor = colors.warning;
+    const isDark = mode === 'dark';
+    const warningColor = isDark ? '#FBBF24' : '#F57C00';
+    bgColor = isDark ? 'rgba(251, 191, 36, 0.15)' : 'rgba(245, 124, 0, 0.1)';
+    borderColor = isDark ? 'rgba(251, 191, 36, 0.3)' : 'rgba(245, 124, 0, 0.2)';
+    textColor = warningColor;
     icon = "info";
   }
 
-  // Fallback if colors.warning isn't mapped in theme
-  const safeBgColor = textColor === colors.warning && !colors.warning ? '#FFF3E0' : bgColor;
-  const safeBorderColor = textColor === colors.warning && !colors.warning ? '#FFE0B2' : borderColor;
-  const safeTextColor = textColor === colors.warning && !colors.warning ? '#F57C00' : textColor;
+  const safeBgColor = bgColor;
+  const safeBorderColor = borderColor;
+  const safeTextColor = textColor;
 
   return (
     <>

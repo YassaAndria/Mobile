@@ -166,7 +166,7 @@ function ZegoCallProvider({ children }: { children: React.ReactNode }) {
         setIsInitialized(true);
         console.log('[ZEGO] Initialized successfully');
       })
-      .catch((e) => {
+      .catch((e: any) => {
         console.error('[ZEGO] Initialization failed:', e);
         setIsInitialized(false);
       });

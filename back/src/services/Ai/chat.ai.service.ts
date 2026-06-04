@@ -8,6 +8,7 @@ import Chat from "../../models/chat";
 import CommunityChunk from "../../models/AI/CommunityChunk.model";
 import { embeddingsModel, llm } from "./core.ai.service"; // 👈 استيراد المحركات من فايل يوسف الأساسي
 import { chatAiPromptTemplate } from "./prompts.ai"; // 👈 استيراد الـ Prompt بالإنجليزي
+import { logTokenUsage } from "../token.service";
 
 // ==========================================
 // 1. Extract Text From PDF (نسخة تشخيصية باللوجات)
@@ -62,7 +63,7 @@ export const extractTextFromPDF = async (fileUrl: string): Promise<string> => {
 // ==========================================
 // 2. Ingest Chat Data (Messages & PDFs)
 // ==========================================
-export const ingestChatData = async (chatId: string) => {
+export const ingestChatData = async (chatId: string, userId?: string) => {
   const chatObjId = new mongoose.Types.ObjectId(chatId);
   const chatDoc = await Chat.findById(chatObjId);
   if (!chatDoc) throw new Error("Chat not found");
@@ -114,7 +115,10 @@ export const ingestChatData = async (chatId: string) => {
 
   await CommunityChunk.deleteMany({ chatId: chatObjId });
 
+  let totalTextLength = 0;
+
   for (const item of rawTexts) {
+    totalTextLength += item.text.length;
     // 💡 بنقسم الكلام لفقرات صغيرة من غير ما نحتاج الـ TextSplitter الخارجي اللي كان ضارب إيرور
     const chunks = item.text.match(/[\s\S]{1,500}/g) || [];
     if (chunks.length === 0) continue;
@@ -128,6 +132,12 @@ export const ingestChatData = async (chatId: string) => {
     }));
     await CommunityChunk.insertMany(chunksToSave);
   }
+  
+  if (userId) {
+    const tokens = Math.ceil(totalTextLength / 4);
+    if (tokens > 0) await logTokenUsage(userId, 'fileSummarization', tokens);
+  }
+
   return { message: "Chat data processed successfully 🚀" };
 };
 
@@ -290,6 +300,12 @@ export const autoIngestSingleMessage = async (
     }));
 
     await CommunityChunk.insertMany(chunksToSave);
+    
+    const tokens = Math.ceil(text.length / 4);
+    if (tokens > 0 && messageDoc.senderId) {
+      await logTokenUsage(messageDoc.senderId.toString(), 'fileSummarization', tokens);
+    }
+    
     console.log(`✅ [AI Ingestion] تمت العملية بنجاح وتخزين البيانات في الـ Vector Store.`);
   } catch (error) {
     console.error("❌ [AI Ingestion] خطأ غير متوقع في دالة autoIngestSingleMessage:", error);

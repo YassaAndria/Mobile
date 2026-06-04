@@ -3,8 +3,8 @@ import { View, StyleSheet, ActivityIndicator, Text, Platform } from 'react-nativ
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 
 // Fix for ZegoUIKitPrebuiltCall grantPermissions ReferenceError on New Architecture
-if (typeof (global as any).Platform === 'undefined') {
-  (global as any).Platform = Platform;
+if (typeof (globalThis as any).Platform === 'undefined') {
+  (globalThis as any).Platform = Platform;
 }
 
 import Constants from 'expo-constants';

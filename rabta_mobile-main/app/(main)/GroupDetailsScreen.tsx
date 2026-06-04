@@ -249,7 +249,7 @@ export default function GroupDetailsScreen() {
     }
   };
 
-  const initiateZegoCall = useCallback(
+  const initiateCall = useCallback(
     async (type: 'voice' | 'video') => {
       if (!resolvedChatId) {
         Alert.alert('Error', 'Cannot start a call before the chat is loaded.');
@@ -332,7 +332,6 @@ export default function GroupDetailsScreen() {
       [{ text: "OK" }],
     );
   };
-
 
   const handleRemoveMember = (userId: string, displayName: string) => {
     if (!communityId) return;
@@ -421,7 +420,7 @@ export default function GroupDetailsScreen() {
               <ActionChip
                 icon="call-outline"
                 label="Call"
-                onPress={() => initiateZegoCall('voice')}
+                onPress={() => initiateCall('voice')}
                 disabled={!resolvedChatId}
                 C={C}
                 styles={styles}
@@ -429,7 +428,7 @@ export default function GroupDetailsScreen() {
               <ActionChip
                 icon="videocam-outline"
                 label="Video"
-                onPress={() => initiateZegoCall('video')}
+                onPress={() => initiateCall('video')}
                 disabled={!resolvedChatId}
                 C={C}
                 styles={styles}
@@ -490,7 +489,7 @@ export default function GroupDetailsScreen() {
                     nestedScrollEnabled={true}
                     keyboardShouldPersistTaps="handled"
                     renderItem={({ item: c }) => {
-                      const cId = (c as any).userId ?? (c as any).backendId ?? null;
+                      const cId = (c as any).userId ?? c.backendId ?? null;
                       if (!cId) return null;
                       const isMember = members.some(m => (m.user?._id || m.user?.id || m._id) === cId);
                       if (isMember) return null;
@@ -560,7 +559,6 @@ export default function GroupDetailsScreen() {
                       </Text>
                     </TouchableOpacity>
                   </View>
-
                 </>
               )}
             </GlassCard>
@@ -577,14 +575,10 @@ export default function GroupDetailsScreen() {
                     return (
                       <View key={u._id || idx} style={styles.requestRow}>
                         <Text style={styles.memberName}>{u.fullName}</Text>
-                        <TouchableOpacity
-                          onPress={() => handleRequest(u._id, "accept")}
-                        >
+                        <TouchableOpacity onPress={() => handleRequest(u._id, "accept")}>
                           <Text style={styles.acceptText}>Accept</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleRequest(u._id, "reject")}
-                        >
+                        <TouchableOpacity onPress={() => handleRequest(u._id, "reject")}>
                           <Text style={styles.rejectText}>Reject</Text>
                         </TouchableOpacity>
                       </View>
@@ -599,7 +593,13 @@ export default function GroupDetailsScreen() {
               <Text style={[styles.sectionLabel, { marginBottom: 0, marginTop: 0 }]}>
                 {members.length} participants
               </Text>
-              <TouchableOpacity onPress={() => { setShowParticipantSearch(v => !v); if (showParticipantSearch) setParticipantSearch(''); }} hitSlop={10}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowParticipantSearch(v => !v);
+                  if (showParticipantSearch) setParticipantSearch('');
+                }}
+                hitSlop={10}
+              >
                 <Ionicons name={showParticipantSearch ? "close" : "search"} size={18} color={C.textMuted} />
               </TouchableOpacity>
             </View>
@@ -622,42 +622,23 @@ export default function GroupDetailsScreen() {
                 return (
                   <View key={item._id} style={styles.memberRow}>
                     {item.avatar ? (
-                      <Image
-                        source={{ uri: item.avatar }}
-                        style={styles.memberAvatar}
-                      />
+                      <Image source={{ uri: item.avatar }} style={styles.memberAvatar} />
                     ) : (
                       <View style={[styles.memberAvatar, styles.memberAvatarPh]}>
-                        <Text style={styles.memberInitial}>
-                          {(item.fullName ?? "?")[0]}
-                        </Text>
+                        <Text style={styles.memberInitial}>{(item.fullName ?? "?")[0]}</Text>
                       </View>
                     )}
                     <View style={styles.memberInfo}>
                       <Text style={styles.memberName}>
-                        {item.fullName}
-                        {isSelf ? " (You)" : ""}
+                        {item.fullName}{isSelf ? " (You)" : ""}
                       </Text>
-                      <Text
-                        style={[
-                          styles.roleBadge,
-                          role === "Admin" && styles.roleAdmin,
-                        ]}
-                      >
+                      <Text style={[styles.roleBadge, role === "Admin" && styles.roleAdmin]}>
                         {isGroupOwner ? "Owner" : role}
                       </Text>
                     </View>
                     {canRemove && (
-                      <TouchableOpacity
-                        onPress={() =>
-                          handleRemoveMember(item._id, item.fullName ?? "member")
-                        }
-                      >
-                        <Ionicons
-                          name="person-remove-outline"
-                          size={22}
-                          color={C.mahoganyLight}
-                        />
+                      <TouchableOpacity onPress={() => handleRemoveMember(item._id, item.fullName ?? "member")}>
+                        <Ionicons name="person-remove-outline" size={22} color={C.mahoganyLight} />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -670,7 +651,6 @@ export default function GroupDetailsScreen() {
               <>
                 <Text style={styles.sectionLabel}>Shared Media, Links & Docs</Text>
                 <GlassCard styles={styles}>
-                  {/* Sub-tab selection header */}
                   <View style={{
                     flexDirection: "row",
                     backgroundColor: mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "#F3F4F6",
@@ -681,10 +661,7 @@ export default function GroupDetailsScreen() {
                     <TouchableOpacity
                       onPress={() => setSharedCategory("media")}
                       style={{
-                        flex: 1,
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                        alignItems: "center",
+                        flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: "center",
                         backgroundColor: sharedCategory === "media" ? (mode === "dark" ? "#2D2D2D" : "#FFFFFF") : "transparent",
                       }}
                     >
@@ -692,14 +669,10 @@ export default function GroupDetailsScreen() {
                         Media ({sharedMedia.media.filter(item => /\.(jpe?g|png|gif|webp|bmp|heic)(\?|$)/i.test(item.url || "")).length})
                       </Text>
                     </TouchableOpacity>
-
                     <TouchableOpacity
                       onPress={() => setSharedCategory("files")}
                       style={{
-                        flex: 1,
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                        alignItems: "center",
+                        flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: "center",
                         backgroundColor: sharedCategory === "files" ? (mode === "dark" ? "#2D2D2D" : "#FFFFFF") : "transparent",
                       }}
                     >
@@ -707,14 +680,10 @@ export default function GroupDetailsScreen() {
                         Files ({sharedMedia.files.length})
                       </Text>
                     </TouchableOpacity>
-
                     <TouchableOpacity
                       onPress={() => setSharedCategory("links")}
                       style={{
-                        flex: 1,
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                        alignItems: "center",
+                        flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: "center",
                         backgroundColor: sharedCategory === "links" ? (mode === "dark" ? "#2D2D2D" : "#FFFFFF") : "transparent",
                       }}
                     >
@@ -724,53 +693,38 @@ export default function GroupDetailsScreen() {
                     </TouchableOpacity>
                   </View>
 
-                  {/* Sub-tab Content List */}
                   {loadingShared ? (
                     <ActivityIndicator color={C.accent} style={{ marginVertical: 20 }} />
                   ) : (
                     <View style={{ minHeight: 80 }}>
-                      {sharedCategory === "media" && (
-                        (() => {
-                          const imagesOnly = sharedMedia.media.filter(item => 
-                            /\.(jpe?g|png|gif|webp|bmp|heic)(\?|$)/i.test(item.url || "")
-                          );
-                          if (imagesOnly.length === 0) {
-                            return (
-                              <Text style={{ textAlign: "center", color: C.textMuted, marginVertical: 20, fontSize: 14 }}>
-                                No media found in this group
-                              </Text>
-                            );
-                          }
-                          return (
-                            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-                              {imagesOnly.map((item, idx) => {
-                                const resolvedUrl = resolveMediaUrl(item.url);
-                                return (
-                                  <TouchableOpacity
-                                    key={idx}
-                                    onPress={() => Linking.openURL(resolvedUrl).catch((err) => console.error(err))}
-                                    style={{
-                                      width: "31%",
-                                      aspectRatio: 1,
-                                      borderRadius: 8,
-                                      backgroundColor: mode === "dark" ? "#2D2D2D" : "#E5E7EB",
-                                      overflow: "hidden",
-                                    }}
-                                  >
-                                    <Image source={{ uri: resolvedUrl }} style={{ width: "100%", height: "100%" }} />
-                                  </TouchableOpacity>
-                                );
-                              })}
-                            </View>
-                          );
-                        })()
-                      )}
+                      {sharedCategory === "media" && (() => {
+                        const imagesOnly = sharedMedia.media.filter(item =>
+                          /\.(jpe?g|png|gif|webp|bmp|heic)(\?|$)/i.test(item.url || "")
+                        );
+                        if (imagesOnly.length === 0) {
+                          return <Text style={{ textAlign: "center", color: C.textMuted, marginVertical: 20, fontSize: 14 }}>No media found in this group</Text>;
+                        }
+                        return (
+                          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                            {imagesOnly.map((item, idx) => {
+                              const resolvedUrl = resolveMediaUrl(item.url);
+                              return (
+                                <TouchableOpacity
+                                  key={idx}
+                                  onPress={() => Linking.openURL(resolvedUrl).catch(err => console.error(err))}
+                                  style={{ width: "31%", aspectRatio: 1, borderRadius: 8, backgroundColor: mode === "dark" ? "#2D2D2D" : "#E5E7EB", overflow: "hidden" }}
+                                >
+                                  <Image source={{ uri: resolvedUrl }} style={{ width: "100%", height: "100%" }} />
+                                </TouchableOpacity>
+                              );
+                            })}
+                          </View>
+                        );
+                      })()}
 
                       {sharedCategory === "files" && (
                         sharedMedia.files.length === 0 ? (
-                          <Text style={{ textAlign: "center", color: C.textMuted, marginVertical: 20, fontSize: 14 }}>
-                            No documents found in this group
-                          </Text>
+                          <Text style={{ textAlign: "center", color: C.textMuted, marginVertical: 20, fontSize: 14 }}>No documents found in this group</Text>
                         ) : (
                           <View style={{ gap: 10 }}>
                             {sharedMedia.files.map((item, idx) => {
@@ -779,26 +733,13 @@ export default function GroupDetailsScreen() {
                               return (
                                 <TouchableOpacity
                                   key={idx}
-                                  onPress={() => Linking.openURL(resolvedUrl).catch((err) => console.error(err))}
-                                  style={{
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    gap: 12,
-                                    padding: 12,
-                                    borderRadius: 10,
-                                    backgroundColor: mode === "dark" ? "#1E1E1E" : "#F9FAFB",
-                                    borderWidth: 1,
-                                    borderColor: C.glassBorder,
-                                  }}
+                                  onPress={() => Linking.openURL(resolvedUrl).catch(err => console.error(err))}
+                                  style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 10, backgroundColor: mode === "dark" ? "#1E1E1E" : "#F9FAFB", borderWidth: 1, borderColor: C.glassBorder }}
                                 >
                                   <Ionicons name="document-text-outline" size={24} color={C.accent} />
                                   <View style={{ flex: 1 }}>
-                                    <Text style={{ fontSize: 14, fontWeight: "600", color: C.textPrimary }} numberOfLines={1}>
-                                      {label}
-                                    </Text>
-                                    <Text style={{ fontSize: 11, color: C.textMuted }}>
-                                      Tap to open document
-                                    </Text>
+                                    <Text style={{ fontSize: 14, fontWeight: "600", color: C.textPrimary }} numberOfLines={1}>{label}</Text>
+                                    <Text style={{ fontSize: 11, color: C.textMuted }}>Tap to open document</Text>
                                   </View>
                                   <Ionicons name="download-outline" size={20} color={C.textMuted} />
                                 </TouchableOpacity>
@@ -808,41 +749,25 @@ export default function GroupDetailsScreen() {
                         )
                       )}
 
-                      {sharedCategory === "links" && (
-                        (() => {
-                          const webLinksOnly = sharedMedia.links.filter(item => 
-                            !/cloudinary/i.test(item.url || "")
-                          );
-                          if (webLinksOnly.length === 0) {
-                            return (
-                              <Text style={{ textAlign: "center", color: C.textMuted, marginVertical: 20, fontSize: 14 }}>
-                                No links found in this group
-                              </Text>
-                            );
-                          }
-                          return (
-                            <View style={{ gap: 10 }}>
-                              {webLinksOnly.map((item, idx) => (
-                                <TouchableOpacity
-                                  key={idx}
-                                  onPress={() => Linking.openURL(item.url).catch((err) => console.error(err))}
-                                  style={{
-                                    padding: 12,
-                                    borderRadius: 10,
-                                    backgroundColor: mode === "dark" ? "#1E1E1E" : "#F9FAFB",
-                                    borderWidth: 1,
-                                    borderColor: C.glassBorder,
-                                  }}
-                                >
-                                  <Text style={{ fontSize: 14, color: C.accent, fontWeight: "500" }} numberOfLines={2}>
-                                    {item.url}
-                                  </Text>
-                                </TouchableOpacity>
-                              ))}
-                            </View>
-                          );
-                        })()
-                      )}
+                      {sharedCategory === "links" && (() => {
+                        const webLinksOnly = sharedMedia.links.filter(item => !/cloudinary/i.test(item.url || ""));
+                        if (webLinksOnly.length === 0) {
+                          return <Text style={{ textAlign: "center", color: C.textMuted, marginVertical: 20, fontSize: 14 }}>No links found in this group</Text>;
+                        }
+                        return (
+                          <View style={{ gap: 10 }}>
+                            {webLinksOnly.map((item, idx) => (
+                              <TouchableOpacity
+                                key={idx}
+                                onPress={() => Linking.openURL(item.url).catch(err => console.error(err))}
+                                style={{ padding: 12, borderRadius: 10, backgroundColor: mode === "dark" ? "#1E1E1E" : "#F9FAFB", borderWidth: 1, borderColor: C.glassBorder }}
+                              >
+                                <Text style={{ fontSize: 14, color: C.accent, fontWeight: "500" }} numberOfLines={2}>{item.url}</Text>
+                              </TouchableOpacity>
+                            ))}
+                          </View>
+                        );
+                      })()}
                     </View>
                   )}
                 </GlassCard>
@@ -850,15 +775,10 @@ export default function GroupDetailsScreen() {
             ) : null}
 
             {/* Danger zone */}
-            <Text style={[styles.sectionLabel, { color: C.mahoganyLight }]}>
-              Danger zone
-            </Text>
+            <Text style={[styles.sectionLabel, { color: C.mahoganyLight }]}>Danger zone</Text>
             <GlassCard style={styles.dangerCard} styles={styles}>
               {!isOwner && (
-                <TouchableOpacity
-                  style={styles.dangerBtn}
-                  onPress={handleLeave}
-                >
+                <TouchableOpacity style={styles.dangerBtn} onPress={handleLeave}>
                   <Ionicons name="exit-outline" size={20} color={C.mahoganyLight} />
                   <Text style={styles.dangerBtnText}>Exit group</Text>
                 </TouchableOpacity>
@@ -925,185 +845,49 @@ const createStyles = (C: GroupDetailsPalette) =>
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  topTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: C.textPrimary,
-  },
+  topTitle: { fontSize: 17, fontWeight: "600", color: C.textPrimary },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   scroll: { paddingHorizontal: 16, paddingBottom: 40 },
   hero: { alignItems: "center", paddingVertical: 24 },
-  heroAvatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 16,
-    borderWidth: 3,
-    borderColor: C.glassBorder,
-  },
-  heroAvatarPh: {
-    backgroundColor: C.glassHighlight,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  heroAvatar: { width: 120, height: 120, borderRadius: 60, marginBottom: 16, borderWidth: 3, borderColor: C.glassBorder },
+  heroAvatarPh: { backgroundColor: C.glassHighlight, alignItems: "center", justifyContent: "center" },
   heroLetter: { fontSize: 48, fontWeight: "700", color: C.textPrimary },
-  heroName: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: C.textPrimary,
-    textAlign: "center",
-  },
+  heroName: { fontSize: 24, fontWeight: "700", color: C.textPrimary, textAlign: "center" },
   heroMeta: { fontSize: 14, color: C.textMuted, marginTop: 4 },
-  heroDesc: {
-    fontSize: 14,
-    color: C.textMuted,
-    textAlign: "center",
-    marginTop: 12,
-    paddingHorizontal: 24,
-    lineHeight: 20,
-  },
-  actionRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 24,
-  },
+  heroDesc: { fontSize: 14, color: C.textMuted, textAlign: "center", marginTop: 12, paddingHorizontal: 24, lineHeight: 20 },
+  actionRow: { flexDirection: "row", justifyContent: "space-around", marginBottom: 24 },
   actionChip: { alignItems: "center", minWidth: 72 },
-  actionIconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: C.glassBg,
-    borderWidth: 1,
-    borderColor: C.glassBorder,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 6,
-  },
+  actionIconWrap: { width: 52, height: 52, borderRadius: 26, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, alignItems: "center", justifyContent: "center", marginBottom: 6 },
   actionLabel: { fontSize: 12, color: C.textMuted, fontWeight: "500" },
-  sectionLabel: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: C.textMuted,
-    marginBottom: 8,
-    marginTop: 8,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  glassCard: {
-    borderRadius: 16,
-    marginBottom: 16,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: C.glassBorder,
-    backgroundColor: C.glassBg,
-  },
+  sectionLabel: { fontSize: 13, fontWeight: "600", color: C.textMuted, marginBottom: 8, marginTop: 8, textTransform: "uppercase", letterSpacing: 0.5 },
+  glassCard: { borderRadius: 16, marginBottom: 16, overflow: "hidden", borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.glassBg },
   glassInner: { padding: 16 },
-  linkText: {
-    color: C.textPrimary,
-    fontSize: 13,
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-    marginBottom: 12,
-  },
+  linkText: { color: C.textPrimary, fontSize: 13, fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace", marginBottom: 12 },
   linkActions: { flexDirection: "row", gap: 10 },
-  linkBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: C.glassBorder,
-    backgroundColor: C.glassHighlight,
-  },
-  linkBtnPrimary: {
-    backgroundColor: C.accent,
-    borderColor: C.accent,
-  },
+  linkBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.glassHighlight },
+  linkBtnPrimary: { backgroundColor: C.accent, borderColor: C.accent },
   linkBtnText: { color: C.textPrimary, fontWeight: "600", fontSize: 14 },
-  refreshLink: {
-    color: C.accent,
-    fontSize: 12,
-    textAlign: "center",
-  },
+  refreshLink: { color: C.accent, fontSize: 12, textAlign: "center" },
   searchRow: { flexDirection: "row", gap: 8, marginBottom: 8 },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: C.glassBorder,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    color: C.textPrimary,
-    backgroundColor: C.inputBg,
-  },
-  goBtn: {
-    backgroundColor: C.accent,
-    paddingHorizontal: 16,
-    justifyContent: "center",
-    borderRadius: 10,
-  },
+  input: { flex: 1, borderWidth: 1, borderColor: C.glassBorder, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: C.textPrimary, backgroundColor: C.inputBg },
+  goBtn: { backgroundColor: C.accent, paddingHorizontal: 16, justifyContent: "center", borderRadius: 10 },
   goBtnText: { color: C.accentContrast, fontWeight: "700" },
-  inviteRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 10,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: C.divider,
-  },
+  inviteRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.divider },
   inviteAction: { color: C.accent, fontWeight: "700" },
-  memberRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: C.divider,
-  },
-  memberAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    marginRight: 12,
-  },
-  memberAvatarPh: {
-    backgroundColor: C.glassHighlight,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  memberRow: { flexDirection: "row", alignItems: "center", paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.divider },
+  memberAvatar: { width: 44, height: 44, borderRadius: 22, marginRight: 12 },
+  memberAvatarPh: { backgroundColor: C.glassHighlight, alignItems: "center", justifyContent: "center" },
   memberInitial: { color: C.accent, fontWeight: "700", fontSize: 16 },
   memberInfo: { flex: 1 },
   memberName: { color: C.textPrimary, fontWeight: "600", fontSize: 16 },
   roleBadge: { fontSize: 12, color: C.textMuted, marginTop: 2 },
   roleAdmin: { color: C.accent },
-  requestRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 8,
-  },
+  requestRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
   acceptText: { color: C.accent, fontWeight: "700" },
   rejectText: { color: C.textMuted, fontWeight: "600" },
   dangerCard: { borderColor: C.dangerBorder },
-  dangerBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: C.divider,
-  },
-  dangerBtnText: {
-    color: C.mahoganyLight,
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  feedLink: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 16,
-  },
+  dangerBtn: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.divider },
+  dangerBtnText: { color: C.mahoganyLight, fontWeight: "600", fontSize: 16 },
+  feedLink: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16 },
   feedLinkText: { color: C.accent, fontWeight: "600" },
 });

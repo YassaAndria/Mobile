@@ -92,6 +92,11 @@ export const getJobDetail = catchAsync(async (req: Request, res: Response, next:
 export const applyToJob = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { proposal, skills, note } = req.body;
   const currentUserId = (req.user as any)._id;
+
+  if ((req.user as any).isBanned || ((req.user as any).banExpiresAt && new Date((req.user as any).banExpiresAt) > new Date())) {
+    return next(new AppError('You are currently banned and cannot apply to jobs.', 403));
+  }
+
   const job = await Job.findById(req.params.id);
   
   if (!job) return next(new AppError('Job not found', 404));
@@ -188,6 +193,10 @@ export const createJob = catchAsync(async (req: Request, res: Response, next: Ne
     return next(new AppError('Your account is pending admin approval. You cannot post jobs yet.', 403));
   }
 
+  if (user && (user.isBanned || (user.banExpiresAt && new Date(user.banExpiresAt) > new Date()))) {
+    return next(new AppError('You are currently banned and cannot post jobs.', 403));
+  }
+
   const publisherId = (req.user as any)._id;
   const job = await Job.create({ ...req.body, publisherId });
 
@@ -271,5 +280,35 @@ export const deleteJob = catchAsync(async (req: Request, res: Response, next: Ne
   res.status(204).json({
     status: 'success',
     data: null
+  });
+});
+
+export const reEvaluateApplicantMatch = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id: jobId, userId } = req.params;
+  const currentUserId = (req.user as any)._id;
+
+  const job = await Job.findById(jobId);
+  if (!job) return next(new AppError('Job not found', 404));
+
+  if (job.publisherId.toString() !== currentUserId.toString()) {
+    return next(new AppError('You are not authorized to evaluate applicants for this job', 403));
+  }
+
+  const aiResult = await jobAiService.calculateMatchScore(jobId as string, userId as string);
+  if (!aiResult) return next(new AppError('Failed to calculate match score', 500));
+
+  const applicantIndex = job.applicants?.findIndex(a => a.userId.toString() === userId.toString());
+  if (applicantIndex !== undefined && applicantIndex > -1 && job.applicants) {
+    job.applicants[applicantIndex].matchScore = aiResult.score;
+    job.applicants[applicantIndex].matchReason = aiResult.reason;
+    await job.save();
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      matchScore: aiResult.score,
+      matchReason: aiResult.reason
+    }
   });
 });

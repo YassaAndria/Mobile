@@ -14,6 +14,8 @@
     "nativewind-env.d.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "temp_zip_extract",
+    "temp_final_zip_extract"
   ]
 }
