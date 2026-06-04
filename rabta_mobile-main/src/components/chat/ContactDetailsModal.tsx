@@ -25,6 +25,8 @@ interface ContactDetailsModalProps {
   onVoiceCall?: () => void;
   onVideoCall?: () => void;
   onSearch?: () => void;
+  starredMessagesCount?: number;
+  onViewStarred?: () => void;
 }
 
 export default function ContactDetailsModal({
@@ -38,6 +40,8 @@ export default function ContactDetailsModal({
   onVoiceCall,
   onVideoCall,
   onSearch,
+  starredMessagesCount = 0,
+  onViewStarred,
 }: ContactDetailsModalProps) {
   const { colors, isDark } = useTheme();
 
@@ -137,11 +141,12 @@ export default function ContactDetailsModal({
             <InfoRow
               icon="star-outline"
               label="Starred"
-              value="None"
+              value={starredMessagesCount > 0 ? `${starredMessagesCount} messages` : 'None'}
               iconColor={accentColor}
               textColor={textColor}
               mutedColor={mutedColor}
               isDark={isDark}
+              onPress={onViewStarred}
             />
             <InfoRow
               icon="notifications-outline"
@@ -197,6 +202,7 @@ function InfoRow({
   mutedColor,
   isDark,
   isLast,
+  onPress,
 }: {
   icon: any;
   label: string;
@@ -206,10 +212,11 @@ function InfoRow({
   mutedColor: string;
   isDark: boolean;
   isLast?: boolean;
+  onPress?: () => void;
 }) {
   return (
     <View>
-      <TouchableOpacity style={styles.infoRow}>
+      <TouchableOpacity style={styles.infoRow} onPress={onPress} disabled={!onPress}>
         <Ionicons name={icon} size={20} color={iconColor} style={styles.infoIcon} />
         <View style={styles.infoContent}>
           <Text style={[styles.infoLabel, { color: textColor }]}>{label}</Text>

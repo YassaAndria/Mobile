@@ -31,6 +31,10 @@ interface ChatBodyProps {
   onForward?: (message: MessageType) => void;
   onReactLocal?: (messageId: string, emoji: string) => void;
   onSmartReplies?: (message: MessageType) => void;
+  starredMessageIds?: Set<string>;
+  onStar?: (messageId: string) => void;
+  onInfo?: (message: MessageType) => void;
+  onMore?: (message: MessageType) => void;
 }
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
@@ -71,6 +75,10 @@ export default function ChatBody({
   onForward,
   onReactLocal,
   onSmartReplies,
+  starredMessageIds,
+  onStar,
+  onInfo,
+  onMore,
 }: ChatBodyProps) {
   const { colors, isDark } = useTheme();
   const router = useRouter();
@@ -571,6 +579,34 @@ export default function ChatBody({
                 gap: 3,
               }}
             >
+              {starredMessageIds?.has(item.id) && (
+                <Ionicons
+                  name="star"
+                  size={10}
+                  color={isMine ? 'rgba(255,255,255,0.7)' : '#FFD700'}
+                  style={{ marginRight: 1 }}
+                />
+              )}
+              {item.isPinned && (
+                <Ionicons
+                  name="pin"
+                  size={10}
+                  color={isMine ? 'rgba(255,255,255,0.7)' : colors.purple}
+                  style={{ marginRight: 1 }}
+                />
+              )}
+              {item.isEdited && (
+                <Text
+                  style={{
+                    fontSize: 9,
+                    color: isMine ? 'rgba(255,255,255,0.65)' : colors.textMuted,
+                    fontStyle: 'italic',
+                    marginRight: 2,
+                  }}
+                >
+                  edited
+                </Text>
+              )}
               <Text
                 style={{
                   fontSize: 10,
@@ -655,10 +691,12 @@ export default function ChatBody({
         onCopy={handleCopy}
         onDelete={handleDelete}
         onPin={handlePin}
-        onStar={(id) => console.log('Star:', id)}
+        onStar={onStar}
         isGroup={isGroup}
         onTranslate={handleTranslateMessage}
         onSmartReplies={onSmartReplies}
+        onMore={onMore}
+        onInfo={onInfo}
       />
 
       {/* Fullscreen Image Modal */}

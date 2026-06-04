@@ -1,4 +1,5 @@
-.env/
+.env
+back/.env
 node_modules/
 .expo/
 dist/

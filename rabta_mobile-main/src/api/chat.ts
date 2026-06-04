@@ -1,5 +1,4 @@
 import axiosInstance from './axiosInstance';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AUDIO_TIMEOUT_MS = 120_000; // 2 min — Cloudinary transcode takes time
 
@@ -17,34 +16,18 @@ export const uploadChatAudio = async (
   chatId: string,
   formData: FormData,
 ): Promise<any> => {
-  const token = await AsyncStorage.getItem('token');
-  const baseURL = axiosInstance.defaults.baseURL || 'http://192.168.1.3:5000/api/v1';
-
   try {
-    const res = await fetch(`${baseURL}/chats/${chatId}/audio`, {
-      method: 'POST',
+    const res = await axiosInstance.post(`/chats/${chatId}/audio`, formData, {
       headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        // Do not set Content-Type here, let fetch handle the boundary
+        'Content-Type': 'multipart/form-data',
       },
-      body: formData,
+      timeout: AUDIO_TIMEOUT_MS,
     });
-
-    if (!res.ok) {
-      let errorMsg = `Server error ${res.status}`;
-      try {
-        const errBody = await res.json();
-        errorMsg = errBody.message || errorMsg;
-      } catch {
-        const errText = await res.text();
-        errorMsg = errText || errorMsg;
-      }
-      throw new Error(errorMsg);
-    }
-    return await res.json();
+    return res.data;
   } catch (error: any) {
-    console.error('Fetch upload error:', error.message);
-    throw new Error(error.message || 'Network Error');
+    const detail = error.response?.data?.message || error.response?.data || error.message || 'Network Error';
+    console.error('Fetch upload error:', detail);
+    throw new Error(typeof detail === 'string' ? detail : 'Network Error');
   }
 };
 

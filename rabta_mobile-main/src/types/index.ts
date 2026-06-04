@@ -82,6 +82,8 @@ export interface MessageType {
   };
   isPinned?: boolean;
   isForwarded?: boolean;
+  isEdited?: boolean;
+  readBy?: string[];
   attachments?: { fileUrl: string; fileType: string; fileSize: number }[];
   status?: 'sending' | 'sent' | 'delivered' | 'read';
   postId?: any;

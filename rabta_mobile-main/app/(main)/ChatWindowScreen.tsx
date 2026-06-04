@@ -24,6 +24,7 @@ import {
   Modal,
   ScrollView,
   Linking,
+  Clipboard,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,6 +40,7 @@ import {
   setAudioModeAsync,
   requestRecordingPermissionsAsync,
 } from 'expo-audio';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uploadChatAudio } from '../../src/api/chat';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useChat } from '../../src/context/ChatContext';
@@ -46,6 +48,10 @@ import axiosInstance from '../../src/api/axiosInstance';
 import ChatBody from '../../src/components/chat/ChatBody';
 import ChatInputBar from '../../src/components/chat/ChatInputBar';
 import AttachmentModal from '../../src/components/chat/AttachmentModal';
+import ForwardMessageModal from '../../src/components/chat/ForwardMessageModal';
+import StarredMessagesModal from '../../src/components/chat/StarredMessagesModal';
+import MessageInfoModal from '../../src/components/chat/MessageInfoModal';
+import MoreActionsModal from '../../src/components/chat/MoreActionsModal';
 import type { RootState } from '../../src/store/store';
 import type { MessageType } from '../../src/types';
 
@@ -101,6 +107,68 @@ export default function ChatWindowScreen() {
   const [sttModalVisible, setSttModalVisible] = useState(false);
   const [isSttRecording, setIsSttRecording] = useState(false);
   const [isSttLoading, setIsSttLoading] = useState(false);
+
+  // Starred messages states
+  const [starredMessageIds, setStarredMessageIds] = useState<Set<string>>(new Set());
+  const [starredModalVisible, setStarredModalVisible] = useState(false);
+
+  // Forward message states
+  const [forwardModalVisible, setForwardModalVisible] = useState(false);
+  const [messageToForward, setMessageToForward] = useState<MessageType | null>(null);
+
+  // Message Info states
+  const [messageInfoVisible, setMessageInfoVisible] = useState(false);
+  const [messageInfoMsg, setMessageInfoMsg] = useState<MessageType | null>(null);
+  const [chatDetails, setChatDetails] = useState<any>(null);
+
+  // More options states
+  const [moreActionsVisible, setMoreActionsVisible] = useState(false);
+  const [moreActionsMsg, setMoreActionsMsg] = useState<MessageType | null>(null);
+
+  // Edit message state
+  const [editingMessage, setEditingMessage] = useState<MessageType | null>(null);
+
+  // Load starred message IDs on chatId change
+  useEffect(() => {
+    if (chatId) {
+      const loadStarred = async () => {
+        try {
+          const val = await AsyncStorage.getItem(`starred_messages_${chatId}`);
+          if (val) {
+            setStarredMessageIds(new Set(JSON.parse(val)));
+          } else {
+            setStarredMessageIds(new Set());
+          }
+        } catch (err) {
+          console.error('[ChatWindow] Error loading starred messages:', err);
+        }
+      };
+      loadStarred();
+    }
+  }, [chatId]);
+
+  const starredMessages = useMemo(() => {
+    return messages.filter((m) => starredMessageIds.has(m.id));
+  }, [messages, starredMessageIds]);
+
+  const handleStarMessage = async (messageId: string) => {
+    setStarredMessageIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(messageId)) {
+        next.delete(messageId);
+      } else {
+        next.add(messageId);
+      }
+      AsyncStorage.setItem(`starred_messages_${chatId}`, JSON.stringify(Array.from(next)));
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (editingMessage) {
+      setMessageText(editingMessage.content || '');
+    }
+  }, [editingMessage]);
 
   // ── NEW: tracks whether we are fetching the Zego token ───────────────────
   const [callLoading, setCallLoading] = useState(false);
@@ -361,6 +429,8 @@ export default function ChatWindowScreen() {
       } : undefined,
       isPinned: msg.isPinned || false,
       isForwarded: msg.isForwarded || false,
+      isEdited: msg.isEdited || false,
+      readBy: msg.readBy || [],
       status: msg.status || 'sent',
       postId: msg.postId,
     };
@@ -444,12 +514,15 @@ export default function ChatWindowScreen() {
             .then((chatListRes) => {
               const chats = chatListRes.data?.data?.chats || [];
               const currChat = chats.find((c: any) => c._id === activeChatId);
-              if (currChat && currChat.mutedBy) {
-                const muted = currChat.mutedBy.some((uid: any) => {
-                  const idStr = typeof uid === 'object' && uid ? (uid._id || uid.id) : uid;
-                  return idStr && idStr.toString() === currentUserId?.toString();
-                });
-                if (isMounted) setIsMuted(muted);
+              if (currChat) {
+                if (isMounted) setChatDetails(currChat);
+                if (currChat.mutedBy) {
+                  const muted = currChat.mutedBy.some((uid: any) => {
+                    const idStr = typeof uid === 'object' && uid ? (uid._id || uid.id) : uid;
+                    return idStr && idStr.toString() === currentUserId?.toString();
+                  });
+                  if (isMounted) setIsMuted(muted);
+                }
               }
             })
             .catch((err) => {
@@ -531,6 +604,22 @@ export default function ChatWindowScreen() {
       setMessages((prev) => prev.filter((m) => m.id !== data.messageId));
     };
 
+    const handleMessageEdited = (data: { messageId: string; content: string }) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === data.messageId ? { ...m, content: data.content, isEdited: true } : m,
+        ),
+      );
+    };
+
+    const handleMessagePinned = (data: { messageId: string; isPinned: boolean }) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === data.messageId ? { ...m, isPinned: data.isPinned } : m,
+        ),
+      );
+    };
+
     socket.on('receive-message', handleReceiveMessage);
     socket.on('receiveMessage', handleReceiveMessage);
     socket.on('messageReacted', handleReactionUpdate);
@@ -540,6 +629,8 @@ export default function ChatWindowScreen() {
     socket.on('online-users', handleOnlineUsers);
     socket.on('messageDeleted', handleMessageDeleted);
     socket.on('message-deleted', handleMessageDeleted);
+    socket.on('messageEdited', handleMessageEdited);
+    socket.on('messagePinned', handleMessagePinned);
 
     return () => {
       socket.emit('leave-room', chatId);
@@ -552,6 +643,8 @@ export default function ChatWindowScreen() {
       socket.off('online-users', handleOnlineUsers);
       socket.off('messageDeleted', handleMessageDeleted);
       socket.off('message-deleted', handleMessageDeleted);
+      socket.off('messageEdited', handleMessageEdited);
+      socket.off('messagePinned', handleMessagePinned);
     };
   }, [socket, chatId, currentUserId, userId, params.chatId, mapBackendMessage]);
 
@@ -578,6 +671,25 @@ export default function ChatWindowScreen() {
   const handleSend = async () => {
     if (!messageText.trim() || !chatId) return;
     const content = messageText.trim();
+
+    if (editingMessage) {
+      const msgId = editingMessage.id;
+      setEditingMessage(null);
+      setMessageText('');
+      try {
+        await axiosInstance.put(`/messages/${msgId}/edit`, { content });
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === msgId ? { ...m, content, isEdited: true } : m,
+          ),
+        );
+      } catch (err) {
+        console.error('[ChatWindowScreen] Failed to edit message:', err);
+        Toast.show({ type: 'error', text1: 'Failed to edit message' });
+      }
+      return;
+    }
+
     const replyId = replyingTo?.id;
     const tempId = `temp-${Date.now()}`;
     const now = new Date();
@@ -1243,15 +1355,68 @@ export default function ChatWindowScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 90}
       >
         <View style={{ flex: 1 }}>
+          {messages.find((m) => m.isPinned) && (() => {
+            const pinned = [...messages].reverse().find((m) => m.isPinned)!;
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  // Jump or alert is useful
+                }}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: isDark ? '#2C2C2E' : '#E9E9EB',
+                  paddingVertical: 8,
+                  paddingHorizontal: 16,
+                  borderBottomWidth: StyleSheet.hairlineWidth,
+                  borderBottomColor: isDark ? '#3A3A3C' : '#E5E5EA',
+                }}
+              >
+                <Ionicons name="pin" size={16} color={colors.purple} style={{ marginRight: 8 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 11, color: colors.purple, fontWeight: '700' }}>Pinned Message</Text>
+                  <Text style={{ fontSize: 13, color: colors.text }} numberOfLines={1}>
+                    {pinned.content || 'Attachment'}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={async () => {
+                    try {
+                      await axiosInstance.put(`/messages/${pinned.id}/pin`);
+                      setMessages((prev) => prev.map((m) => m.id === pinned.id ? { ...m, isPinned: false } : m));
+                    } catch (e) {
+                      console.error('[ChatWindow] Unpin error:', e);
+                    }
+                  }}
+                  style={{ padding: 4 }}
+                >
+                  <Ionicons name="close" size={16} color={colors.textMuted} />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            );
+          })()}
           <ChatBody
             messages={messages}
             loading={loading}
             currentUserId={currentUserId}
             isGroup={isGroup}
             onReply={(msg) => setReplyingTo(msg)}
-            onForward={() => Alert.alert('Forward', 'Forward feature coming soon!')}
+            onForward={(msg) => {
+              setMessageToForward(msg);
+              setForwardModalVisible(true);
+            }}
             onReactLocal={handleReactLocal}
             onSmartReplies={handleGenerateSmartReplies}
+            starredMessageIds={starredMessageIds}
+            onStar={handleStarMessage}
+            onInfo={(msg) => {
+              setMessageInfoMsg(msg);
+              setMessageInfoVisible(true);
+            }}
+            onMore={(msg) => {
+              setMoreActionsMsg(msg);
+              setMoreActionsVisible(true);
+            }}
           />
         </View>
 
@@ -1397,6 +1562,39 @@ export default function ChatWindowScreen() {
                 )}
               </View>
             ) : null}
+
+            {editingMessage && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingHorizontal: 16,
+                  paddingVertical: 10,
+                  backgroundColor: isDark ? '#2a2a2a' : '#E9E9EB',
+                  borderTopWidth: 1,
+                  borderTopColor: colors.border,
+                }}
+              >
+                <Ionicons name="pencil" size={16} color={colors.purple} style={{ marginRight: 8 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: colors.purple, textTransform: 'uppercase' }}>
+                    Editing Message
+                  </Text>
+                  <Text style={{ fontSize: 13, color: colors.text }} numberOfLines={1}>
+                    {editingMessage.content}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    setEditingMessage(null);
+                    setMessageText('');
+                  }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="close" size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+            )}
 
             <ChatInputBar
               value={messageText}
@@ -1867,6 +2065,40 @@ export default function ChatWindowScreen() {
               </View>
             )}
 
+            {/* Starred Messages Row */}
+            <TouchableOpacity
+              onPress={() => {
+                setContactDetailsVisible(false);
+                setStarredModalVisible(true);
+              }}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                backgroundColor: isDark ? '#1E1E1E' : '#F9FAFB',
+                borderRadius: 12,
+                marginHorizontal: 16,
+                marginBottom: 24,
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Ionicons name="star" size={20} color="#FFD700" />
+                <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text }}>
+                  Starred Messages
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Text style={{ fontSize: 14, color: colors.textMuted }}>
+                  {starredMessages.length > 0 ? `${starredMessages.length}` : 'None'}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+              </View>
+            </TouchableOpacity>
+
             {/* Shared Media, Files, and Links Section */}
             <View style={{ paddingHorizontal: 16 }}>
               <Text style={{ fontSize: 13, fontWeight: '700', color: colors.purple, textTransform: 'uppercase', marginBottom: 12 }}>
@@ -2025,6 +2257,53 @@ export default function ChatWindowScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
+
+      {/* ── Forward Message Modal ── */}
+      <ForwardMessageModal
+        visible={forwardModalVisible}
+        onClose={() => setForwardModalVisible(false)}
+        message={messageToForward}
+        currentUserId={currentUserId || ''}
+        onForwardSuccess={(chatName) => {
+          setForwardModalVisible(false);
+          Toast.show({ type: 'success', text1: `Message forwarded to ${chatName}` });
+        }}
+      />
+
+      {/* ── Starred Messages Modal ── */}
+      <StarredMessagesModal
+        visible={starredModalVisible}
+        onClose={() => setStarredModalVisible(false)}
+        starredMessages={starredMessages}
+      />
+
+      {/* ── Message Info Modal ── */}
+      <MessageInfoModal
+        visible={messageInfoVisible}
+        onClose={() => setMessageInfoVisible(false)}
+        message={messageInfoMsg}
+        chatUsers={chatDetails?.users || []}
+        currentUserId={currentUserId || ''}
+        isGroup={isGroup}
+      />
+
+      {/* ── More Actions Modal ── */}
+      <MoreActionsModal
+        visible={moreActionsVisible}
+        onClose={() => setMoreActionsVisible(false)}
+        message={moreActionsMsg}
+        onEdit={(msg) => setEditingMessage(msg)}
+        onCopy={(content) => {
+          Clipboard.setString(content);
+          Toast.show({ type: 'success', text1: 'Copied to clipboard' });
+        }}
+        onTranslate={(msg) => {
+          // Fallback or trigger translation
+        }}
+        onSmartReplies={(msg) => {
+          handleGenerateSmartReplies();
+        }}
+      />
     </SafeAreaView>
   );
 }

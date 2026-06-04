@@ -32,6 +32,8 @@ interface MessageContextMenuProps {
   isGroup?: boolean;
   onTranslate?: (message: MessageType) => void;
   onSmartReplies?: (message: MessageType) => void;
+  onMore?: (message: MessageType) => void;
+  onInfo?: (message: MessageType) => void;
 }
 
 export default function MessageContextMenu({
@@ -48,6 +50,8 @@ export default function MessageContextMenu({
   isGroup,
   onTranslate,
   onSmartReplies,
+  onMore,
+  onInfo,
 }: MessageContextMenuProps) {
   const { colors, isDark } = useTheme();
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -130,7 +134,7 @@ export default function MessageContextMenu({
     {
       icon: 'information-circle-outline' as any,
       label: 'Info',
-      onPress: onClose,
+      onPress: () => { onInfo?.(message); onClose(); },
       iconLib: 'Ionicons',
     },
     {
@@ -218,7 +222,13 @@ export default function MessageContextMenu({
               </View>
 
               {/* More button */}
-              <TouchableOpacity style={[styles.moreBtn, { backgroundColor: menuBg }]} onPress={onClose}>
+              <TouchableOpacity
+                style={[styles.moreBtn, { backgroundColor: menuBg }]}
+                onPress={() => {
+                  onMore?.(message);
+                  onClose();
+                }}
+              >
                 <Text style={[styles.menuLabel, { color: textColor }]}>More...</Text>
                 <Ionicons name="ellipsis-horizontal-circle-outline" size={20} color={colors.textMuted} />
               </TouchableOpacity>
