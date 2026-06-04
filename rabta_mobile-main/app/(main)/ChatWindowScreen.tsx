@@ -14,6 +14,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
+  TextInput,
   Text,
   StyleSheet,
   KeyboardAvoidingView,
@@ -73,6 +74,7 @@ export default function ChatWindowScreen() {
     avatar?: string;
     isOnline?: string;
     communityId?: string;
+    openSearch?: string;
   }>();
 
   const {
@@ -127,6 +129,15 @@ export default function ChatWindowScreen() {
 
   // Edit message state
   const [editingMessage, setEditingMessage] = useState<MessageType | null>(null);
+
+  const [showMessageSearch, setShowMessageSearch] = useState(params.openSearch === 'true');
+  const [messageSearchQuery, setMessageSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (params.openSearch === 'true') {
+      setShowMessageSearch(true);
+    }
+  }, [params.openSearch]);
 
   // Load starred message IDs on chatId change
   useEffect(() => {
@@ -1330,6 +1341,9 @@ export default function ChatWindowScreen() {
                       </TouchableOpacity>
                     </>
                   )}
+                  <TouchableOpacity onPress={() => setShowMessageSearch(v => !v)}>
+                    <Ionicons name="search-outline" size={22} color={colors.purple} />
+                  </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {
                       setThreeDotsMenuVisible(true);
@@ -1347,6 +1361,37 @@ export default function ChatWindowScreen() {
           headerShadowVisible: false,
         }}
       />
+
+      {showMessageSearch && (
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: isDark ? '#1a1a1a' : '#f5f5f5',
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderBottomWidth: 1,
+          borderBottomColor: isDark ? '#333' : '#e0e0e0',
+          gap: 8,
+        }}>
+          <Ionicons name="search" size={18} color={colors.textMuted} />
+          <TextInput
+            style={{ flex: 1, color: colors.text, fontSize: 15, paddingVertical: 4 }}
+            placeholder="Search messages..."
+            placeholderTextColor={colors.textMuted}
+            value={messageSearchQuery}
+            onChangeText={setMessageSearchQuery}
+            autoFocus
+          />
+          {messageSearchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setMessageSearchQuery('')}>
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={() => { setShowMessageSearch(false); setMessageSearchQuery(''); }}>
+            <Text style={{ color: colors.purple, fontWeight: '600', fontSize: 14 }}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* ── Chat body ──────────────────────────────────────────────────────── */}
       <KeyboardAvoidingView
@@ -1396,7 +1441,13 @@ export default function ChatWindowScreen() {
             );
           })()}
           <ChatBody
-            messages={messages}
+            messages={
+              messageSearchQuery.trim()
+                ? messages.filter(m =>
+                    m.content?.toLowerCase().includes(messageSearchQuery.toLowerCase())
+                  )
+                : messages
+            }
             loading={loading}
             currentUserId={currentUserId}
             isGroup={isGroup}

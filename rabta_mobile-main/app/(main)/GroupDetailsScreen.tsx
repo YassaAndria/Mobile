@@ -11,6 +11,7 @@ import {
   Share,
   Platform,
   Linking,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -438,7 +439,7 @@ export default function GroupDetailsScreen() {
                 label="Add"
                 onPress={() => {
                   setShowAddMember((v) => {
-                    if (!v) {
+                    if (!v && unifiedContacts.length === 0) {
                       syncContacts();
                     }
                     return !v;
@@ -451,9 +452,19 @@ export default function GroupDetailsScreen() {
                 icon="search-outline"
                 label="Search"
                 onPress={() => {
-                  setShowParticipantSearch((v) => !v);
-                  if (showParticipantSearch) setParticipantSearch("");
+                  if (resolvedChatId) {
+                    router.push({
+                      pathname: '/ChatWindowScreen',
+                      params: {
+                        chatId: resolvedChatId,
+                        chatName: name,
+                        isGroup: 'true',
+                        openSearch: 'true',
+                      },
+                    } as any);
+                  }
                 }}
+                disabled={!resolvedChatId}
                 C={C}
                 styles={styles}
               />
@@ -471,65 +482,50 @@ export default function GroupDetailsScreen() {
                 {syncLoading ? (
                   <ActivityIndicator color={C.accent} style={{ marginVertical: 10 }} />
                 ) : (
-                  <ScrollView style={{ maxHeight: 300 }}>
-                    {unifiedContacts.length === 0 ? (
-                      <Text style={{ color: C.textMuted, fontSize: 13, textAlign: 'center', marginVertical: 10 }}>
-                        No contacts found on your device.
-                      </Text>
-                    ) : (
-                      unifiedContacts.map(c => {
-                        const cId = (c as any).userId ?? (c as any).backendId ?? null;
-                        const cName = c.name || 'Unknown';
-                        const cAvatar = c.avatar;
-                        const isMember = c.isRegistered && members.some(
-                          m => (m.user?._id || m.user?.id || m._id) === cId
-                        );
-
-                        return (
-                          <View key={c.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: C.divider }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.glassBg, justifyContent: 'center', alignItems: 'center', marginRight: 10, overflow: 'hidden' }}>
-                                {cAvatar ? (
-                                  <Image
-                                    source={{ uri: cAvatar.startsWith('http') ? cAvatar : `${process.env.EXPO_PUBLIC_API_BASE_URL?.replace('/api/v1', '')}${cAvatar}` }}
-                                    style={{ width: '100%', height: '100%' }}
-                                  />
-                                ) : (
-                                  <Text style={{ color: C.accent, fontWeight: 'bold' }}>{cName[0]?.toUpperCase()}</Text>
-                                )}
-                              </View>
-                              <View>
-                                <Text style={{ color: C.textPrimary, fontSize: 15, fontWeight: '500' }}>{cName}</Text>
-                                {!c.isRegistered && (
-                                  <Text style={{ color: C.textMuted, fontSize: 11 }}>Not on Rabta</Text>
-                                )}
-                              </View>
-                            </View>
-
-                            {c.isRegistered && cId ? (
-                              isMember ? (
-                                <Text style={{ color: C.textMuted, fontSize: 12, paddingHorizontal: 12 }}>Added</Text>
+                  <FlatList
+                    data={unifiedContacts.filter(c => c.isRegistered)}
+                    keyExtractor={c => c.id}
+                    style={{ maxHeight: 250 }}
+                    scrollEnabled={true}
+                    nestedScrollEnabled={true}
+                    keyboardShouldPersistTaps="handled"
+                    renderItem={({ item: c }) => {
+                      const cId = (c as any).userId ?? (c as any).backendId ?? null;
+                      if (!cId) return null;
+                      const isMember = members.some(m => (m.user?._id || m.user?.id || m._id) === cId);
+                      if (isMember) return null;
+                      const cName = c.name || 'Unknown';
+                      const cAvatar = c.avatar;
+                      return (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: C.divider }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.glassBg, justifyContent: 'center', alignItems: 'center', marginRight: 10, overflow: 'hidden' }}>
+                              {cAvatar ? (
+                                <Image
+                                  source={{ uri: cAvatar.startsWith('http') ? cAvatar : `${process.env.EXPO_PUBLIC_API_BASE_URL?.replace('/api/v1', '')}${cAvatar}` }}
+                                  style={{ width: '100%', height: '100%' }}
+                                />
                               ) : (
-                                <TouchableOpacity
-                                  style={{ backgroundColor: C.accent, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}
-                                  onPress={() => communityId && cId && handleInvite(cId)}
-                                >
-                                  <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>Add</Text>
-                                </TouchableOpacity>
-                              )
-                            ) : (
-                              <TouchableOpacity
-                                style={{ backgroundColor: C.glassHighlight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: C.glassBorder }}
-                                onPress={handleShareLink}
-                              >
-                                <Text style={{ color: C.textPrimary, fontSize: 12, fontWeight: 'bold' }}>Invite</Text>
-                              </TouchableOpacity>
-                            )}
+                                <Text style={{ color: C.accent, fontWeight: 'bold' }}>{cName[0]?.toUpperCase()}</Text>
+                              )}
+                            </View>
+                            <Text style={{ color: C.textPrimary, fontSize: 15, fontWeight: '500' }}>{cName}</Text>
                           </View>
-                        );
-                      })
-                    )}
-                  </ScrollView>
+                          <TouchableOpacity
+                            style={{ backgroundColor: C.accent, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}
+                            onPress={() => communityId && cId && handleInvite(cId)}
+                          >
+                            <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>Add</Text>
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    }}
+                    ListEmptyComponent={
+                      <Text style={{ color: C.textMuted, fontSize: 13, textAlign: 'center', marginVertical: 10 }}>
+                        No registered contacts found on Rabta.
+                      </Text>
+                    }
+                  />
                 )}
               </GlassCard>
             )}
@@ -599,13 +595,18 @@ export default function GroupDetailsScreen() {
             )}
 
             {/* Participants */}
-            <Text style={styles.sectionLabel}>
-              {members.length} participants
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, marginTop: 8 }}>
+              <Text style={[styles.sectionLabel, { marginBottom: 0, marginTop: 0 }]}>
+                {members.length} participants
+              </Text>
+              <TouchableOpacity onPress={() => { setShowParticipantSearch(v => !v); if (showParticipantSearch) setParticipantSearch(''); }} hitSlop={10}>
+                <Ionicons name={showParticipantSearch ? "close" : "search"} size={18} color={C.textMuted} />
+              </TouchableOpacity>
+            </View>
             {showParticipantSearch && (
               <TextInput
                 style={[styles.input, { marginBottom: 12 }]}
-                placeholder="Filter members..."
+                placeholder="Search members..."
                 placeholderTextColor={C.textMuted}
                 value={participantSearch}
                 onChangeText={setParticipantSearch}
