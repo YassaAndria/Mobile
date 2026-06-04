@@ -34,6 +34,7 @@ import { rehydrateAuth } from '../src/store/slices/authSlice';
 import { store } from '../src/store/store';
 import type { RootState } from '../src/store/store';
 import { ThemeProvider } from '../src/theme/ThemeContext';
+import { useInitialPermissions } from '../src/hooks/useInitialPermissions';
 
 // ZegoCloud UIKit — call invitation service (handles incoming call UI/sound)
 import ZegoUIKitPrebuiltCallService, {
@@ -59,6 +60,9 @@ function AuthHydrate({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const didRun = useRef(false);
+
+  // Request contacts permission on first app launch
+  useInitialPermissions();
 
   useEffect(() => {
     if (didRun.current) return;

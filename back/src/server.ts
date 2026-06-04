@@ -847,7 +847,7 @@ server.on('error', (error: NodeJS.ErrnoException) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT,"0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🔗 Base URL is ready at: http://localhost:${PORT}${BASE_URL}`);
   console.log(`🔌 Socket.io Central is ready!`);
