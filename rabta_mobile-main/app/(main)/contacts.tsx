@@ -225,6 +225,23 @@ export default function ContactsScreen() {
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={[styles.row, { borderBottomColor: colors.border }]}
+        activeOpacity={0.75}
+        onPress={() => router.push('/(main)/contacts-sync' as any)}
+      >
+        <View style={[styles.avatar, { backgroundColor: colors.purple10 }]}>
+          <Ionicons name="people" size={24} color={colors.purple} />
+        </View>
+        <View style={styles.centerCol}>
+          <Text style={[styles.name, { color: colors.purple }]}>Phone Contacts</Text>
+          <Text style={[styles.sub, { color: colors.textMuted }]}>
+            Find & invite contacts from your phone
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </TouchableOpacity>
+
       {/* ── Contacts count ─────────────────────────────────────────────── */}
       {!loading && !error && contacts.length > 0 && (
         <View style={[styles.countBar, { backgroundColor: colors.bg }]}>

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import * as Contacts from 'expo-contacts/legacy';
+import * as Contacts from 'expo-contacts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 
@@ -12,6 +12,7 @@ const CONTACTS_PERMISSION_REQUESTED_KEY = 'contacts_permission_requested';
 export function useInitialPermissions() {
   useEffect(() => {
     const requestContactsPermission = async () => {
+      await AsyncStorage.removeItem('contacts_permission_requested');
       try {
         // Check if we've already asked before
         const alreadyAsked = await AsyncStorage.getItem(CONTACTS_PERMISSION_REQUESTED_KEY);
