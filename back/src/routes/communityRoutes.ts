@@ -4,7 +4,7 @@ import { restrictTo } from "../middlewares/authorize.middleware";
 import {
   listCommunities,
   searchCommunities,
-  getCommunity,
+  getCommunityById,
   createCommunity,
   joinCommunity,
   manageJoinRequest,
@@ -29,7 +29,7 @@ router.get("/search", searchCommunities);
 router.post("/", createCommunity);
 router.get("/invite/:token", previewInviteGroup);
 router.post("/invite/:token/join", joinGroupViaInviteLink);
-router.get("/:id", getCommunity);
+router.get("/:id", getCommunityById);
 router.post("/:id/invite-link", generateInviteLink);
 router.post("/:id/join", joinCommunity);
 router.post("/:id/leave", leaveCommunity);

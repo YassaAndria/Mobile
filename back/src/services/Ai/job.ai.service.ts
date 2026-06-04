@@ -2,13 +2,15 @@ import { llm } from "./core.ai.service";
 import Job from "../../models/Job";
 import { User } from "../../models/user";
 import { jobMatchingPromptTemplate } from "./prompts.ai";
+import { logTokenUsage } from "../token.service";
 
 export const calculateMatchScore = async (
   jobId: string,
   freelancerId: string
 ): Promise<{ score: number; reason: string } | null> => {
   try {
-    const job = await Job.findById(jobId).select("title description requiredSkills");
+    // @ts-ignore
+    const job = await require("../../models/Job").default.findById(jobId).select("title description requiredSkills publisherId");
     const freelancer = await User.findById(freelancerId).select("fullName jobTitle bioHeadline aboutMe skills");
 
     if (!job || !freelancer) {
@@ -39,8 +41,16 @@ export const calculateMatchScore = async (
     });
 
     const llmModel = await llm;
-    const response = await llmModel.invoke(formattedPrompt);
+    const response: any = await llmModel.invoke(formattedPrompt);
+    
+    const tokens = response?.response_metadata?.tokenUsage?.totalTokens 
+      || response?.usage_metadata?.total_tokens 
+      || Math.ceil((response?.content?.length || 0) / 4);
 
+    if (tokens > 0 && job.publisherId) {
+      await logTokenUsage(job.publisherId.toString(), 'employerMatching', tokens);
+    }
+    
     const content = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
 
     // Strip markdown code blocks (e.g. ```json ... ```)

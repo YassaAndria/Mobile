@@ -32,6 +32,8 @@ export interface IMessage extends Document {
   status: "sending" | "sent" | "delivered" | "read";
   isEdited: boolean;
   isDeletedForEveryone: boolean;
+  isAiDeleted?: boolean;
+  aiDeleteReason?: string;
   hiddenFor: mongoose.Types.ObjectId[];
   duration?: number;
   isPinned: boolean;
@@ -93,6 +95,8 @@ const MessageSchema: Schema = new Schema(
     },
     isEdited: { type: Boolean, default: false },
     isDeletedForEveryone: { type: Boolean, default: false },
+    isAiDeleted: { type: Boolean, default: false },
+    aiDeleteReason: { type: String },
     hiddenFor: [{ type: Schema.Types.ObjectId, ref: "User" }],
     duration: { type: Number },
     isPinned: { type: Boolean, default: false },

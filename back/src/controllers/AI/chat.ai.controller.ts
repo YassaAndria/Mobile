@@ -110,7 +110,17 @@ export const summarizeChat = catchAsync(async (req: Request, res: Response) => {
   });
 
   const messagesText = compressedMessages.join("\n");
-  const summary = await aiAssistantService.summarizeMessages(messagesText);
+  const totalMsgCount = await Message.countDocuments({ chatId });
+  const allMessagesIncluded = totalMsgCount <= limit;
+  const hitMaxLimit = totalMsgCount > 100 && limit >= 100;
+
+  const summary = await aiAssistantService.summarizeMessages(
+    userId,
+    messagesText,
+    limit,
+    allMessagesIncluded,
+    hitMaxLimit
+  );
 
   res.status(200).json({ status: "success", data: summary });
 });
@@ -118,7 +128,8 @@ export const summarizeChat = catchAsync(async (req: Request, res: Response) => {
 export const answerQuestion = catchAsync(
   async (req: Request, res: Response) => {
     const { chatId, question } = req.body;
-    const answer = await aiAssistantService.answerWithContext(chatId, question);
+    const userId = req.user?._id?.toString();
+    const answer = await aiAssistantService.answerWithContext(userId, chatId, question);
     res.status(200).json({ status: "success", data: answer });
   },
 );
@@ -142,7 +153,8 @@ export const generateChatReplies = catchAsync(
       .reverse()
       .map((msg: any) => msg.content)
       .join("\n");
-    const result = await aiAssistantService.generateSmartReplies(messagesText);
+    const userId = req.user?._id?.toString();
+    const result = await aiAssistantService.generateSmartReplies(userId, messagesText);
 
     let parsedReplies;
     try {
@@ -158,7 +170,8 @@ export const generateChatReplies = catchAsync(
 export const translateMessage = catchAsync(
   async (req: Request, res: Response) => {
     const { text, targetLang } = req.body;
-    const result = await aiAssistantService.translateMessage(text, targetLang);
+    const userId = req.user?._id?.toString();
+    const result = await aiAssistantService.translateMessage(userId, text, targetLang);
     res.status(200).json({ status: "success", data: result });
   },
 );
@@ -177,14 +190,18 @@ export const speechToText = catchAsync(async (req: Request, res: Response) => {
   const sttProvider = process.env.STT_PROVIDER || "openai";
   let transcribedText = "";
 
+  const userId = req.user?._id?.toString();
+
   if (sttProvider === "openai") {
     transcribedText = await aiAssistantService.transcribeAudioOpenAI(
+      userId,
       req.file.buffer,
       req.file.mimetype,
       req.file.originalname,
     );
   } else {
     transcribedText = await aiAssistantService.transcribeAudioDeepgram(
+      userId,
       req.file.buffer,
       req.file.mimetype,
     );

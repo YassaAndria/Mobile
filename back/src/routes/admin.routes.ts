@@ -12,7 +12,8 @@ import {
   deleteUser,
   getPendingEmployers,
   verifyEmployer,
-  rejectEmployer
+  rejectEmployer,
+  revertAiAction
 } from '../controllers/admin.controller';
 import { protect } from '../middlewares/auth.middleware';
 import { isAdmin } from '../middlewares/admin.middleware';
@@ -47,5 +48,6 @@ router.delete('/groups/:id', deleteGroup);
 
 // Activity Logs
 router.get('/logs', getAdminLogs);
+router.put('/logs/:id/revert', revertAiAction);
 
 export default router;

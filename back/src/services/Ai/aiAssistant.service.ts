@@ -10,6 +10,7 @@ import {
 // استدعاء ملف الـ Prompts والمحرك الأساسي
 import { AI_ASSISTANT_PROMPTS } from "../Ai/prompts.ai";
 import { llm, OPENAI_STT_MODEL, DEEPGRAM_MODEL } from "./core.ai.service";
+import { logTokenUsage } from "../token.service";
 
 dotenv.config(); // زي ما يوسف عامل بالظبط
 
@@ -33,7 +34,7 @@ export const getAssistantGraph = async () => {
 // 🚀 الدوال الأساسية (Endpoints Logic)
 // ==========================================
 
-export const answerWithContext = async (threadId: string, question: string) => {
+export const answerWithContext = async (userId: string | undefined, threadId: string, question: string) => {
   const graph = await getAssistantGraph();
   const config = { configurable: { thread_id: threadId } };
 
@@ -42,39 +43,69 @@ export const answerWithContext = async (threadId: string, question: string) => {
     config,
   );
 
-  return state.messages[state.messages.length - 1].content;
+  const lastMessage: any = state.messages[state.messages.length - 1];
+  const tokens = lastMessage?.response_metadata?.tokenUsage?.totalTokens 
+    || lastMessage?.usage_metadata?.total_tokens 
+    || Math.ceil((lastMessage?.content?.length || 0) / 4);
+    
+  if (tokens > 0 && userId) {
+    await logTokenUsage(userId, 'appChatbot', tokens);
+  }
+
+  return lastMessage.content;
 };
 
-export const summarizeMessages = async (messagesText: string) => {
+export const summarizeMessages = async (userId: string | undefined, messagesText: string, limit?: number | string, allMessagesIncluded?: boolean, hitMaxLimit?: boolean) => {
   const systemPrompt = new SystemMessage(AI_ASSISTANT_PROMPTS.SUMMARIZE_SYSTEM);
   const userPrompt = new HumanMessage(
-    AI_ASSISTANT_PROMPTS.SUMMARIZE_USER(messagesText),
+    AI_ASSISTANT_PROMPTS.SUMMARIZE_USER(messagesText, limit, allMessagesIncluded, hitMaxLimit),
   );
 
   const resolvedLlm = await llm;
-  const response = await resolvedLlm.invoke([systemPrompt, userPrompt]);
+  const response: any = await resolvedLlm.invoke([systemPrompt, userPrompt]);
+  
+  const tokens = response?.response_metadata?.tokenUsage?.totalTokens 
+    || response?.usage_metadata?.total_tokens 
+    || Math.ceil((response?.content?.length || 0) / 4);
+
+  if (tokens > 0 && userId) await logTokenUsage(userId, 'chatSummarization', tokens);
+
   return response.content;
 };
 
-export const generateSmartReplies = async (messagesText: string) => {
+export const generateSmartReplies = async (userId: string | undefined, messagesText: string) => {
   const systemPrompt = new SystemMessage(
     AI_ASSISTANT_PROMPTS.GENERATE_REPLY_SYSTEM,
   );
   const userPrompt = new HumanMessage(`Conversation Context:\n${messagesText}`);
 
   const resolvedLlm = await llm;
-  const response = await resolvedLlm.invoke([systemPrompt, userPrompt]);
+  const response: any = await resolvedLlm.invoke([systemPrompt, userPrompt]);
+
+  const tokens = response?.response_metadata?.tokenUsage?.totalTokens 
+    || response?.usage_metadata?.total_tokens 
+    || Math.ceil((response?.content?.length || 0) / 4);
+
+  if (tokens > 0 && userId) await logTokenUsage(userId, 'suggestedReplies', tokens);
+
   return response.content;
 };
 
-export const translateMessage = async (text: string, targetLang: string) => {
+export const translateMessage = async (userId: string | undefined, text: string, targetLang: string) => {
   const systemPrompt = new SystemMessage(
     AI_ASSISTANT_PROMPTS.TRANSLATE_SYSTEM(targetLang),
   );
   const userPrompt = new HumanMessage(`Text to translate:\n${text}`);
 
   const resolvedLlm = await llm;
-  const response = await resolvedLlm.invoke([systemPrompt, userPrompt]);
+  const response: any = await resolvedLlm.invoke([systemPrompt, userPrompt]);
+
+  const tokens = response?.response_metadata?.tokenUsage?.totalTokens 
+    || response?.usage_metadata?.total_tokens 
+    || Math.ceil((response?.content?.length || 0) / 4);
+
+  if (tokens > 0 && userId) await logTokenUsage(userId, 'translation', tokens);
+
   return response.content;
 };
 
@@ -82,6 +113,7 @@ export const translateMessage = async (text: string, targetLang: string) => {
 // 🚀 Speech-to-Text (OpenAI New Model)
 // ==========================================
 export const transcribeAudioOpenAI = async (
+  userId: string | undefined,
   audioBuffer: Buffer,
   mimetype: string,
   originalName: string,
@@ -112,7 +144,12 @@ export const transcribeAudioOpenAI = async (
     }
 
     const data = await response.json();
-    return data.text;
+    const transcriptText = data.text || "";
+    
+    const tokens = Math.ceil((transcriptText.length || 0) / 4);
+    if (tokens > 0 && userId) await logTokenUsage(userId, 'voiceToText', tokens);
+
+    return transcriptText;
   } catch (error) {
     console.error("❌ [OpenAI STT] Unexpected error:", error);
     throw new Error(
@@ -125,6 +162,7 @@ export const transcribeAudioOpenAI = async (
 // 🚀 Speech-to-Text (Deepgram AI)
 // ==========================================
 export const transcribeAudioDeepgram = async (
+  userId: string | undefined,
   audioBuffer: Buffer,
   mimetype: string,
 ) => {
@@ -147,7 +185,12 @@ export const transcribeAudioDeepgram = async (
     }
 
     const data = await response.json();
-    return data.results?.channels[0]?.alternatives[0]?.transcript || "";
+    const transcriptText = data.results?.channels[0]?.alternatives[0]?.transcript || "";
+    
+    const tokens = Math.ceil((transcriptText.length || 0) / 4);
+    if (tokens > 0 && userId) await logTokenUsage(userId, 'voiceToText', tokens);
+
+    return transcriptText;
   } catch (error) {
     console.error("❌ [Deepgram API] Unexpected error:", error);
     throw new Error(

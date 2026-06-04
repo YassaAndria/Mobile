@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 
-const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL || "http://192.168.1.3:5000/api/v1"; // Fallback if undefined
+const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL || "http://192.168.1.5:5000/api/v1"; // Fallback if undefined
 
 if (!process.env.EXPO_PUBLIC_API_BASE_URL) {
   console.error("ERROR: EXPO_PUBLIC_API_BASE_URL is not defined in the environment. Using fallback.");

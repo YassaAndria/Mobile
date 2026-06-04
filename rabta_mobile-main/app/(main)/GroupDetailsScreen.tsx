@@ -477,7 +477,7 @@ export default function GroupDetailsScreen() {
                 ) : (
                   <ScrollView style={{ maxHeight: 300 }}>
                     {unifiedContacts.filter(c => c.isRegistered).map(c => {
-                      const cId = c.userId;
+                      const cId = c.backendId;
                       if (!cId) return null;
                       
                       // Skip if already in the group
@@ -488,9 +488,9 @@ export default function GroupDetailsScreen() {
                       const cAvatar = c.avatar;
 
                       return (
-                        <View key={c.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: C.border }}>
+                        <View key={c.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: C.glassBorder }}>
                           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.surface, justifyContent: 'center', alignItems: 'center', marginRight: 10, overflow: 'hidden' }}>
+                            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.inputBg, justifyContent: 'center', alignItems: 'center', marginRight: 10, overflow: 'hidden' }}>
                               {cAvatar ? (
                                 <Image 
                                   source={{ uri: cAvatar.startsWith('http') ? cAvatar : `${process.env.EXPO_PUBLIC_API_BASE_URL?.replace('/api/v1', '')}${cAvatar}` }} 
@@ -500,11 +500,11 @@ export default function GroupDetailsScreen() {
                                 <Text style={{ color: C.accent, fontWeight: 'bold' }}>{cName[0]?.toUpperCase()}</Text>
                               )}
                             </View>
-                            <Text style={{ color: C.text, fontSize: 15, fontWeight: '500' }}>{cName}</Text>
+                            <Text style={{ color: C.textPrimary, fontSize: 15, fontWeight: '500' }}>{cName}</Text>
                           </View>
                           <TouchableOpacity
                             style={{ backgroundColor: C.accent, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}
-                            onPress={() => inviteCommunityMember(cId)}
+                            onPress={() => inviteCommunityMember(communityId, cId)}
                           >
                             <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>Add</Text>
                           </TouchableOpacity>

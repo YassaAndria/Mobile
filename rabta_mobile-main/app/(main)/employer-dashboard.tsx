@@ -98,12 +98,12 @@ export default function EmployerDashboardScreen() {
       )}
 
       {currentStatus === 'rejected' && (
-        <View style={[styles.alertBanner, { backgroundColor: `${colors.error}15`, borderColor: `${colors.error}40`, flexDirection: 'column', alignItems: 'stretch' }]}>
+        <View style={[styles.alertBanner, { backgroundColor: colors.errorBg, borderColor: colors.errorBorder, flexDirection: 'column', alignItems: 'stretch' }]}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-            <MaterialIcons name="error-outline" size={24} color={colors.error} style={{ marginTop: 2 }} />
+            <MaterialIcons name="error-outline" size={24} color={colors.errorText} style={{ marginTop: 2 }} />
             <View style={{ flex: 1 }}>
-              <Text style={[typography.body, { color: colors.error, fontWeight: 'bold' }]}>Account Verification Rejected</Text>
-              <Text style={[typography.caption, { color: colors.error, marginTop: 4 }]}>Reason: {user?.rejectionReason || "Please try again."}</Text>
+              <Text style={[typography.body, { color: colors.errorText, fontWeight: 'bold' }]}>Account Verification Rejected</Text>
+              <Text style={[typography.caption, { color: colors.errorText, marginTop: 4 }]}>Reason: {user?.rejectionReason || "Please try again."}</Text>
             </View>
           </View>
           <Button

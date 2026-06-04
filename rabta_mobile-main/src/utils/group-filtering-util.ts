@@ -1,4 +1,4 @@
-import { RegisteredContact } from '../hooks/useSyncContacts';
+import { UnifiedContact } from '../hooks/useSyncContacts';
 
 /**
  * Filters a raw list of users (e.g., from a general search or database query)
@@ -15,12 +15,16 @@ import { RegisteredContact } from '../hooks/useSyncContacts';
  */
 export function filterUsersBySyncedContacts(
   allUsers: any[],
-  syncedContacts: RegisteredContact[]
+  syncedContacts: UnifiedContact[]
 ): any[] {
   if (!allUsers || !syncedContacts) return [];
 
   // Create a Set of synced contact IDs for O(1) lookup
-  const syncedIds = new Set(syncedContacts.map(contact => contact._id));
+  const syncedIds = new Set(
+    syncedContacts
+      .filter(contact => contact.isRegistered && contact.backendId)
+      .map(contact => contact.backendId)
+  );
 
   // Filter the allUsers list
   return allUsers.filter(user => syncedIds.has(user._id));

@@ -5,6 +5,7 @@ import Job from '../models/Job';
 import Chat from '../models/chat';
 import Community from '../models/Community';
 import AdminLog from '../models/adminLog.model';
+import BannedContact from '../models/BannedContact';
 import { AppError } from '../utils/AppError';
 
 // =======================
@@ -31,7 +32,18 @@ export const getAdminStats = catchAsync(async (req: Request, res: Response, next
 // Users Moderation
 // =======================
 export const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const users = await User.find().select('-password');
+  const { sortBy } = req.query;
+  
+  let sortOptions: any = {};
+  if (sortBy === 'tokens_asc') {
+    sortOptions.totalTokensUsed = 1;
+  } else if (sortBy === 'tokens_desc') {
+    sortOptions.totalTokensUsed = -1;
+  } else {
+    sortOptions.createdAt = -1; // default sort
+  }
+
+  const users = await User.find().select('-password').sort(sortOptions);
   res.status(200).json({
     status: 'success',
     results: users.length,
@@ -289,5 +301,49 @@ export const getAdminLogs = catchAsync(async (req: Request, res: Response, next:
     status: 'success',
     results: logs.length,
     data: { logs }
+  });
+});
+
+export const revertAiAction = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const logId = req.params.id;
+  const log = await AdminLog.findById(logId);
+  if (!log) return next(new AppError('Log not found', 404));
+  if (log.category !== 'AI' || log.isReverted) return next(new AppError('This log cannot be reverted', 400));
+
+  const targetUserId = log.targetUserId;
+  const user = await User.findById(targetUserId);
+
+  if (user) {
+    if (user.aiStrikes && user.aiStrikes > 0) {
+      user.aiStrikes -= 1;
+    }
+    
+    user.isBanned = false;
+    user.banExpiresAt = undefined;
+    
+    await user.save({ validateBeforeSave: false });
+
+    if (log.actionType === "PERMANENT_BAN" && (user.email || user.phoneNumber)) {
+      await BannedContact.deleteMany({
+        $or: [{ email: user.email }, { phoneNumber: user.phoneNumber }]
+      });
+    }
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(user._id.toString()).emit("banStatusUpdated", {
+        isBanned: false,
+        banExpiresAt: null,
+        message: "Your ban has been lifted by an admin."
+      });
+    }
+  }
+
+  log.isReverted = true;
+  await log.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: 'AI decision reverted successfully. User ban lifted and strike removed.'
   });
 });
