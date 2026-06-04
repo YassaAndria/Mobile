@@ -15,7 +15,6 @@ import './config/passport';
 import fs from 'fs';
 import path from 'path';
 
-// التأكد من وجود مجلد الرفع عند بدء التشغيل
 const uploadDir = path.join(process.cwd(), 'uploads', 'avatars');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -38,7 +37,6 @@ const PORT = Number(process.env.PORT) || 5000;
 const BASE_URL = '/api/v1';
 
 // ==========================================
-// 🛡️ الميدلويرز الأساسية (CORS & JSON) - مكانها الصح هنا
 // ==========================================
 const frontendOriginEnv = process.env.FRONTEND_URL?.trim();
 const allowedOrigins = [
