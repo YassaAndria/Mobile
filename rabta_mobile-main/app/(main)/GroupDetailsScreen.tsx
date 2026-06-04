@@ -459,7 +459,7 @@ export default function GroupDetailsScreen() {
               />
             </View>
 
-            {showAddMember && isAdmin && (
+            {showAddMember && (
               <GlassCard style={{ marginBottom: 16 }} styles={styles}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <Text style={[styles.sectionLabel, { marginTop: 0, marginBottom: 0 }]}>Add from Contacts</Text>
@@ -470,47 +470,65 @@ export default function GroupDetailsScreen() {
 
                 {syncLoading ? (
                   <ActivityIndicator color={C.accent} style={{ marginVertical: 10 }} />
-                ) : unifiedContacts.filter(c => c.isRegistered).length === 0 ? (
-                  <Text style={{ color: C.textMuted, fontSize: 13, textAlign: 'center', marginVertical: 10 }}>
-                    No registered contacts found on Rabta.
-                  </Text>
                 ) : (
                   <ScrollView style={{ maxHeight: 300 }}>
-                    {unifiedContacts.filter(c => c.isRegistered).map(c => {
-                      const cId = (c as any).userId ?? (c as any).backendId ?? null;
-                      if (!cId) return null;
-                      
-                      // Skip if already in the group
-                      const isMember = members.some(m => (m.user?._id || m.user?.id || m._id) === cId);
-                      if (isMember) return null;
+                    {unifiedContacts.length === 0 ? (
+                      <Text style={{ color: C.textMuted, fontSize: 13, textAlign: 'center', marginVertical: 10 }}>
+                        No contacts found on your device.
+                      </Text>
+                    ) : (
+                      unifiedContacts.map(c => {
+                        const cId = (c as any).userId ?? (c as any).backendId ?? null;
+                        const cName = c.name || 'Unknown';
+                        const cAvatar = c.avatar;
+                        const isMember = c.isRegistered && members.some(
+                          m => (m.user?._id || m.user?.id || m._id) === cId
+                        );
 
-                      const cName = c.name || 'Unknown';
-                      const cAvatar = c.avatar;
-
-                      return (
-                        <View key={c.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: C.divider }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.glassBg, justifyContent: 'center', alignItems: 'center', marginRight: 10, overflow: 'hidden' }}>
-                              {cAvatar ? (
-                                <Image 
-                                  source={{ uri: cAvatar.startsWith('http') ? cAvatar : `${process.env.EXPO_PUBLIC_API_BASE_URL?.replace('/api/v1', '')}${cAvatar}` }} 
-                                  style={{ width: '100%', height: '100%' }} 
-                                />
-                              ) : (
-                                <Text style={{ color: C.accent, fontWeight: 'bold' }}>{cName[0]?.toUpperCase()}</Text>
-                              )}
+                        return (
+                          <View key={c.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: C.divider }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.glassBg, justifyContent: 'center', alignItems: 'center', marginRight: 10, overflow: 'hidden' }}>
+                                {cAvatar ? (
+                                  <Image
+                                    source={{ uri: cAvatar.startsWith('http') ? cAvatar : `${process.env.EXPO_PUBLIC_API_BASE_URL?.replace('/api/v1', '')}${cAvatar}` }}
+                                    style={{ width: '100%', height: '100%' }}
+                                  />
+                                ) : (
+                                  <Text style={{ color: C.accent, fontWeight: 'bold' }}>{cName[0]?.toUpperCase()}</Text>
+                                )}
+                              </View>
+                              <View>
+                                <Text style={{ color: C.textPrimary, fontSize: 15, fontWeight: '500' }}>{cName}</Text>
+                                {!c.isRegistered && (
+                                  <Text style={{ color: C.textMuted, fontSize: 11 }}>Not on Rabta</Text>
+                                )}
+                              </View>
                             </View>
-                            <Text style={{ color: C.textPrimary, fontSize: 15, fontWeight: '500' }}>{cName}</Text>
+
+                            {c.isRegistered && cId ? (
+                              isMember ? (
+                                <Text style={{ color: C.textMuted, fontSize: 12, paddingHorizontal: 12 }}>Added</Text>
+                              ) : (
+                                <TouchableOpacity
+                                  style={{ backgroundColor: C.accent, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}
+                                  onPress={() => communityId && cId && handleInvite(cId)}
+                                >
+                                  <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>Add</Text>
+                                </TouchableOpacity>
+                              )
+                            ) : (
+                              <TouchableOpacity
+                                style={{ backgroundColor: C.glassHighlight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: C.glassBorder }}
+                                onPress={handleShareLink}
+                              >
+                                <Text style={{ color: C.textPrimary, fontSize: 12, fontWeight: 'bold' }}>Invite</Text>
+                              </TouchableOpacity>
+                            )}
                           </View>
-                          <TouchableOpacity
-                            style={{ backgroundColor: C.accent, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}
-                            onPress={() => communityId && cId && handleInvite(cId)}
-                          >
-                            <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>Add</Text>
-                          </TouchableOpacity>
-                        </View>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </ScrollView>
                 )}
               </GlassCard>
