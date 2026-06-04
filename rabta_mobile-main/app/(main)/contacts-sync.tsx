@@ -11,6 +11,7 @@ import { typography as Typography } from '../../src/theme/typography';
 import { useSyncContacts, UnifiedContact } from '../../src/hooks/useSyncContacts';
 import axiosInstance from '../../src/api/axiosInstance';
 import { MaterialIcons } from '@expo/vector-icons';
+import { generateInviteMessage, inviteShareConfig } from '../../src/utils/inviteUtils';
 
 export default function ContactsSyncScreen() {
   const router = useRouter();
@@ -38,16 +39,17 @@ export default function ContactsSyncScreen() {
     }
   };
 
-  const inviteContact = async (phoneNumber: string) => {
+  const inviteContact = async (phoneNumber: string, contactName?: string) => {
     try {
-      const dummyLink = "https://rabta.app/download-placeholder";
-      const message = `Hey! Join me on Rabta using this link: ${dummyLink}`;
+      const message = generateInviteMessage(contactName);
       await Share.share({
         message,
-        title: 'Join Rabta',
+        ...inviteShareConfig,
       });
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      if (error.code !== 'E_SHARE_CANCELLED') {
+        Alert.alert('Error', error.message || 'Failed to share invite');
+      }
     }
   };
 
@@ -80,41 +82,50 @@ export default function ContactsSyncScreen() {
           <Text style={{ color: colors.textMuted, marginTop: 12 }}>Syncing your contacts...</Text>
         </View>
       ) : (
-        <FlatList
-          data={unifiedContacts}
-          keyExtractor={(item, index) => `${item.id}-${index}`}
-          renderItem={({ item }) => (
-            <View style={s.row}>
-              {item.avatar
-                ? <Image source={{ uri: item.avatar }} style={s.avatar} />
-                : <View style={s.avatar}>
-                    {item.isRegistered 
-                      ? <Text style={{ color: colors.purple, fontWeight: '700', fontSize: 16 }}>{item.name[0]?.toUpperCase()}</Text>
-                      : <MaterialIcons name="person" size={24} color={colors.purple} />
-                    }
-                  </View>
-              }
-              <View style={{ flex: 1 }}>
-                <Text style={s.name}>{item.name}</Text>
-                <Text style={s.phone}>{item.phoneNumber}</Text>
-              </View>
-              {item.isRegistered ? (
-                <TouchableOpacity style={s.btn} onPress={() => startChat(item.backendId!)} disabled={startingChat === item.backendId}>
-                  {startingChat === item.backendId ? <ActivityIndicator color={colors.purple} size="small" /> : <Text style={s.btnText}>Message</Text>}
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity style={s.inviteBtn} onPress={() => inviteContact(item.phoneNumber)}>
-                  <Text style={s.inviteBtnText}>Invite</Text>
-                </TouchableOpacity>
-              )}
+        <>
+          {unifiedContacts.length > 0 && (
+            <View style={{ padding: Spacing.lg, backgroundColor: colors.purple10, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+              <Text style={{ fontSize: 12, color: colors.purple, fontWeight: '600' }}>
+                📞 {unifiedContacts.filter(c => c.isRegistered).length} on Rabta • {unifiedContacts.filter(c => !c.isRegistered).length} not yet registered
+              </Text>
             </View>
           )}
-          ListEmptyComponent={
-            <Text style={{ textAlign: 'center', marginTop: 32, color: colors.textMuted }}>
-              No contacts found on your device.
-            </Text>
-          }
-        />
+          <FlatList
+            data={unifiedContacts}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
+            renderItem={({ item }) => (
+              <View style={s.row}>
+                {item.avatar
+                  ? <Image source={{ uri: item.avatar }} style={s.avatar} />
+                  : <View style={s.avatar}>
+                      {item.isRegistered 
+                        ? <Text style={{ color: colors.purple, fontWeight: '700', fontSize: 16 }}>{item.name[0]?.toUpperCase()}</Text>
+                        : <MaterialIcons name="person" size={24} color={colors.purple} />
+                      }
+                    </View>
+                }
+                <View style={{ flex: 1 }}>
+                  <Text style={s.name}>{item.name}</Text>
+                  <Text style={s.phone}>{item.phoneNumber}</Text>
+                </View>
+                {item.isRegistered ? (
+                  <TouchableOpacity style={s.btn} onPress={() => startChat(item.backendId!)} disabled={startingChat === item.backendId}>
+                    {startingChat === item.backendId ? <ActivityIndicator color={colors.purple} size="small" /> : <Text style={s.btnText}>Message</Text>}
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity style={s.inviteBtn} onPress={() => inviteContact(item.phoneNumber, item.name)}>
+                    <Text style={s.inviteBtnText}>Invite</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+            ListEmptyComponent={
+              <Text style={{ textAlign: 'center', marginTop: 32, color: colors.textMuted }}>
+                No contacts found on your device.
+              </Text>
+            }
+          />
+        </>
       )}
     </View>
   );
