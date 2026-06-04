@@ -95,12 +95,26 @@ export default function LoginScreen() {
   }, [response]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-    if (!authUser?.jobTitle && !authUser?.bioHeadline) {
-      router.replace("/setup-profile");
-    } else {
-      router.replace("/chats");
-    }
+    if (!isAuthenticated || !authUser) return;
+
+    const checkRedirect = async () => {
+      const userId = authUser.id || authUser._id;
+      const hasLoggedInKey = `has_logged_in_${userId}`;
+      const hasLoggedInBefore = await AsyncStorage.getItem(hasLoggedInKey);
+
+      if (hasLoggedInBefore === "true") {
+        router.replace("/chats");
+      } else {
+        await AsyncStorage.setItem(hasLoggedInKey, "true");
+        if (!authUser.jobTitle && !authUser.bioHeadline) {
+          router.replace("/setup-profile");
+        } else {
+          router.replace("/chats");
+        }
+      }
+    };
+
+    checkRedirect();
   }, [isAuthenticated, authUser, router]);
 
   const {
@@ -135,12 +149,21 @@ export default function LoginScreen() {
       dispatch(setCredentials({ user: data.data.user, token: data.data.token }));
       Toast.show({ type: "success", text1: "Successfully logged in with Google!" });
 
-      if (data.data.user.role === "employer" && data.data.profileComplete) {
-        router.replace("/employer-dashboard");
-      } else if (!data.data.profileComplete) {
-        router.replace("/setup-profile");
+      const userId = data.data.user.id || data.data.user._id;
+      const hasLoggedInKey = `has_logged_in_${userId}`;
+      const hasLoggedInBefore = await AsyncStorage.getItem(hasLoggedInKey);
+
+      if (hasLoggedInBefore === "true") {
+        router.replace("/chats");
       } else {
-        router.replace("/freelancer-dashboard");
+        await AsyncStorage.setItem(hasLoggedInKey, "true");
+        if (data.data.user.role === "employer" && data.data.profileComplete) {
+          router.replace("/employer-dashboard");
+        } else if (!data.data.profileComplete) {
+          router.replace("/setup-profile");
+        } else {
+          router.replace("/freelancer-dashboard");
+        }
       }
     } catch (error: any) {
       const msg = error?.message || "Google login failed. Please try again.";
@@ -191,12 +214,21 @@ export default function LoginScreen() {
       const responseData = await loginUser({ email: data.email, password: data.password });
       dispatch(setCredentials({ user: responseData.user, token: responseData.token }));
       Toast.show({ type: "success", text1: "Successfully logged in!" });
-      if (responseData.user.role === "employer" && responseData.profileComplete) {
-        router.replace("/employer-dashboard");
-      } else if (!responseData.profileComplete) {
-        router.replace("/setup-profile");
+      const userId = responseData.user.id || responseData.user._id;
+      const hasLoggedInKey = `has_logged_in_${userId}`;
+      const hasLoggedInBefore = await AsyncStorage.getItem(hasLoggedInKey);
+
+      if (hasLoggedInBefore === "true") {
+        router.replace("/chats");
       } else {
-        router.replace("/freelancer-dashboard");
+        await AsyncStorage.setItem(hasLoggedInKey, "true");
+        if (responseData.user.role === "employer" && responseData.profileComplete) {
+          router.replace("/employer-dashboard");
+        } else if (!responseData.profileComplete) {
+          router.replace("/setup-profile");
+        } else {
+          router.replace("/freelancer-dashboard");
+        }
       }
     } catch (error: unknown) {
       const errorMessage = getApiErrorMessage(error, "Login failed. Please check your credentials.");

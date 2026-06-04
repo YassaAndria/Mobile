@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -68,6 +69,10 @@ export default function SignupScreen() {
         role: data.role,
       });
       dispatch(setCredentials({ user: responseData.user, token: responseData.token }));
+      const userId = responseData.user.id || responseData.user._id;
+      if (userId) {
+        await AsyncStorage.setItem(`has_logged_in_${userId}`, "true");
+      }
       Toast.show({ type: "success", text1: "Account created! Let's set up your profile." });
       router.replace("/setup-profile");
     } catch (error: unknown) {

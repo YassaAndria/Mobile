@@ -38,12 +38,21 @@ export default function LoginSuccessScreen() {
         const user = response.data.data.user;
         dispatch(setCredentials({ user, token }));
         Toast.show({ type: "success", text1: "Successfully logged in with Google!" });
-        if (user.role === "employer" && profileComplete) {
-          router.replace("/employer-dashboard");
-        } else if (!profileComplete) {
-          router.replace("/setup-profile");
+        const userId = user.id || user._id;
+        const hasLoggedInKey = `has_logged_in_${userId}`;
+        const hasLoggedInBefore = await AsyncStorage.getItem(hasLoggedInKey);
+
+        if (hasLoggedInBefore === "true") {
+          router.replace("/chats");
         } else {
-          router.replace("/freelancer-dashboard");
+          await AsyncStorage.setItem(hasLoggedInKey, "true");
+          if (user.role === "employer" && profileComplete) {
+            router.replace("/employer-dashboard");
+          } else if (!profileComplete) {
+            router.replace("/setup-profile");
+          } else {
+            router.replace("/freelancer-dashboard");
+          }
         }
       } catch {
         await AsyncStorage.removeItem("token");
