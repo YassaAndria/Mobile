@@ -12,8 +12,10 @@ import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import axiosInstance from '../../src/api/axiosInstance';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../../src/theme/ThemeContext';
 
 export default function AdminLogsScreen() {
+  const { colors, isDark } = useTheme();
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -55,7 +57,7 @@ export default function AdminLogsScreen() {
   };
 
   const getActionConfig = (action: string) => {
-    if (!action) return { icon: 'clipboard-list', color: '#7F77DD', bgColor: 'rgba(127, 119, 221, 0.1)' };
+    if (!action) return { icon: 'clipboard-list', color: colors.purple, bgColor: colors.purple10 };
     const act = action.toLowerCase();
     
     if (act.includes('delete')) return { icon: 'trash', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.1)' };
@@ -65,7 +67,7 @@ export default function AdminLogsScreen() {
     if (act.includes('create')) return { icon: 'plus', color: '#378ADD', bgColor: 'rgba(55, 138, 221, 0.1)' };
     if (act.includes('update')) return { icon: 'pen', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.1)' };
     
-    return { icon: 'clipboard-list', color: '#7F77DD', bgColor: 'rgba(127, 119, 221, 0.1)' };
+    return { icon: 'clipboard-list', color: colors.purple, bgColor: colors.purple10 };
   };
 
   const renderItem = ({ item }: { item: any }) => {
@@ -76,15 +78,15 @@ export default function AdminLogsScreen() {
           <FontAwesome5 name={config.icon} size={16} color={config.color} />
         </View>
         <View style={styles.logContent}>
-          <Text style={styles.logText}>
-            <Text style={styles.adminName}>{item.adminId?.fullName || 'Admin'}</Text>
+          <Text style={[styles.logText, { color: colors.text }]}>
+            <Text style={[styles.adminName, { color: colors.purple }]}>{item.adminId?.fullName || 'Admin'}</Text>
             {' '}
-            <Text style={styles.actionText}>{item.action}</Text>
+            <Text style={[styles.actionText, { color: colors.textMuted }]}>{item.action}</Text>
             {' '}
-            <Text style={styles.targetText}>{item.targetEntityName || ''}</Text>
+            <Text style={[styles.targetText, { color: colors.text }]}>{item.targetEntityName || ''}</Text>
           </Text>
           {item.createdAt && (
-            <Text style={styles.timeText}>{getRelativeTime(item.createdAt)}</Text>
+            <Text style={[styles.timeText, { color: colors.textMuted }]}>{getRelativeTime(item.createdAt)}</Text>
           )}
         </View>
       </View>
@@ -93,30 +95,30 @@ export default function AdminLogsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7F77DD" />
+      <SafeAreaView style={[styles.centerContainer, { backgroundColor: colors.bg }]}>
+        <ActivityIndicator size="large" color={colors.purple} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <View style={styles.screenHeader}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        <Pressable onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Activity Logs</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Activity Logs</Text>
       </View>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <FlatList
           data={logs}
           keyExtractor={(item) => item._id || Math.random().toString()}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.border }]} />}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>No activity logs found.</Text>
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>No activity logs found.</Text>
           }
         />
       </View>
@@ -127,11 +129,9 @@ export default function AdminLogsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D0D12',
   },
   centerContainer: {
     flex: 1,
-    backgroundColor: '#0D0D12',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -145,26 +145,21 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#141419',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     marginRight: 12,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
   },
   card: {
     flex: 1,
-    backgroundColor: '#141419',
     marginHorizontal: 16,
     marginBottom: 24,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     overflow: 'hidden',
   },
   listContent: {
@@ -172,7 +167,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    color: 'rgba(255,255,255,0.5)',
     marginTop: 24,
     fontSize: 16,
   },
@@ -195,27 +189,20 @@ const styles = StyleSheet.create({
   },
   logText: {
     fontSize: 15,
-    color: 'rgba(255,255,255,0.8)',
     lineHeight: 22,
   },
   adminName: {
-    color: '#7F77DD',
     fontWeight: 'bold',
   },
-  actionText: {
-    color: 'rgba(255,255,255,0.6)',
-  },
+  actionText: {},
   targetText: {
-    color: '#FFFFFF',
     fontWeight: '600',
   },
   timeText: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.4)',
     marginTop: 4,
   },
   separator: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.05)',
   }
 });

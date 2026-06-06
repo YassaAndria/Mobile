@@ -96,6 +96,7 @@ export default function ChatWindowScreen() {
   const [loading, setLoading] = useState(true);
   const [messageText, setMessageText] = useState('');
   const [isOnline, setIsOnline] = useState(paramIsOnline === 'true');
+  const [partnerLastSeen, setPartnerLastSeen] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [chatStatus, setChatStatus] = useState<'accepted' | 'pending' | null>(null);
   const [chatInitiatedBy, setChatInitiatedBy] = useState<string | null>(null);
@@ -183,6 +184,47 @@ export default function ChatWindowScreen() {
 
   // ── NEW: tracks whether we are fetching the Zego token ───────────────────
   const [callLoading, setCallLoading] = useState(false);
+  const [translatedMessages, setTranslatedMessages] = useState<Record<string, { translatedText: string; originalText: string }>>({});
+  const [translatingMessageId, setTranslatingMessageId] = useState<string | null>(null);
+
+  const handleTranslateMessage = useCallback(async (msg: MessageType) => {
+    if (!msg.content) return;
+    setTranslatingMessageId(msg.id);
+    try {
+      const isArabic = /[\u0600-\u06FF]/.test(msg.content);
+      const targetLang = isArabic ? 'en' : 'ar';
+      const res = await axiosInstance.post(
+        '/api/ai/chat/translate',
+        { text: msg.content, targetLang },
+        { timeout: 60000 },
+      );
+      if (res.data?.status === 'success' && res.data?.data) {
+        setTranslatedMessages((prev) => ({
+          ...prev,
+          [msg.id]: {
+            translatedText: res.data.data,
+            originalText: msg.content || '',
+          },
+        }));
+      } else {
+        Alert.alert('Translation Failed', 'Failed to translate message.');
+      }
+    } catch (err: any) {
+      console.error('[ChatWindow] Error translating message:', err);
+      Alert.alert('Translation Error', err.response?.data?.message || 'Failed to translate message.');
+    } finally {
+      setTranslatingMessageId(null);
+    }
+  }, []);
+
+  const handleClearTranslation = useCallback((messageId: string) => {
+    setTranslatedMessages((prev) => {
+      const copy = { ...prev };
+      delete copy[messageId];
+      return copy;
+    });
+  }, []);
+
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const isHoldingMicRef = useRef(false);
@@ -280,6 +322,56 @@ export default function ChatWindowScreen() {
         });
     }
   }, [contactDetailsVisible, resolvedPartnerId]);
+
+  const formatLastSeen = (dateString: string | Date) => {
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+
+      if (diffMins < 1) return 'just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return '';
+    }
+  };
+
+  useEffect(() => {
+    if (!socket || !resolvedPartnerId) return;
+
+    const handleOnlineUsers = (onlineUserIds: string[]) => {
+      console.log('🟢 [ChatWindow] Received online-users:', onlineUserIds);
+      const isPartnerOnline = onlineUserIds.includes(resolvedPartnerId);
+      setIsOnline(isPartnerOnline);
+    };
+
+    socket.on('online-users', handleOnlineUsers);
+    
+    axiosInstance.get(`/users/${resolvedPartnerId}`)
+      .then((res) => {
+        if (res.data?.status === 'success' && res.data?.data?.user) {
+          const u = res.data.data.user;
+          const showOnline = u.showOnlineStatus !== false && (u.settings?.privacy?.showOnline !== false);
+          
+          if (showOnline) {
+            setPartnerLastSeen(u.lastSeen || null);
+            setIsOnline(u.status === 'online');
+          } else {
+            setPartnerLastSeen(null);
+            setIsOnline(false);
+          }
+        }
+      })
+      .catch((err) => console.error('[ChatWindow] Error fetching partner presence details:', err));
+
+    return () => {
+      socket.off('online-users', handleOnlineUsers);
+    };
+  }, [socket, resolvedPartnerId]);
 
   const typingTimeoutRef = useRef<any>(null);
   const isTypingRef = useRef(false);
@@ -783,19 +875,36 @@ export default function ChatWindowScreen() {
         return;
       }
 
-      router.push({
-        pathname: '/call',
-        params: {
-          callType: type,
-          recipientId: partnerId,
-          recipientName: chatName,
-          currentUserId: currentUserId || '',
-          currentUserName: currentUser?.fullName || '',
-          callId: chatId,
-        },
-      } as any);
+      try {
+        setCallLoading(true);
+        // Fetch server-signed Zego token
+        const response = await axiosInstance.post('/calls/zego-token');
+        const { token, appId } = response.data.data;
+
+        if (!token) {
+          Alert.alert('Error', 'Failed to retrieve Zego call token from server.');
+          return;
+        }
+
+        router.push({
+          pathname: `/call/${chatId}`,
+          params: {
+            callId: chatId,
+            callType: type,
+            recipientId: partnerId,
+            recipientName: chatName,
+            zegoToken: token,
+            zegoAppId: String(appId),
+          },
+        } as any);
+      } catch (err: any) {
+        console.error('[ChatWindowScreen] Failed to fetch Zego token:', err?.response?.data || err);
+        Alert.alert('Call Error', 'Failed to start a secure call session.');
+      } finally {
+        setCallLoading(false);
+      }
     },
-    [chatId, userId, params.chatId, chatName, currentUserId, currentUser?.fullName, router],
+    [chatId, userId, params.chatId, chatName, router],
   );
 
   const startVideoCall = useCallback(() => initiateZegoCall('video'), [initiateZegoCall]);
@@ -1085,12 +1194,16 @@ export default function ChatWindowScreen() {
   }, [recorder, chatId, currentUserId, mapBackendMessage, socket]);
 
 
-  const handleGenerateSmartReplies = async () => {
+  const handleGenerateSmartReplies = async (message?: MessageType) => {
     if (!chatId) return;
     setLoadingReplies(true);
     setSmartReplies([]);
     try {
-      const res = await axiosInstance.post('/api/ai/chat/generate-reply', { chatId });
+      const res = await axiosInstance.post('/api/ai/chat/generate-reply', {
+        chatId,
+        messageId: message?.id,
+        messageContent: message?.content,
+      });
       if (res.data?.status === 'success' && Array.isArray(res.data?.data)) {
         setSmartReplies(res.data.data);
       } else {
@@ -1317,7 +1430,13 @@ export default function ChatWindowScreen() {
                     { color: isTyping ? colors.purple : colors.textMuted },
                   ]}
                 >
-                  {isTyping ? 'typing...' : isOnline ? 'Online' : 'Offline'}
+                  {isTyping
+                    ? 'typing...'
+                    : isOnline
+                    ? 'Online'
+                    : partnerLastSeen
+                    ? `Last seen ${formatLastSeen(partnerLastSeen)}`
+                    : 'Offline'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1468,6 +1587,10 @@ export default function ChatWindowScreen() {
               setMoreActionsMsg(msg);
               setMoreActionsVisible(true);
             }}
+            translatedMessages={translatedMessages}
+            translatingMessageId={translatingMessageId}
+            onTranslate={handleTranslateMessage}
+            onClearTranslation={handleClearTranslation}
           />
         </View>
 
@@ -2349,7 +2472,8 @@ export default function ChatWindowScreen() {
           Toast.show({ type: 'success', text1: 'Copied to clipboard' });
         }}
         onTranslate={(msg) => {
-          // Fallback or trigger translation
+          setMoreActionsVisible(false);
+          handleTranslateMessage(msg);
         }}
         onSmartReplies={(msg) => {
           handleGenerateSmartReplies();

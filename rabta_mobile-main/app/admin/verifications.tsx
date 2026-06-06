@@ -18,6 +18,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import axiosInstance from '../../src/api/axiosInstance';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../../src/theme/ThemeContext';
 
 interface Employer {
   _id: string;
@@ -31,6 +32,7 @@ interface Employer {
 }
 
 export default function AdminVerificationsScreen() {
+  const { colors, isDark } = useTheme();
   const [employers, setEmployers] = useState<Employer[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -105,20 +107,20 @@ export default function AdminVerificationsScreen() {
     const linkedinUrl = item.socialLinks?.linkedin || item.verificationLink;
 
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.cardHeader}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>{item.fullName.charAt(0).toUpperCase()}</Text>
+          <View style={[styles.avatarCircle, { backgroundColor: colors.purple10 }]}>
+            <Text style={[styles.avatarText, { color: colors.purple }]}>{item.fullName.charAt(0).toUpperCase()}</Text>
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.nameText}>{item.fullName}</Text>
-            <Text style={styles.companyText}>{item.companyName || 'No Company Name'}</Text>
+            <Text style={[styles.nameText, { color: colors.text }]}>{item.fullName}</Text>
+            <Text style={[styles.companyText, { color: colors.textMuted }]}>{item.companyName || 'No Company Name'}</Text>
           </View>
         </View>
 
         <View style={styles.infoRow}>
-          <Ionicons name="mail" size={16} color="rgba(255,255,255,0.5)" />
-          <Text style={styles.infoText}>{item.email}</Text>
+          <Ionicons name="mail" size={16} color={colors.textMuted} />
+          <Text style={[styles.infoText, { color: colors.text }]} numberOfLines={1}>{item.email}</Text>
         </View>
 
         {linkedinUrl ? (
@@ -133,12 +135,12 @@ export default function AdminVerificationsScreen() {
           </View>
         )}
 
-        <View style={styles.actionsRow}>
+        <View style={[styles.actionsRow, { borderTopColor: colors.border }]}>
           <Pressable style={styles.rejectBtn} onPress={() => openRejectModal(item._id)}>
             <Ionicons name="close" size={18} color="#ef4444" />
             <Text style={styles.rejectBtnText}>Reject</Text>
           </Pressable>
-          <Pressable style={styles.approveBtn} onPress={() => handleApprove(item._id)}>
+          <Pressable style={[styles.approveBtn, { backgroundColor: colors.successText || '#22c55e' }]} onPress={() => handleApprove(item._id)}>
             <Ionicons name="checkmark" size={18} color="#FFFFFF" />
             <Text style={styles.approveBtnText}>Approve</Text>
           </Pressable>
@@ -149,19 +151,19 @@ export default function AdminVerificationsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7F77DD" />
+      <SafeAreaView style={[styles.centerContainer, { backgroundColor: colors.bg }]}>
+        <ActivityIndicator size="large" color={colors.purple} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <View style={styles.screenHeader}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        <Pressable onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Verifications</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Verifications</Text>
       </View>
 
       <FlatList
@@ -172,7 +174,7 @@ export default function AdminVerificationsScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="checkmark-circle" size={64} color="#22c55e" />
-            <Text style={styles.emptyText}>No pending verification requests.</Text>
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>No pending verification requests.</Text>
           </View>
         }
       />
@@ -188,14 +190,14 @@ export default function AdminVerificationsScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
           style={styles.modalOverlay}
         >
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Reject Employer</Text>
-            <Text style={styles.modalSubtitle}>Please provide a reason for rejection (min 10 chars):</Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Reject Employer</Text>
+            <Text style={[styles.modalSubtitle, { color: colors.textMuted }]}>Please provide a reason for rejection (min 10 chars):</Text>
             
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
               placeholder="Enter reason..."
-              placeholderTextColor="rgba(255,255,255,0.4)"
+              placeholderTextColor={colors.textMuted}
               multiline
               numberOfLines={4}
               value={rejectReason}
@@ -205,7 +207,7 @@ export default function AdminVerificationsScreen() {
             
             <View style={styles.modalActions}>
               <Pressable style={styles.modalCancelBtn} onPress={() => setRejectModalVisible(false)}>
-                <Text style={styles.modalCancelText}>Cancel</Text>
+                <Text style={[styles.modalCancelText, { color: colors.textMuted }]}>Cancel</Text>
               </Pressable>
               <Pressable style={styles.modalSubmitBtn} onPress={submitReject}>
                 <Text style={styles.modalSubmitText}>Submit</Text>
@@ -222,11 +224,9 @@ export default function AdminVerificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D0D12',
   },
   centerContainer: {
     flex: 1,
-    backgroundColor: '#0D0D12',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -240,17 +240,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#141419',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     marginRight: 12,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
   },
   listContent: {
     paddingHorizontal: 16,
@@ -262,15 +259,12 @@ const styles = StyleSheet.create({
     marginTop: 64,
   },
   emptyText: {
-    color: 'rgba(255,255,255,0.5)',
     fontSize: 16,
     marginTop: 16,
   },
   card: {
-    backgroundColor: '#141419',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     padding: 16,
     marginBottom: 16,
   },
@@ -283,13 +277,11 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(127, 119, 221, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   avatarText: {
-    color: '#7F77DD',
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -297,13 +289,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   nameText: {
-    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   companyText: {
-    color: 'rgba(255,255,255,0.5)',
     fontSize: 14,
   },
   infoRow: {
@@ -312,7 +302,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   infoText: {
-    color: 'rgba(255,255,255,0.7)',
     fontSize: 14,
     marginLeft: 8,
   },
@@ -333,7 +322,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.07)',
   },
   rejectBtn: {
     flex: 1,
@@ -355,7 +343,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#22c55e',
     paddingVertical: 12,
     borderRadius: 12,
     marginLeft: 8,
@@ -373,30 +360,23 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   modalContent: {
-    backgroundColor: '#141419',
     width: '100%',
     borderRadius: 16,
     padding: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
   },
   modalTitle: {
-    color: '#FFFFFF',
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   modalSubtitle: {
-    color: 'rgba(255,255,255,0.6)',
     fontSize: 14,
     marginBottom: 16,
   },
   modalInput: {
-    backgroundColor: '#0D0D12',
-    color: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
     padding: 12,
     minHeight: 100,
     textAlignVertical: 'top',
@@ -414,7 +394,6 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   modalCancelText: {
-    color: 'rgba(255,255,255,0.6)',
     fontWeight: 'bold',
     fontSize: 16,
   },

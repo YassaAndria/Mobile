@@ -3,6 +3,7 @@ import Call from '../models/Call';
 import Community from '../models/Community';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/AppError';
+import { generateToken04 } from '../utils/zegoTokenGenerator';
 
 export const getUserCalls = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -28,6 +29,9 @@ export const getUserCalls = catchAsync(async (req: Request, res: Response, next:
   }
 });
 
+import { User } from '../models/user';
+import { sendPushToUsers } from '../services/notification.service';
+
 export const initiateCall = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { receiverId, communityId, type } = req.body;
   const callerId = (req.user as any)._id;
@@ -52,6 +56,34 @@ export const initiateCall = catchAsync(async (req: Request, res: Response, next:
     status: 'missed'
   });
 
+  // Fetch caller name to include in push notification
+  const callerUser = await User.findById(callerId).select('fullName');
+  const callerName = callerUser?.fullName || 'Someone';
+
+  try {
+    if (type !== 'group' && receiverId) {
+      await sendPushToUsers([receiverId], {
+        title: 'اتصال وارد',
+        body: `يتصل بك ${callerName}`,
+        data: { type: 'call', callId: call._id.toString(), callerId: callerId.toString() }
+      });
+    } else if (type === 'group' && communityId) {
+      const community = await Community.findById(communityId).select('members name');
+      if (community) {
+        const memberIds = community.members
+          .map(id => id.toString())
+          .filter(id => id !== callerId.toString());
+        await sendPushToUsers(memberIds, {
+          title: `اتصال جماعي في ${community.name}`,
+          body: `بدأ ${callerName} اتصالاً جماعياً`,
+          data: { type: 'call', callId: call._id.toString(), communityId: communityId.toString() }
+        });
+      }
+    }
+  } catch (pushErr) {
+    console.error('⚠️ Failed to dispatch call push notification:', pushErr);
+  }
+
   res.status(201).json({
     status: 'success',
     data: { call }
@@ -73,4 +105,31 @@ export const deleteCall = catchAsync(async (req: Request, res: Response, next: N
     status: 'success',
     data: null
   });
+});
+
+export const getZegoToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const userId = (req.user as any)._id?.toString() || req.body.userId;
+  if (!userId) {
+    return next(new AppError('User ID is required to generate a Zego token', 400));
+  }
+
+  const appId = Number(process.env.ZEGO_APP_ID || 661194692);
+  const serverSecret = process.env.ZEGO_SERVER_SECRET || '0b9a59ed8d868d1a72cd3cc3920128f8';
+
+  const effectiveTimeInSeconds = 3600;
+  const payload = '';
+
+  try {
+    const token = generateToken04(appId, userId, serverSecret, effectiveTimeInSeconds, payload);
+    res.status(200).json({
+      status: 'success',
+      data: {
+        token,
+        appId,
+      }
+    });
+  } catch (error: any) {
+    console.error('ZEGO TOKEN GENERATION ERROR:', error.message);
+    return next(new AppError('Failed to generate Zego token: ' + (error.errorMessage || error.message), 500));
+  }
 });

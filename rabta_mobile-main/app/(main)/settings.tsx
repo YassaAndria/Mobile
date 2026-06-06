@@ -8,6 +8,8 @@ import Toast from "react-native-toast-message";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../src/store/slices/authSlice";
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { unregisterDeviceTokenWithBackend } from "../../src/utils/notifications";
 import type { RootState } from "../../src/store/store";
 import { useTheme } from "../../src/theme/ThemeContext";
 import { typography } from "../../src/theme/typography";
@@ -78,6 +80,16 @@ export default function SettingsScreen() {
         // Ignore Google sign out error (e.g. if the user didn't log in via Google)
       }
 
+      // 1.5 Unregister push token from backend while still authenticated
+      try {
+        const pushToken = await AsyncStorage.getItem("pushToken");
+        if (pushToken) {
+          await unregisterDeviceTokenWithBackend(pushToken);
+          await AsyncStorage.removeItem("pushToken");
+        }
+      } catch (tokenError) {
+        console.error("Failed to unregister push token during logout:", tokenError);
+      }
 
       // 2. مسح التوكن وبيانات المستخدم باستخدام Redux slice
       dispatch(logout());
@@ -136,6 +148,20 @@ export default function SettingsScreen() {
           <View style={{ flex: 1 }}>
             <Text style={[styles.rowTitle, { color: colors.text }]}>Privacy</Text>
             <Text style={[styles.rowSub, { color: colors.textSubtle }]}>Last seen</Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={22} color={colors.textSubtle} />
+        </Pressable>
+
+        <Pressable
+          style={styles.row}
+          onPress={() => router.push("/bookmarks")}
+        >
+          <View style={[styles.iconBox, { backgroundColor: colors.purple10 }]}>
+            <MaterialIcons name="bookmark" size={22} color={colors.purple} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.rowTitle, { color: colors.text }]}>Saved Items</Text>
+            <Text style={[styles.rowSub, { color: colors.textSubtle }]}>Bookmarked jobs and talents</Text>
           </View>
           <MaterialIcons name="chevron-right" size={22} color={colors.textSubtle} />
         </Pressable>

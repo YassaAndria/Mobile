@@ -102,14 +102,16 @@ export default function LoginScreen() {
       const hasLoggedInKey = `has_logged_in_${userId}`;
       const hasLoggedInBefore = await AsyncStorage.getItem(hasLoggedInKey);
 
+      const targetScreen = authUser.role === "employer" ? "/employer-dashboard" : "/chats";
+
       if (hasLoggedInBefore === "true") {
-        router.replace("/chats");
+        router.replace(targetScreen);
       } else {
         await AsyncStorage.setItem(hasLoggedInKey, "true");
-        if (!authUser.jobTitle && !authUser.bioHeadline) {
+        if (!authUser.profileComplete) {
           router.replace("/setup-profile");
         } else {
-          router.replace("/chats");
+          router.replace(targetScreen);
         }
       }
     };

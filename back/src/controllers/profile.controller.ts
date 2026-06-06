@@ -55,7 +55,7 @@ export const updateMyProfile = catchAsync(async (req: Request, res: Response, ne
 // 3. جلب بروفايل مستخدم آخر (عشان لو حد عايز يفتح بروفايل زميله)
 export const getUserProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const user = await User.findById(req.params.id).select(
-    'fullName avatar status aboutMe bioHeadline jobTitle location role companyName industry skills socialLinks featuredProjects links projects isVerified showOnlineStatus phoneNumber email createdAt'
+    'fullName avatar status lastSeen settings aboutMe bioHeadline jobTitle location role companyName industry skills socialLinks featuredProjects links projects isVerified showOnlineStatus phoneNumber email createdAt'
   );
 
   if (!user) {
@@ -287,21 +287,29 @@ export const getSavedItems = catchAsync(async (req: Request, res: Response, next
   const user = req.user as any;
 
   let populatedUser;
+  let savedItems: any[] = [];
+
   if (user.role === 'freelancer') {
-    populatedUser = await User.findById(user._id).populate('savedProjects');
+    populatedUser = await User.findById(user._id).populate({
+      path: 'savedProjects',
+      populate: {
+        path: 'publisherId',
+        select: 'companyName'
+      }
+    });
+    if (!populatedUser) {
+      return next(new AppError('User not found.', 404));
+    }
+    const rawSavedItems = populatedUser.savedProjects || [];
+    savedItems = rawSavedItems.filter((item: any) => item !== null && item !== undefined);
   } else if (user.role === 'employer') {
     populatedUser = await User.findById(user._id).populate('savedFreelancers', 'fullName avatar jobTitle skills bio companyName status');
-  } else {
-    return next(new AppError('Invalid user role.', 400));
+    if (!populatedUser) {
+      return next(new AppError('User not found.', 404));
+    }
+    const rawSavedItems = populatedUser.savedFreelancers || [];
+    savedItems = rawSavedItems.filter((item: any) => item !== null && item !== undefined);
   }
-
-  if (!populatedUser) {
-    return next(new AppError('User not found.', 404));
-  }
-
-  const savedItems = user.role === 'freelancer'
-    ? (populatedUser.savedProjects || [])
-    : (populatedUser.savedFreelancers || []);
 
   res.status(200).json({
     status: 'success',

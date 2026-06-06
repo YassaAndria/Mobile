@@ -250,7 +250,7 @@ export const getAppliedJobs = catchAsync(async (req: Request, res: Response, nex
   // Format the data for the frontend
   const formattedJobs = jobs.map(job => {
     // Find the specific application for this user
-    const application = job.applicants?.find(app => app.userId.toString() === userId.toString());
+    const application = job.applicants?.find(app => app.userId && app.userId.toString() === userId.toString());
     
     return {
       id: job._id,

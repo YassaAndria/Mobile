@@ -64,10 +64,16 @@ export default function JobsBoardScreen() {
 
   // ── Reactive header: re-runs whenever showFilterBar or colors change ──────
   useLayoutEffect(() => {
+    const canGoBack = navigation.canGoBack();
     navigation.setOptions({
       headerBackVisible: false,
       headerLeft: () => (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingLeft: 5 }}>
+          {canGoBack && (
+            <Pressable onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+          )}
           <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text }}>Jobs</Text>
           <Ionicons
             name={showFilterBar ? 'options' : 'options-outline'}
@@ -78,7 +84,7 @@ export default function JobsBoardScreen() {
         </View>
       ),
     });
-  }, [navigation, showFilterBar, colors]);
+  }, [navigation, showFilterBar, colors, router]);
 
   const fetchJobs = async () => {
     try {

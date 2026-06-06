@@ -34,6 +34,16 @@ const ADMIN_TABS: TabItem[] = [
   { path: "/settings",  icon: "settings",            activeIcon: "settings",       label: "Settings"  },
 ];
 
+/** Employer variant: Jobs is replaced by Employer Workspace */
+const EMPLOYER_TABS: TabItem[] = [
+  { path: "/employer-dashboard", icon: "dashboard",           activeIcon: "dashboard",      label: "Workspace" },
+  { path: "/calls",              icon: "call",                activeIcon: "call",           label: "Calls"     },
+  { path: "/chats",              icon: "chat-bubble-outline", activeIcon: "chat-bubble",    label: "Chats"     },
+  { path: "/ai-chat",            icon: "auto-awesome",        activeIcon: "auto-awesome",   label: "AI"        },
+  { path: "/community",          icon: "people-outline",      activeIcon: "people",         label: "Community" },
+  { path: "/settings",           icon: "settings",            activeIcon: "settings",       label: "Settings"  },
+];
+
 const BottomTabBar: React.FC = () => {
   const pathname = usePathname();
   const router   = useRouter();
@@ -58,13 +68,12 @@ const BottomTabBar: React.FC = () => {
   // ── Live auth state from Redux ────────────────────────────────────────────
   const userRole = useSelector((state: RootState) => state.auth.user?.role);
 
-  const isAdmin = userRole === "admin";
-
-  // Compose tab list: admins get Dashboard in place of Jobs
-  const tabs = useMemo<TabItem[]>(
-    () => (isAdmin ? ADMIN_TABS : BASE_TABS),
-    [isAdmin]
-  );
+  // Compose tab list based on role
+  const tabs = useMemo<TabItem[]>(() => {
+    if (userRole === "admin") return ADMIN_TABS;
+    if (userRole === "employer") return EMPLOYER_TABS;
+    return BASE_TABS;
+  }, [userRole]);
 
   const isActive = (path: string) => pathname.startsWith(path);
 

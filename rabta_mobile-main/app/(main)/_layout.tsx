@@ -5,6 +5,12 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../src/store/store";
 import { useTheme } from "../../src/theme/ThemeContext";
 import { MainLayout } from "../../src/components/layout/MainLayout";
+import * as Notifications from "expo-notifications";
+import {
+  registerForPushNotificationsAsync,
+  registerDeviceTokenWithBackend,
+  unregisterDeviceTokenWithBackend
+} from "../../src/utils/notifications";
 
 const PENDING_INVITE_KEY = "pendingGroupInviteToken";
 
@@ -39,6 +45,61 @@ export default function MainGroupLayout() {
       }
     })();
   }, [isAuthenticated, router]);
+
+  // Push notifications handling
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let isMounted = true;
+    let responseListener: any;
+
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+
+    registerForPushNotificationsAsync().then(async (token) => {
+      if (!isMounted) return;
+      if (token) {
+        console.log('[MainLayout] Got push token:', token);
+        await AsyncStorage.setItem('pushToken', token);
+        await registerDeviceTokenWithBackend(token);
+      }
+    });
+
+    responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data;
+      console.log('[MainLayout] Push notification clicked with data:', data);
+      if (data && data.chatId) {
+        router.push({
+          pathname: '/ChatWindowScreen',
+          params: {
+            chatId: data.chatId,
+            chatName: data.chatName || data.title || '',
+            isGroup: data.type === 'group' ? 'true' : 'false',
+          }
+        } as any);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      if (responseListener) {
+        responseListener.remove();
+      }
+    };
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      AsyncStorage.removeItem('pushToken');
+    }
+  }, [isAuthenticated]);
 
   if (!isAuthenticated && !isAuthRoute) {
     return null;

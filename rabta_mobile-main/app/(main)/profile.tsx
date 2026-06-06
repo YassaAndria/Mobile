@@ -48,7 +48,7 @@ function FreelancerProfileBody({ user, colors, isDark, router }: any) {
             {[
               { title: "Edit Profile", icon: "edit", route: "/edit-profile" },
               { title: "My Dashboard", icon: "dashboard", route: "/freelancer-profile/freelancer-dashboard" },
-              { title: "Saved Jobs", icon: "bookmark", route: "/saved-jobs" },
+              { title: "Saved Jobs", icon: "bookmark", route: "/bookmarks" },
             ].map((btn, i) => (
               <TouchableOpacity
                 key={i}
@@ -175,6 +175,14 @@ function EmployerProfileBody({ user, colors, isDark, router }: any) {
             title="Go to Dashboard"
             onPress={() => router.push("/employer-dashboard")}
             icon={<MaterialIcons name="dashboard" size={18} color="#fff" />}
+          />
+          <Button
+            title="Saved Talents"
+            variant="outline"
+            onPress={() => router.push("/bookmarks")}
+            icon={<MaterialIcons name="bookmark" size={18} color={colors.purple} />}
+            style={{ borderColor: colors.purple }}
+            textStyle={{ color: colors.purple }}
           />
           <Button
             title="Edit Company"

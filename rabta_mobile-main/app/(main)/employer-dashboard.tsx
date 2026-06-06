@@ -116,14 +116,23 @@ export default function EmployerDashboardScreen() {
         </View>
       )}
 
-      {currentStatus === 'approved' && (
+      <View style={{ flexDirection: "row", gap: 12, marginBottom: 24 }}>
+        {currentStatus === 'approved' && (
+          <Button
+            title="Post New Job"
+            onPress={() => router.push("/post-job")}
+            icon={<MaterialIcons name="add" size={20} color="#fff" />}
+            style={{ flex: 1 }}
+          />
+        )}
         <Button
-          title="Post New Job"
-          onPress={() => router.push("/post-job")}
-          style={{ marginBottom: 24 }}
-          icon={<MaterialIcons name="add" size={20} color="#fff" />}
+          title="Browse Job Board"
+          variant="secondary"
+          onPress={() => router.push("/jobs")}
+          icon={<MaterialIcons name="work-outline" size={20} color={colors.text} />}
+          style={{ flex: 1 }}
         />
-      )}
+      </View>
 
       <Text style={[typography.h3, { color: colors.text, marginBottom: 16 }]}>
         <MaterialIcons name="bar-chart" size={22} color={colors.purple} /> Projects Overview

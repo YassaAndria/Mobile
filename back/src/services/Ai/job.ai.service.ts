@@ -1,5 +1,4 @@
 import { llm } from "./core.ai.service";
-import Job from "../../models/Job";
 import { User } from "../../models/user";
 import { jobMatchingPromptTemplate } from "./prompts.ai";
 import { logTokenUsage } from "../token.service";
@@ -8,10 +7,13 @@ export const calculateMatchScore = async (
   jobId: string,
   freelancerId: string
 ): Promise<{ score: number; reason: string } | null> => {
+  let job: any;
+  let freelancer: any;
+
   try {
     // @ts-ignore
-    const job = await require("../../models/Job").default.findById(jobId).select("title description requiredSkills publisherId");
-    const freelancer = await User.findById(freelancerId).select("fullName jobTitle bioHeadline aboutMe skills");
+    job = await require("../../models/Job").default.findById(jobId).select("title description requiredSkills publisherId");
+    freelancer = await User.findById(freelancerId).select("fullName jobTitle bioHeadline aboutMe skills");
 
     if (!job || !freelancer) {
       console.warn("⚠️ [Job Matching] Job or Freelancer not found");
@@ -65,9 +67,26 @@ export const calculateMatchScore = async (
       };
     }
 
-    return null;
-  } catch (error) {
-    console.error("❌ Job Matching Error:", error);
-    throw error;
+    throw new Error("Invalid response format from LLM");
+  } catch (error: any) {
+    console.warn("⚠️ Job Matching LLM call failed, performing local match calculations:", error.message || error);
+    
+    if (!job || !freelancer) return null;
+
+    // Local fallback logic: match skills intersection
+    const jobSkillsList = job.requiredSkills?.map((s: string) => s.toLowerCase().trim()) || [];
+    const freelancerSkillsList = freelancer.skills?.map((s: string) => s.toLowerCase().trim()) || [];
+    
+    const matched = jobSkillsList.filter((s: string) => freelancerSkillsList.includes(s));
+    
+    let score = 50; // default medium score
+    if (jobSkillsList.length > 0) {
+      score = Math.round((matched.length / jobSkillsList.length) * 100);
+    }
+
+    return {
+      score: score,
+      reason: `Offline match calculation based on skills intersection. Matched skills: ${matched.join(", ") || "None"}.`
+    };
   }
 };

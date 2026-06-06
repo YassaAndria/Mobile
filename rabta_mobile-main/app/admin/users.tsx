@@ -15,8 +15,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import axiosInstance from '../../src/api/axiosInstance';
+import { useTheme } from '../../src/theme/ThemeContext';
 
 export default function AdminUsersScreen() {
+  const { colors, isDark } = useTheme();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -104,25 +106,25 @@ export default function AdminUsersScreen() {
   const renderItem = ({ item }: { item: any }) => {
     const isExpanded = expandedUserId === item._id;
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Pressable 
           style={styles.cardHeader}
           onPress={() => setExpandedUserId(isExpanded ? null : item._id)}
         >
           <View style={styles.cardHeaderLeft}>
-            <Text style={styles.nameText}>{item.fullName}</Text>
-            <Text style={styles.emailText}>{item.email}</Text>
+            <Text style={[styles.nameText, { color: colors.text }]}>{item.fullName}</Text>
+            <Text style={[styles.emailText, { color: colors.textMuted }]}>{item.email}</Text>
           </View>
           <Ionicons 
             name={isExpanded ? "chevron-up" : "chevron-down"} 
             size={20} 
-            color="rgba(255,255,255,0.4)" 
+            color={colors.textMuted} 
           />
         </Pressable>
         
         <View style={styles.badgesRow}>
-          <View style={[styles.badge, item.role === 'admin' ? styles.badgeAdmin : styles.badgeUser]}>
-            <Text style={[styles.badgeText, item.role === 'admin' ? styles.badgeTextAdmin : styles.badgeTextUser]}>
+          <View style={[styles.badge, item.role === 'admin' ? styles.badgeAdmin : [styles.badgeUser, { backgroundColor: colors.border }]]}>
+            <Text style={[styles.badgeText, item.role === 'admin' ? styles.badgeTextAdmin : [styles.badgeTextUser, { color: colors.textMuted }]]}>
               {item.role}
             </Text>
           </View>
@@ -139,41 +141,41 @@ export default function AdminUsersScreen() {
         </View>
 
         {isExpanded && (
-          <View style={styles.detailsContainer}>
-            <Text style={styles.detailsTitle}>Token Usage Breakdown</Text>
+          <View style={[styles.detailsContainer, { backgroundColor: colors.bgAlt, borderColor: colors.border }]}>
+            <Text style={[styles.detailsTitle, { color: colors.text }]}>Token Usage Breakdown</Text>
             <View style={styles.grid}>
-              <View style={styles.gridItem}>
-                <Text style={styles.gridLabel}>Voice to Text</Text>
-                <Text style={styles.gridValue}>{item.tokenUsage?.voiceToText || 0}</Text>
+              <View style={[styles.gridItem, { backgroundColor: colors.surface2, borderColor: colors.border }]}>
+                <Text style={[styles.gridLabel, { color: colors.textMuted }]}>Voice to Text</Text>
+                <Text style={[styles.gridValue, { color: colors.text }]}>{item.tokenUsage?.voiceToText || 0}</Text>
               </View>
-              <View style={styles.gridItem}>
-                <Text style={styles.gridLabel}>Chat Summary</Text>
-                <Text style={styles.gridValue}>{item.tokenUsage?.chatSummarization || 0}</Text>
+              <View style={[styles.gridItem, { backgroundColor: colors.surface2, borderColor: colors.border }]}>
+                <Text style={[styles.gridLabel, { color: colors.textMuted }]}>Chat Summary</Text>
+                <Text style={[styles.gridValue, { color: colors.text }]}>{item.tokenUsage?.chatSummarization || 0}</Text>
               </View>
-              <View style={styles.gridItem}>
-                <Text style={styles.gridLabel}>Smart Search</Text>
-                <Text style={styles.gridValue}>{item.tokenUsage?.smartSearch || 0}</Text>
+              <View style={[styles.gridItem, { backgroundColor: colors.surface2, borderColor: colors.border }]}>
+                <Text style={[styles.gridLabel, { color: colors.textMuted }]}>Smart Search</Text>
+                <Text style={[styles.gridValue, { color: colors.text }]}>{item.tokenUsage?.smartSearch || 0}</Text>
               </View>
-              <View style={styles.gridItem}>
-                <Text style={styles.gridLabel}>File Summary</Text>
-                <Text style={styles.gridValue}>{item.tokenUsage?.fileSummarization || 0}</Text>
+              <View style={[styles.gridItem, { backgroundColor: colors.surface2, borderColor: colors.border }]}>
+                <Text style={[styles.gridLabel, { color: colors.textMuted }]}>File Summary</Text>
+                <Text style={[styles.gridValue, { color: colors.text }]}>{item.tokenUsage?.fileSummarization || 0}</Text>
               </View>
-              <View style={styles.gridItem}>
-                <Text style={styles.gridLabel}>Suggested Replies</Text>
-                <Text style={styles.gridValue}>{item.tokenUsage?.suggestedReplies || 0}</Text>
+              <View style={[styles.gridItem, { backgroundColor: colors.surface2, borderColor: colors.border }]}>
+                <Text style={[styles.gridLabel, { color: colors.textMuted }]}>Suggested Replies</Text>
+                <Text style={[styles.gridValue, { color: colors.text }]}>{item.tokenUsage?.suggestedReplies || 0}</Text>
               </View>
-              <View style={styles.gridItem}>
-                <Text style={styles.gridLabel}>Translation</Text>
-                <Text style={styles.gridValue}>{item.tokenUsage?.translation || 0}</Text>
+              <View style={[styles.gridItem, { backgroundColor: colors.surface2, borderColor: colors.border }]}>
+                <Text style={[styles.gridLabel, { color: colors.textMuted }]}>Translation</Text>
+                <Text style={[styles.gridValue, { color: colors.text }]}>{item.tokenUsage?.translation || 0}</Text>
               </View>
-              <View style={styles.gridItem}>
-                <Text style={styles.gridLabel}>App Chatbot</Text>
-                <Text style={styles.gridValue}>{item.tokenUsage?.appChatbot || 0}</Text>
+              <View style={[styles.gridItem, { backgroundColor: colors.surface2, borderColor: colors.border }]}>
+                <Text style={[styles.gridLabel, { color: colors.textMuted }]}>App Chatbot</Text>
+                <Text style={[styles.gridValue, { color: colors.text }]}>{item.tokenUsage?.appChatbot || 0}</Text>
               </View>
               {item.role === 'employer' && (
-                <View style={styles.gridItem}>
-                  <Text style={styles.gridLabel}>Employer Matching</Text>
-                  <Text style={styles.gridValue}>{item.tokenUsage?.employerMatching || 0}</Text>
+                <View style={[styles.gridItem, { backgroundColor: colors.surface2, borderColor: colors.border }]}>
+                  <Text style={[styles.gridLabel, { color: colors.textMuted }]}>Employer Matching</Text>
+                  <Text style={[styles.gridValue, { color: colors.text }]}>{item.tokenUsage?.employerMatching || 0}</Text>
                 </View>
               )}
             </View>
@@ -181,12 +183,15 @@ export default function AdminUsersScreen() {
         )}
 
         {item.role !== 'admin' && (
-          <View style={styles.actionsRow}>
+          <View style={[styles.actionsRow, { borderTopColor: colors.border }]}>
             <Pressable 
-              style={[styles.actionBtn, item.isBanned ? styles.btnDefault : styles.btnDangerLight]} 
+              style={[
+                styles.actionBtn, 
+                item.isBanned ? [styles.btnDefault, { backgroundColor: colors.border }] : styles.btnDangerLight,
+              ]} 
               onPress={() => toggleBan(item._id)}
             >
-              <Text style={item.isBanned ? styles.btnTextDefault : styles.btnTextDanger}>
+              <Text style={item.isBanned ? [styles.btnTextDefault, { color: colors.text }] : styles.btnTextDanger}>
                 {item.isBanned ? 'Unban' : 'Ban User'}
               </Text>
             </Pressable>
@@ -206,16 +211,16 @@ export default function AdminUsersScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <Text style={styles.headerTitle}>User Management</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>User Management</Text>
         
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="rgba(255,255,255,0.5)" style={styles.searchIcon} />
+        <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Ionicons name="search" size={20} color={colors.textMuted} style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
             placeholder="Search users by name or email..."
-            placeholderTextColor="rgba(255,255,255,0.5)"
+            placeholderTextColor={colors.textMuted}
             value={searchTerm}
             onChangeText={setSearchTerm}
             autoCapitalize="none"
@@ -227,10 +232,18 @@ export default function AdminUsersScreen() {
             {sortOptions.map((opt) => (
               <Pressable 
                 key={opt.key}
-                style={[styles.sortChip, sortBy === opt.key && styles.sortChipActive]}
+                style={[
+                  styles.sortChip, 
+                  { backgroundColor: colors.surface2, borderColor: colors.border },
+                  sortBy === opt.key && [styles.sortChipActive, { backgroundColor: colors.purple, borderColor: colors.purple }]
+                ]}
                 onPress={() => setSortBy(opt.key)}
               >
-                <Text style={[styles.sortChipText, sortBy === opt.key && styles.sortChipTextActive]}>
+                <Text style={[
+                  styles.sortChipText, 
+                  { color: colors.textMuted }, 
+                  sortBy === opt.key && styles.sortChipTextActive
+                ]}>
                   {opt.label}
                 </Text>
               </Pressable>
@@ -239,8 +252,8 @@ export default function AdminUsersScreen() {
         </View>
 
         {loading ? (
-          <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color="#7F77DD" />
+          <View style={[styles.centerContainer, { backgroundColor: colors.bg }]}>
+            <ActivityIndicator size="large" color={colors.purple} />
           </View>
         ) : (
           <FlatList
@@ -249,12 +262,12 @@ export default function AdminUsersScreen() {
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No users found.</Text>
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>No users found.</Text>
             }
             ListFooterComponent={
               filteredUsers.length > displayedUsers.length ? (
-                <Pressable style={styles.loadMoreBtn} onPress={() => setPage(p => p + 1)}>
-                  <Text style={styles.loadMoreText}>Load More</Text>
+                <Pressable style={[styles.loadMoreBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => setPage(p => p + 1)}>
+                  <Text style={[styles.loadMoreText, { color: colors.text }]}>Load More</Text>
                 </Pressable>
               ) : null
             }
@@ -268,30 +281,25 @@ export default function AdminUsersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D0D12',
   },
   centerContainer: {
     flex: 1,
-    backgroundColor: '#0D0D12',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginHorizontal: 16,
     marginVertical: 16,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#141419',
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     paddingHorizontal: 12,
   },
   searchIcon: {
@@ -300,7 +308,6 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 48,
-    color: '#FFFFFF',
     fontSize: 16,
   },
   sortContainer: {
@@ -313,17 +320,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     marginRight: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
-  sortChipActive: {
-    backgroundColor: '#7F77DD',
-    borderColor: '#7F77DD',
-  },
+  sortChipActive: {},
   sortChipText: {
-    color: 'rgba(255,255,255,0.6)',
     fontSize: 13,
     fontWeight: '600',
   },
@@ -335,10 +336,8 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   card: {
-    backgroundColor: '#141419',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     padding: 16,
     marginBottom: 12,
   },
@@ -354,12 +353,10 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 4,
   },
   emailText: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
   },
   badgesRow: {
     flexDirection: 'row',
@@ -374,9 +371,7 @@ const styles = StyleSheet.create({
   badgeAdmin: {
     backgroundColor: 'rgba(127, 119, 221, 0.1)',
   },
-  badgeUser: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-  },
+  badgeUser: {},
   badgeBanned: {
     backgroundColor: 'rgba(239, 68, 68, 0.1)',
   },
@@ -393,9 +388,7 @@ const styles = StyleSheet.create({
   badgeTextAdmin: {
     color: '#7F77DD',
   },
-  badgeTextUser: {
-    color: 'rgba(255,255,255,0.5)',
-  },
+  badgeTextUser: {},
   badgeTextBanned: {
     color: '#ef4444',
   },
@@ -409,13 +402,10 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 16,
     padding: 12,
-    backgroundColor: 'rgba(255,255,255,0.02)',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
   detailsTitle: {
-    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: 'bold',
     marginBottom: 12,
@@ -427,20 +417,16 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: '48%',
-    backgroundColor: '#1C1C24',
     padding: 8,
     borderRadius: 8,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
   },
   gridLabel: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 11,
     marginBottom: 4,
   },
   gridValue: {
-    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: 'bold',
   },
@@ -449,7 +435,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.07)',
     paddingTop: 12,
   },
   actionBtn: {
@@ -458,14 +443,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginRight: 8,
   },
-  btnDefault: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
-  },
+  btnDefault: {},
   btnDangerLight: {
     backgroundColor: 'rgba(239, 68, 68, 0.1)',
   },
   btnTextDefault: {
-    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -482,21 +464,17 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    color: 'rgba(255,255,255,0.5)',
     marginTop: 24,
     fontSize: 16,
   },
   loadMoreBtn: {
-    backgroundColor: '#141419',
     paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     alignItems: 'center',
     marginTop: 8,
   },
   loadMoreText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   }

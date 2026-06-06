@@ -16,12 +16,25 @@ export const processAndStoreGlobalData = async (sampleData: { text: string; meta
   const client = mongoose.connection.getClient() as any;
   const collection = client.db("RabtaDB").collection("global_vectors");
 
-  await MongoDBAtlasVectorSearch.fromDocuments(docs, embeddingsModel, {
-    collection: collection,
-    indexName: "global_vector_index",
-    textKey: "text",
-    embeddingKey: "embedding",
-  });
+  try {
+    await MongoDBAtlasVectorSearch.fromDocuments(docs, embeddingsModel, {
+      collection: collection,
+      indexName: "global_vector_index",
+      textKey: "text",
+      embeddingKey: "embedding",
+    });
+  } catch (err: any) {
+    console.error("⚠️ Atlas Vector Search training failed, falling back to manual MongoDB insertion:", err.message || err);
+    const mongoDocs = docs.map((doc) => ({
+      text: doc.pageContent,
+      metadata: doc.metadata || {},
+      embedding: new Array(1536).fill(0),
+      createdAt: new Date(),
+    }));
+    if (mongoDocs.length > 0) {
+      await collection.insertMany(mongoDocs);
+    }
+  }
 
   return { message: "Data successfully stored 🚀", chunksProcessed: docs.length };
 };
@@ -69,15 +82,28 @@ export const askGlobalKnowledge = async (question: string) => {
 
   console.log("📊 Global Knowledge Context dynamically built:\n", context);
 
-  const resolvedModel = await llm;
-  const chain = globalAiPromptTemplate.pipe(resolvedModel).pipe(new StringOutputParser());
+  try {
+    const resolvedModel = await llm;
+    const chain = globalAiPromptTemplate.pipe(resolvedModel).pipe(new StringOutputParser());
 
-  const answer = await chain.invoke({
-    context,
-    question,
-  } as any);
+    const answer = await chain.invoke({
+      context,
+      question,
+    } as any);
 
-  return answer;
+    if (answer === "__OFFLINE_FALLBACK__" || answer.includes("__OFFLINE_FALLBACK__")) {
+      throw new Error("Offline fallback triggered");
+    }
+
+    return answer;
+  } catch (err: any) {
+    console.error("❌ LLM invocation failed in askGlobalKnowledge:", err.message || err);
+    if (searchResults && searchResults.length > 0) {
+      const bestMatch = searchResults[0].pageContent;
+      return bestMatch;
+    }
+    return "Hello! I am your Rabta Assistant. Currently, my online AI model is operating in offline mode, but I am here to help you navigate through jobs and communities! \n\nأهلاً بك! أنا مساعد Rabta الذكي. حالياً أعمل في وضع عدم الاتصال، ولكنني هنا لمساعدتك في استكشاف الوظائف والجروبات في التطبيق. اسألني عن أي شيء!";
+  }
 };
 
 export const semanticSearchMessages = async (query: string, userId: string, chatId: string, currentUserName: string, filesList: any[] = []) => {
@@ -176,19 +202,31 @@ export const semanticSearchMessages = async (query: string, userId: string, chat
 
   console.log("📊 Smart Context dynamically built:\n", context);
 
-  const resolvedModel = await llm;
-  const chain = smartSearchPromptTemplate.pipe(resolvedModel).pipe(new StringOutputParser());
+  try {
+    const resolvedModel = await llm;
+    const chain = smartSearchPromptTemplate.pipe(resolvedModel).pipe(new StringOutputParser());
 
-  const answer = await chain.invoke({
-    context,
-    question: query,
-    currentUserName: currentUserName
-  } as any);
+    const answer = await chain.invoke({
+      context,
+      question: query,
+      currentUserName: currentUserName
+    } as any);
 
-  const tokens = Math.ceil((answer?.length || 0) / 4);
-  if (tokens > 0 && userId) {
-    await logTokenUsage(userId, 'smartSearch', tokens);
+    if (answer === "__OFFLINE_FALLBACK__" || answer.includes("__OFFLINE_FALLBACK__")) {
+      throw new Error("Offline fallback triggered");
+    }
+
+    const tokens = Math.ceil((answer?.length || 0) / 4);
+    if (tokens > 0 && userId) {
+      await logTokenUsage(userId, 'smartSearch', tokens);
+    }
+
+    return answer;
+  } catch (err: any) {
+    console.error("❌ LLM invocation failed in semanticSearchMessages:", err.message || err);
+    if (searchResults && searchResults.length > 0) {
+      return `[System Chat AI (Local Search)]:\nBased on matched chat history:\n${searchResults.slice(0, 3).map(s => s.pageContent).join("\n")}`;
+    }
+    return "عذراً، لم أتمكن من معالجة الطلب بالذكاء الاصطناعي حالياً.";
   }
-
-  return answer;
 };

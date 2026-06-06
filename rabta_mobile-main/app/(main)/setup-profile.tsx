@@ -44,8 +44,12 @@ export default function SetupProfileScreen() {
   });
 
   useEffect(() => {
-    if (user?.jobTitle || user?.bioHeadline) {
-      router.replace("/chats");
+    if (user?.profileComplete) {
+      if (user?.role === "employer") {
+        router.replace("/employer-dashboard");
+      } else {
+        router.replace("/chats");
+      }
     }
   }, [user, router]);
 
@@ -56,7 +60,7 @@ export default function SetupProfileScreen() {
         jobTitle: user.jobTitle || "",
         location: user.location || "",
         bioHeadline: user.bioHeadline || "",
-        detailedAbout: user.bio || user.about || "",
+        detailedAbout: user.bio || user.about || user.aboutMe || "",
         contactEmail: user.contactEmail || "",
         skillsText: Array.isArray(user.skills) ? user.skills.join(", ") : "",
         companyName: user.companyName || "",
@@ -64,6 +68,30 @@ export default function SetupProfileScreen() {
       });
     }
   }, [user]);
+
+  const fields = React.useMemo(() => {
+    const isEmployer = user?.role === "employer";
+    if (isEmployer) {
+      return [
+        ["companyName", "Company Name"],
+        ["industry", "Industry"],
+        ["location", "Location"],
+        ["bioHeadline", "Headline / Slogan"],
+        ["detailedAbout", "About Company"],
+        ["contactEmail", "Contact Email"],
+      ] as const;
+    } else {
+      return [
+        ["fullName", "Full Name"],
+        ["jobTitle", "Job Title"],
+        ["location", "Location"],
+        ["bioHeadline", "Professional Headline"],
+        ["detailedAbout", "About Me"],
+        ["contactEmail", "Contact Email"],
+        ["skillsText", "Skills (comma separated)"],
+      ] as const;
+    }
+  }, [user?.role]);
 
   const handleImageUpload = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -99,11 +127,15 @@ export default function SetupProfileScreen() {
         companyName: formData.companyName,
         industry: formData.industry,
         skills,
-        profileCompleted: true,
+        profileComplete: true,
       });
-      dispatch(updateProfile({ ...response.data.data.user, profileCompleted: true }));
+      dispatch(updateProfile({ ...response.data.data.user, profileComplete: true }));
       Toast.show({ type: "success", text1: "Profile setup complete!" });
-      router.replace("/profile");
+      if (user?.role === "employer") {
+        router.replace("/employer-dashboard");
+      } else {
+        router.replace("/chats");
+      }
     } catch {
       Toast.show({ type: "error", text1: "Failed to save profile." });
     } finally {
@@ -133,19 +165,7 @@ export default function SetupProfileScreen() {
           />
         </View>
 
-        {(
-          [
-            ["fullName", "Full name"],
-            ["jobTitle", "Job title"],
-            ["location", "Location"],
-            ["bioHeadline", "Headline"],
-            ["detailedAbout", "About"],
-            ["contactEmail", "Contact email"],
-            ["skillsText", "Skills (comma separated)"],
-            ["companyName", "Company name"],
-            ["industry", "Industry"],
-          ] as const
-        ).map(([key, label]) => (
+        {fields.map(([key, label]) => (
           <View key={key} style={{ marginBottom: 12 }}>
             <Text style={[typography.label, { color: colors.textMuted, marginBottom: 6 }]}>{label}</Text>
             <TextInput

@@ -125,22 +125,38 @@ export default function BookmarksScreen() {
     }
   };
 
-  const toJobCardProps = (item: SavedJob): Job => ({
-    id: item._id,
-    title: item.title || "Untitled Job",
-    company: item.publisherId?.companyName || "Unknown Company",
-    location: item.location || "Remote",
-    salary: {
-      min: parseInt(item.budgetOrSalary || "0", 10) || 0,
-      max: parseInt(item.budgetOrSalary || "0", 10) || 0,
-      currency: "$",
-    },
-    category: item.requiredSkills?.[0] || "General",
-    level: item.jobType || "Freelance",
-    description: item.description || "",
-    applicants: item.applicants?.length || 0,
-    postedAt: item.createdAt || "",
-  });
+  const toJobCardProps = (item: SavedJob): Job => {
+    if (!item) {
+      return {
+        id: "",
+        title: "Untitled Job",
+        company: "Unknown Company",
+        location: "Remote",
+        salary: { min: 0, max: 0, currency: "$" },
+        category: "General",
+        level: "Freelance",
+        description: "",
+        applicants: 0,
+        postedAt: "",
+      };
+    }
+    return {
+      id: item._id,
+      title: item.title || "Untitled Job",
+      company: item.publisherId?.companyName || "Unknown Company",
+      location: item.location || "Remote",
+      salary: {
+        min: parseInt(item.budgetOrSalary || "0", 10) || 0,
+        max: parseInt(item.budgetOrSalary || "0", 10) || 0,
+        currency: "$",
+      },
+      category: item.requiredSkills?.[0] || "General",
+      level: item.jobType || "Freelance",
+      description: item.description || "",
+      applicants: item.applicants?.length || 0,
+      postedAt: item.createdAt || "",
+    };
+  };
 
   const activeTabName = isFreelancer ? "Saved Projects" : isEmployer ? "Saved Talents" : "Saved Items";
   const isEmpty = isEmployer ? savedFreelancers.length === 0 : savedJobs.length === 0;
@@ -163,8 +179,8 @@ export default function BookmarksScreen() {
         )}
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={[typography.h3, { color: colors.text }]}>{freelancer.fullName}</Text>
-        <Text style={[typography.bodySmall, { color: colors.purple, fontWeight: "600" }]}>{freelancer.jobTitle || "Freelancer"}</Text>
+        <Text style={{ fontSize: 16, fontWeight: "700", color: colors.text }}>{freelancer.fullName}</Text>
+        <Text style={{ fontSize: 11, fontWeight: "600", color: colors.purple, marginTop: 2 }}>{freelancer.jobTitle || "Freelancer"}</Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
           {(freelancer.skills || []).slice(0, 3).map((skill, index) => (
             <View key={index} style={[styles.skill, { backgroundColor: colors.purpleSoft }]}>
@@ -251,10 +267,20 @@ export default function BookmarksScreen() {
         />
       )}
 
+      {!isLoading && !fetchError && isEmpty && !isEmployer && !isFreelancer && (
+        <EmptyState
+          icon="bookmark-border"
+          heading="No saved items yet"
+          subtext="There are no bookmarked items under this account."
+          colors={colors}
+          isDark={isDark}
+        />
+      )}
+
       {!isLoading && !fetchError && !isEmpty && (
         <View style={{ gap: 16, paddingBottom: 32 }}>
-          {isEmployer && savedFreelancers.map(renderFreelancerCard)}
-          {isFreelancer && savedJobs.map((item) => (
+          {isEmployer && savedFreelancers.filter(item => item !== null && item !== undefined).map(renderFreelancerCard)}
+          {isFreelancer && savedJobs.filter(item => item !== null && item !== undefined).map((item) => (
             <JobCard key={item._id} job={toJobCardProps(item)} isSavedPage />
           ))}
         </View>

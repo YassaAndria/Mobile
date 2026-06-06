@@ -136,23 +136,37 @@ export const answerQuestion = catchAsync(
 
 export const generateChatReplies = catchAsync(
   async (req: Request, res: Response) => {
-    const { chatId } = req.body;
-    const lastMessages = await Message.find({ chatId })
-      .sort({ createdAt: -1 })
-      .limit(3);
+    const { chatId, messageId, messageContent } = req.body;
+    let messagesText = "";
 
-    if (lastMessages.length === 0) {
-      res.status(200).json({
-        status: "success",
-        data: ["مرحباً بك", "كيف يمكنني المساعدة؟"],
-      });
-      return;
+    if (messageContent) {
+      messagesText = messageContent as string;
+    } else if (messageId) {
+      const msg = await Message.findById(messageId);
+      if (msg) {
+        messagesText = msg.content || "";
+      }
     }
 
-    const messagesText = lastMessages
-      .reverse()
-      .map((msg: any) => msg.content)
-      .join("\n");
+    if (!messagesText) {
+      const lastMessages = await Message.find({ chatId })
+        .sort({ createdAt: -1 })
+        .limit(3);
+
+      if (lastMessages.length === 0) {
+        res.status(200).json({
+          status: "success",
+          data: ["مرحباً بك", "كيف يمكنني المساعدة؟"],
+        });
+        return;
+      }
+
+      messagesText = lastMessages
+        .reverse()
+        .map((msg: any) => msg.content)
+        .join("\n");
+    }
+
     const userId = req.user?._id?.toString();
     const result = await aiAssistantService.generateSmartReplies(userId, messagesText);
 

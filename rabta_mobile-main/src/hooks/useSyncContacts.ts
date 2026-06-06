@@ -3,6 +3,7 @@ import * as Contacts from 'expo-contacts/legacy';
 import * as Localization from 'expo-localization';
 import axiosInstance from '../api/axiosInstance';
 import { Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export interface UnifiedContact {
   id: string; // unique key
@@ -27,6 +28,11 @@ export function useSyncContacts() {
       if (status !== 'granted') {
         throw new Error('Contacts permission denied. Please enable it in your device settings.');
       }
+
+      Toast.show({
+        type: 'success',
+        text1: '✅ Contacts permission granted',
+      });
 
       const { data } = await Contacts.getContactsAsync({
         fields: [Contacts.Fields.PhoneNumbers],

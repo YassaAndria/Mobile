@@ -21,6 +21,7 @@ export default function ChatsScreen() {
   const currentUserId = currentUser?._id || currentUser?.id || '';
 
   const [chats, setChats] = useState<any[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,12 +84,19 @@ export default function ChatsScreen() {
       });
     };
 
+    const handleOnlineUsers = (onlineUserIds: string[]) => {
+      console.log('🟢 Received online-users from socket:', onlineUserIds);
+      setOnlineUsers(onlineUserIds);
+    };
+
     socket.on('receive-message', handleNewMessage);
     socket.on('receiveMessage', handleNewMessage);
+    socket.on('online-users', handleOnlineUsers);
     
     return () => {
       socket.off('receive-message', handleNewMessage);
       socket.off('receiveMessage', handleNewMessage);
+      socket.off('online-users', handleOnlineUsers);
     };
   }, [socket, currentUserId, fetchChats]);
 
@@ -106,23 +114,28 @@ export default function ChatsScreen() {
       return {
         name: chat.groupName || chat.name || 'Group Chat',
         avatar: getAvatarUri(chat.groupAvatar || chat.avatar),
+        isOnline: false,
       };
     }
     
     // 1-on-1 chat
     const partner = chat.users?.find((u: any) => (u._id || u.id) !== currentUserId);
     if (partner) {
+      const partnerId = partner._id || partner.id;
+      const isOnline = onlineUsers.includes(partnerId) || partner.status === 'online';
       return {
         name: partner.fullName || partner.name || partner.username || 'User',
         avatar: getAvatarUri(partner.avatar || partner.profilePicture),
+        isOnline,
       };
     }
     
     return {
       name: chat.name || 'Chat',
       avatar: getAvatarUri(chat.avatar),
+      isOnline: false,
     };
-  }, [currentUserId]);
+  }, [currentUserId, onlineUsers]);
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
@@ -134,7 +147,7 @@ export default function ChatsScreen() {
   }, [chats, searchQuery, getChatDetails]);
 
   const renderItem = ({ item }: { item: any }) => {
-    const { name, avatar } = getChatDetails(item);
+    const { name, avatar, isOnline } = getChatDetails(item);
     const initials = name.charAt(0).toUpperCase();
 
     // Resolve last message — backend may use lastMessage or latestMessage, both shapes supported
@@ -175,6 +188,9 @@ export default function ChatsScreen() {
             <Image source={{ uri: avatar }} style={styles.avatar} contentFit="cover" />
           ) : (
             <Text style={[styles.initials, { color: colors.purple }]}>{initials}</Text>
+          )}
+          {isOnline && (
+            <View style={[styles.onlineDot, { backgroundColor: '#10B981', borderColor: colors.surface }]} />
           )}
         </View>
         
@@ -338,11 +354,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
-    overflow: 'hidden',
   },
   avatar: {
     width: '100%',
     height: '100%',
+    borderRadius: 26,
   },
   initials: {
     fontSize: 20,
@@ -376,5 +392,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 11,
     fontWeight: '700',
+  },
+  onlineDot: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    zIndex: 10,
   },
 });

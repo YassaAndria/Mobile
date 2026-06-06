@@ -16,8 +16,10 @@ import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import axiosInstance from '../../src/api/axiosInstance';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../../src/theme/ThemeContext';
 
 export default function AdminJobsScreen() {
+  const { colors, isDark } = useTheme();
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,22 +79,22 @@ export default function AdminJobsScreen() {
   );
 
   const renderItem = ({ item }: { item: any }) => (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.cardHeader}>
-        <Text style={styles.titleText}>{item?.title || item?.position || 'No Title'}</Text>
+        <Text style={[styles.titleText, { color: colors.text }]}>{item?.title || item?.position || 'No Title'}</Text>
         <Pressable style={styles.deleteBtn} onPress={() => deleteJob(item._id)}>
           <Ionicons name="trash-outline" size={18} color="#ef4444" />
         </Pressable>
       </View>
       
       <View style={styles.infoRow}>
-        <Ionicons name="business-outline" size={16} color="rgba(255,255,255,0.5)" />
-        <Text style={styles.employerText}>
+        <Ionicons name="business-outline" size={16} color={colors.textMuted} />
+        <Text style={[styles.employerText, { color: colors.textMuted }]}>
           {item?.publisherId?.fullName || item?.publisherId?.companyName || 'Unknown'}
         </Text>
       </View>
       
-      <View style={styles.budgetRow}>
+      <View style={[styles.budgetRow, { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.08)' }]}>
         <Ionicons name="cash-outline" size={16} color="#22c55e" />
         <Text style={styles.budgetText}>${item?.budgetOrSalary || 'N/A'}</Text>
       </View>
@@ -101,28 +103,28 @@ export default function AdminJobsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7F77DD" />
+      <SafeAreaView style={[styles.centerContainer, { backgroundColor: colors.bg }]}>
+        <ActivityIndicator size="large" color={colors.purple} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={styles.screenHeader}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+          <Pressable onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
-          <Text style={styles.headerTitle}>Jobs Moderation</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Jobs Moderation</Text>
         </View>
         
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="rgba(255,255,255,0.5)" style={styles.searchIcon} />
+        <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Ionicons name="search" size={20} color={colors.textMuted} style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
             placeholder="Search jobs by title or company..."
-            placeholderTextColor="rgba(255,255,255,0.5)"
+            placeholderTextColor={colors.textMuted}
             value={searchTerm}
             onChangeText={setSearchTerm}
             autoCapitalize="none"
@@ -135,7 +137,7 @@ export default function AdminJobsScreen() {
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>No jobs found.</Text>
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>No jobs found.</Text>
           }
         />
       </KeyboardAvoidingView>
@@ -146,11 +148,9 @@ export default function AdminJobsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D0D12',
   },
   centerContainer: {
     flex: 1,
-    backgroundColor: '#0D0D12',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -164,27 +164,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#141419',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     marginRight: 12,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#141419',
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     paddingHorizontal: 12,
   },
   searchIcon: {
@@ -193,7 +188,6 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 48,
-    color: '#FFFFFF',
     fontSize: 16,
   },
   listContent: {
@@ -202,15 +196,12 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    color: 'rgba(255,255,255,0.5)',
     marginTop: 24,
     fontSize: 16,
   },
   card: {
-    backgroundColor: '#141419',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     padding: 16,
     marginBottom: 12,
   },
@@ -224,7 +215,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginRight: 12,
   },
   deleteBtn: {
@@ -239,13 +229,11 @@ const styles = StyleSheet.create({
   },
   employerText: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
     marginLeft: 6,
   },
   budgetRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
     alignSelf: 'flex-start',
     paddingHorizontal: 12,
     paddingVertical: 6,

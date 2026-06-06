@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import axiosInstance from '../../src/api/axiosInstance';
+import { useTheme } from '../../src/theme/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -22,6 +23,7 @@ interface Stats {
 }
 
 export default function AdminOverviewScreen() {
+  const { colors, isDark } = useTheme();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,48 +54,48 @@ export default function AdminOverviewScreen() {
 
   if (loading && !refreshing) {
     return (
-      <SafeAreaView style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7F77DD" />
+      <SafeAreaView style={[styles.centerContainer, { backgroundColor: colors.bg }]}>
+        <ActivityIndicator size="large" color={colors.purple} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#7F77DD" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.purple} />
         }
       >
-        <Text style={styles.headerTitle}>Overview</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Overview</Text>
 
         <View style={styles.statsGrid}>
           {/* Total Users Card */}
-          <View style={[styles.statCard, styles.cardUsers]}>
-            <View style={styles.iconContainerUsers}>
-              <Ionicons name="people" size={24} color="#7F77DD" />
+          <View style={[styles.statCard, styles.cardUsers, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={[styles.iconContainerUsers, { backgroundColor: colors.purple10 }]}>
+              <Ionicons name="people" size={24} color={colors.purple} />
             </View>
-            <Text style={styles.statLabel}>Total Users</Text>
-            <Text style={styles.statValue}>{stats?.totalUsers || 0}</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Total Users</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{stats?.totalUsers || 0}</Text>
           </View>
 
           {/* Total Jobs Card */}
-          <View style={[styles.statCard, styles.cardJobs]}>
-            <View style={styles.iconContainerJobs}>
+          <View style={[styles.statCard, styles.cardJobs, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={[styles.iconContainerJobs, { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.08)' }]}>
               <Ionicons name="briefcase" size={24} color="#22c55e" />
             </View>
-            <Text style={styles.statLabel}>Total Jobs</Text>
-            <Text style={styles.statValue}>{stats?.totalJobs || 0}</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Total Jobs</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{stats?.totalJobs || 0}</Text>
           </View>
 
           {/* Total Communities Card */}
-          <View style={[styles.statCard, styles.cardGroups]}>
-            <View style={styles.iconContainerGroups}>
+          <View style={[styles.statCard, styles.cardGroups, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={[styles.iconContainerGroups, { backgroundColor: isDark ? 'rgba(55, 138, 221, 0.15)' : 'rgba(55, 138, 221, 0.08)' }]}>
               <Ionicons name="globe" size={24} color="#378ADD" />
             </View>
-            <Text style={styles.statLabel}>Communities</Text>
-            <Text style={styles.statValue}>{stats?.totalGroups || 0}</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Communities</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{stats?.totalGroups || 0}</Text>
           </View>
         </View>
 
@@ -105,11 +107,9 @@ export default function AdminOverviewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D0D12',
   },
   centerContainer: {
     flex: 1,
-    backgroundColor: '#0D0D12',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 24,
   },
   statsGrid: {
@@ -129,10 +128,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   statCard: {
-    backgroundColor: '#141419',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     padding: 20,
     marginBottom: 16,
     width: (width - 48) / 2, // 2 columns layout
@@ -154,7 +151,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(127, 119, 221, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -163,7 +159,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -172,19 +167,16 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(55, 138, 221, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
   statLabel: {
-    color: 'rgba(255,255,255,0.6)',
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
   },
   statValue: {
-    color: '#FFFFFF',
     fontSize: 28,
     fontWeight: 'bold',
   }

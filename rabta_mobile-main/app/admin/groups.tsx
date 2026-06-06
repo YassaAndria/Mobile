@@ -16,8 +16,10 @@ import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import axiosInstance from '../../src/api/axiosInstance';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../../src/theme/ThemeContext';
 
 export default function AdminGroupsScreen() {
+  const { colors, isDark } = useTheme();
   const [groups, setGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,27 +77,27 @@ export default function AdminGroupsScreen() {
   );
 
   const renderItem = ({ item }: { item: any }) => (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.cardHeader}>
-        <Text style={styles.nameText}>{item?.name || 'Unnamed'}</Text>
+        <Text style={[styles.nameText, { color: colors.text }]}>{item?.name || 'Unnamed'}</Text>
         <Pressable style={styles.deleteBtn} onPress={() => deleteGroup(item._id)}>
           <Ionicons name="trash-outline" size={18} color="#ef4444" />
         </Pressable>
       </View>
       
       <View style={styles.infoRow}>
-        <Ionicons name="person-outline" size={16} color="rgba(255,255,255,0.5)" />
-        <Text style={styles.infoText}>{item?.creator?.fullName || 'Unknown'}</Text>
+        <Ionicons name="person-outline" size={16} color={colors.textMuted} />
+        <Text style={[styles.infoText, { color: colors.textMuted }]}>{item?.creator?.fullName || 'Unknown'}</Text>
       </View>
       
-      <View style={styles.statsRow}>
+      <View style={[styles.statsRow, { borderTopColor: colors.border }]}>
         <View style={styles.statItem}>
-          <Ionicons name="people" size={16} color="#7F77DD" />
-          <Text style={styles.statValue}>{item?.memberCount || 0} Members</Text>
+          <Ionicons name="people" size={16} color={colors.purple} />
+          <Text style={[styles.statValue, { color: colors.purple }]}>{item?.memberCount || 0} Members</Text>
         </View>
         <View style={styles.statItem}>
-          <Ionicons name="calendar-outline" size={16} color="rgba(255,255,255,0.5)" />
-          <Text style={styles.dateText}>
+          <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
+          <Text style={[styles.dateText, { color: colors.textMuted }]}>
             {item?.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A'}
           </Text>
         </View>
@@ -105,28 +107,28 @@ export default function AdminGroupsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7F77DD" />
+      <SafeAreaView style={[styles.centerContainer, { backgroundColor: colors.bg }]}>
+        <ActivityIndicator size="large" color={colors.purple} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={styles.screenHeader}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+          <Pressable onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
-          <Text style={styles.headerTitle}>Community Mgmt</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Community Mgmt</Text>
         </View>
         
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="rgba(255,255,255,0.5)" style={styles.searchIcon} />
+        <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Ionicons name="search" size={20} color={colors.textMuted} style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
             placeholder="Search communities..."
-            placeholderTextColor="rgba(255,255,255,0.5)"
+            placeholderTextColor={colors.textMuted}
             value={searchTerm}
             onChangeText={setSearchTerm}
             autoCapitalize="none"
@@ -139,7 +141,7 @@ export default function AdminGroupsScreen() {
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>No communities found.</Text>
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>No communities found.</Text>
           }
         />
       </KeyboardAvoidingView>
@@ -150,11 +152,9 @@ export default function AdminGroupsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D0D12',
   },
   centerContainer: {
     flex: 1,
-    backgroundColor: '#0D0D12',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -168,27 +168,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#141419',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     marginRight: 12,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#141419',
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     paddingHorizontal: 12,
   },
   searchIcon: {
@@ -197,7 +192,6 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 48,
-    color: '#FFFFFF',
     fontSize: 16,
   },
   listContent: {
@@ -206,15 +200,12 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    color: 'rgba(255,255,255,0.5)',
     marginTop: 24,
     fontSize: 16,
   },
   card: {
-    backgroundColor: '#141419',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
     padding: 16,
     marginBottom: 12,
   },
@@ -228,7 +219,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginRight: 12,
   },
   deleteBtn: {
@@ -243,7 +233,6 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
     marginLeft: 6,
   },
   statsRow: {
@@ -251,7 +240,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.07)',
     paddingTop: 12,
   },
   statItem: {
@@ -259,13 +247,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    color: '#7F77DD',
     fontWeight: 'bold',
     fontSize: 14,
     marginLeft: 6,
   },
   dateText: {
-    color: 'rgba(255,255,255,0.5)',
     fontSize: 14,
     marginLeft: 6,
   }

@@ -1,4 +1,4 @@
-// hello test yassa
+// hello test yassa - updated env key
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -31,6 +31,7 @@ import jwt from 'jsonwebtoken';
 import Call from './models/Call'; 
 import { User } from './models/user';
 import * as chatService from './services/chat.service';
+import { sendPushToUsers } from './services/notification.service';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -179,8 +180,17 @@ io.on('connection', (socket) => {
   // ==========================================
   // بما إن اليوزر اتأكدنا من هويته في الـ middleware
   // بنسجله تلقائياً في الـ userSocketMap
+  const setOnline = async (userId: string) => {
+    try {
+      await User.findByIdAndUpdate(userId, { status: 'online' });
+    } catch (err) {
+      console.error(`Error setting online status for ${userId}:`, err);
+    }
+  };
+
   if (authenticatedUserId) {
     addUserSocket(authenticatedUserId, socket.id);
+    setOnline(authenticatedUserId);
     console.log(`✅ [Auto] The user [${authenticatedUserId}] registered via auth middleware on line [${socket.id}]`);
     broadcastActiveUsers();
   }
@@ -188,6 +198,7 @@ io.on('connection', (socket) => {
   // التسجيل اليدوي (للتوافق مع الكود القديم)
   socket.on('register-user', (userId: string) => {
     addUserSocket(userId, socket.id);
+    setOnline(userId);
     socket.join(userId); // Early room join as requested
     console.log(`✅ The user [${userId}] Connected to the socket line [${socket.id}]`);
     broadcastActiveUsers();
@@ -195,6 +206,7 @@ io.on('connection', (socket) => {
 
   socket.on('registerUser', (userId: string) => {
     addUserSocket(userId, socket.id);
+    setOnline(userId);
     socket.join(userId); // Early room join as requested
     console.log(`✅ The user [${userId}] Connected to the socket line [${socket.id}]`);
     broadcastActiveUsers();
@@ -307,6 +319,12 @@ io.on('connection', (socket) => {
             senderId: authenticatedUserId,
             chatId: data.chatId
           });
+
+          sendPushToUsers([receiverId], {
+            title: senderName,
+            body: data.content || 'أرسل لك رسالة جديدة',
+            data: { type: 'chat', chatId: data.chatId, senderId: authenticatedUserId }
+          }).catch(err => console.error('⚠️ Direct msg push notify error:', err));
         }
       }
 
@@ -317,12 +335,14 @@ io.on('connection', (socket) => {
         );
         console.log('👥 group members to notify:', groupMembers);
         
+        const senderName = (socket as any).user?.fullName || 'Someone';
+        const pushRecipients: string[] = [];
+
         for (const memberId of groupMembers) {
           const memberUser = await User.findById(memberId)
             .select('notificationSettings')
             .lean();
           if (memberUser?.notificationSettings?.communityMentions !== false) {
-            const senderName = (socket as any).user?.fullName || 'Someone';
             console.log('✅ Emitting group notification to:', memberId.toString());
             io.to(memberId.toString()).emit('notification', {
               type: 'group',
@@ -330,7 +350,16 @@ io.on('connection', (socket) => {
               senderId: authenticatedUserId,
               chatId: data.chatId
             });
+            pushRecipients.push(memberId.toString());
           }
+        }
+
+        if (pushRecipients.length > 0) {
+          sendPushToUsers(pushRecipients, {
+            title: chat.name || chat.groupName || 'مجموعة جديدة',
+            body: `${senderName}: ${data.content || 'أرسل رسالة جديدة'}`,
+            data: { type: 'group', chatId: data.chatId, senderId: authenticatedUserId }
+          }).catch(err => console.error('⚠️ Group msg push notify error:', err));
         }
       }
       
@@ -761,10 +790,18 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     console.log(`🔴 Line disconnected: ${socket.id}`);
     const disconnectedUserId = removeUserSocket(socket.id);
-    if (disconnectedUserId) {
+    if (disconnectedUserId && !isUserOnline(disconnectedUserId)) {
+      try {
+        await User.findByIdAndUpdate(disconnectedUserId, {
+          status: 'offline',
+          lastSeen: new Date()
+        });
+      } catch (err) {
+        console.error(`Error updating offline status for user ${disconnectedUserId}:`, err);
+      }
       broadcastActiveUsers();
     }
   });

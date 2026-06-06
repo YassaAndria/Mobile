@@ -62,7 +62,7 @@ function AuthHydrate({ children }: { children: React.ReactNode }) {
   const didRun = useRef(false);
 
   // Request contacts permission on first app launch
-  useInitialPermissions();
+  // useInitialPermissions();
 
   useEffect(() => {
     if (didRun.current) return;

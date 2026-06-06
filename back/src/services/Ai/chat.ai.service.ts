@@ -149,26 +149,50 @@ export const searchChatRAG = async (
   prompt: string,
   limit = 3,
 ) => {
-  const queryEmbedding = await embeddingsModel.embedQuery(prompt);
-  return await CommunityChunk.aggregate([
-    {
-      $vectorSearch: {
-        index: "vector_index",
-        path: "embedding",
-        queryVector: queryEmbedding,
-        numCandidates: limit * 10,
-        limit: limit,
-        filter: { chatId: new mongoose.Types.ObjectId(chatId) },
+  let results: any[] = [];
+  try {
+    const queryEmbedding = await embeddingsModel.embedQuery(prompt);
+    results = await CommunityChunk.aggregate([
+      {
+        $vectorSearch: {
+          index: "vector_index",
+          path: "embedding",
+          queryVector: queryEmbedding,
+          numCandidates: limit * 10,
+          limit: limit,
+          filter: { chatId: new mongoose.Types.ObjectId(chatId) },
+        },
       },
-    },
-    {
-      $project: {
-        _id: 0,
-        content: 1,
-        metadata: 1, // 👈 هنا خلينا الـ project يرجع الـ metadata كلها عشان نستفيد من الـ timestamp
+      {
+        $project: {
+          _id: 0,
+          content: 1,
+          metadata: 1,
+        },
       },
-    },
-  ]);
+    ]);
+  } catch (err: any) {
+    console.error("⚠️ searchChatRAG vector search failed, using Mongoose fallback:", err.message || err);
+  }
+
+  if (!results || results.length === 0) {
+    try {
+      const keywords = prompt.split(" ").filter((w: string) => w.length > 2).join("|");
+      const keywordMatches = await CommunityChunk.find({
+        chatId: new mongoose.Types.ObjectId(chatId),
+        content: { $regex: keywords || prompt, $options: "i" }
+      }).limit(limit);
+
+      results = keywordMatches.map((doc: any) => ({
+        content: doc.content,
+        metadata: doc.metadata
+      }));
+    } catch (fallbackErr: any) {
+      console.error("❌ Mongoose regex fallback search failed in searchChatRAG:", fallbackErr.message || fallbackErr);
+    }
+  }
+
+  return results;
 };
 
 // ==========================================
@@ -224,9 +248,21 @@ export const askChatAi = async (
     currentUserName: currentUserName,
   });
 
-  const llmModel = await llm;
-  const response = await llmModel.invoke(formattedPrompt);
-  return response.content;
+  try {
+    const llmModel = await llm;
+    const response = await llmModel.invoke(formattedPrompt);
+    const contentStr = typeof response.content === "string" ? response.content : JSON.stringify(response.content);
+    if (contentStr === "__OFFLINE_FALLBACK__" || contentStr.includes("__OFFLINE_FALLBACK__")) {
+      throw new Error("Offline fallback triggered");
+    }
+    return response.content;
+  } catch (err: any) {
+    console.error("❌ LLM invocation failed in askChatAi:", err.message || err);
+    if (results && results.length > 0) {
+      return `[System AI (Local Search Fallback)]:\nBased on chat files:\n${results[0].content}`;
+    }
+    return "I am currently offline but ready to assist you. Please try again later.";
+  }
 };
 
 // ==========================================

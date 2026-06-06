@@ -88,9 +88,30 @@ export interface IUser extends Document {
     appChatbot: number;
     employerMatching: number;
   };
+  aiCurrentWindowUsage?: {
+    voiceToText: number;
+    chatSummarization: number;
+    smartSearch: number;
+    fileSummarization: number;
+    suggestedReplies: number;
+    translation: number;
+    appChatbot: number;
+    employerMatching: number;
+  };
+  aiLimitResets?: {
+    voiceToText?: Date | null;
+    chatSummarization?: Date | null;
+    smartSearch?: Date | null;
+    fileSummarization?: Date | null;
+    suggestedReplies?: Date | null;
+    translation?: Date | null;
+    appChatbot?: Date | null;
+    employerMatching?: Date | null;
+  };
   totalTokensUsed: number;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
+  lastSeen?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword: (candidatePassword: string, userPassword: string) => Promise<boolean>;
@@ -254,6 +275,7 @@ const UserSchema: Schema = new Schema({
     inAppSounds: { type: Boolean, default: true }
   },
   showOnlineStatus: { type: Boolean, default: true },
+  lastSeen: { type: Date, default: Date.now },
   savedProjects: [{ type: Schema.Types.ObjectId, ref: 'Job' }],
   savedFreelancers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   connections: [{ type: Schema.Types.ObjectId, ref: 'User' }],
@@ -275,6 +297,26 @@ const UserSchema: Schema = new Schema({
     translation: { type: Number, default: 0 },
     appChatbot: { type: Number, default: 0 },
     employerMatching: { type: Number, default: 0 }
+  },
+  aiCurrentWindowUsage: {
+    voiceToText: { type: Number, default: 0 },
+    chatSummarization: { type: Number, default: 0 },
+    smartSearch: { type: Number, default: 0 },
+    fileSummarization: { type: Number, default: 0 },
+    suggestedReplies: { type: Number, default: 0 },
+    translation: { type: Number, default: 0 },
+    appChatbot: { type: Number, default: 0 },
+    employerMatching: { type: Number, default: 0 }
+  },
+  aiLimitResets: {
+    voiceToText: { type: Date, default: null },
+    chatSummarization: { type: Date, default: null },
+    smartSearch: { type: Date, default: null },
+    fileSummarization: { type: Date, default: null },
+    suggestedReplies: { type: Date, default: null },
+    translation: { type: Date, default: null },
+    appChatbot: { type: Date, default: null },
+    employerMatching: { type: Date, default: null }
   },
   totalTokensUsed: { type: Number, default: 0 },
   resetPasswordToken: String,

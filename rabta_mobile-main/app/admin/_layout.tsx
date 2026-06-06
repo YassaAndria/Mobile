@@ -10,14 +10,14 @@ import { useTheme } from "../../src/theme/ThemeContext";
 export default function AdminLayout() {
   const { user, token } = useSelector((s: RootState) => s.auth);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isDark } = useTheme();
+  const { colors, isDark } = useTheme();
 
   // Theme-aware dynamic colors (cannot live in StyleSheet.create)
-  const rootBg         = isDark ? "#121212" : "#F3F4F6";
-  const headerBg       = isDark ? "#121212" : "#FFFFFF";
-  const headerBorder   = isDark ? "#333333" : "#E5E7EB";
-  const headerTitleClr = isDark ? "#FFFFFF" : "#111827";
-  const sidebarBg      = isDark ? "#121212" : "#FFFFFF";
+  const rootBg         = colors.bg;
+  const headerBg       = colors.surface;
+  const headerBorder   = colors.border;
+  const headerTitleClr = colors.text;
+  const sidebarBg      = colors.surface;
 
   if (!token || !user) {
     return <Redirect href="/login" />;

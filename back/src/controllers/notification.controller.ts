@@ -107,3 +107,40 @@ export const updatePrivacySettings = catchAsync(async (req: Request, res: Respon
     showOnlineStatus: Boolean(showOnlineStatus)
   });
 });
+
+import DeviceToken from '../models/DeviceToken';
+
+export const registerDeviceToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { token, platform } = req.body;
+  const userId = (req.user as any)._id;
+
+  if (!token) {
+    return next(new AppError('Push token is required', 400));
+  }
+
+  await DeviceToken.findOneAndUpdate(
+    { token },
+    { userId, platform },
+    { upsert: true, new: true }
+  );
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Device token registered successfully.'
+  });
+});
+
+export const unregisterDeviceToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return next(new AppError('Push token is required', 400));
+  }
+
+  await DeviceToken.findOneAndDelete({ token });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Device token unregistered successfully.'
+  });
+});

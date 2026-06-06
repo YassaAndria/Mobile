@@ -8,10 +8,10 @@ import {
   Alert,
   Vibration,
   Modal,
-  SafeAreaView,
   Keyboard,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -35,6 +35,10 @@ interface ChatBodyProps {
   onStar?: (messageId: string) => void;
   onInfo?: (message: MessageType) => void;
   onMore?: (message: MessageType) => void;
+  translatedMessages?: Record<string, { translatedText: string; originalText: string }>;
+  translatingMessageId?: string | null;
+  onTranslate?: (message: MessageType) => void;
+  onClearTranslation?: (messageId: string) => void;
 }
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
@@ -79,6 +83,10 @@ export default function ChatBody({
   onStar,
   onInfo,
   onMore,
+  translatedMessages,
+  translatingMessageId,
+  onTranslate,
+  onClearTranslation,
 }: ChatBodyProps) {
   const { colors, isDark } = useTheme();
   const router = useRouter();
@@ -108,12 +116,19 @@ export default function ChatBody({
   const soundRef = useRef<any>(null);
 
   // Translation states
-  const [translatedMessages, setTranslatedMessages] = useState<Record<string, { translatedText: string, originalText: string }>>({});
-  const [translatingMessageId, setTranslatingMessageId] = useState<string | null>(null);
+  const [internalTranslated, setInternalTranslated] = useState<Record<string, { translatedText: string; originalText: string }>>({});
+  const [internalTranslatingId, setInternalTranslatingId] = useState<string | null>(null);
+
+  const activeTranslated = translatedMessages || internalTranslated;
+  const activeTranslatingId = translatingMessageId !== undefined ? translatingMessageId : internalTranslatingId;
 
   const handleTranslateMessage = useCallback(async (msg: MessageType) => {
+    if (onTranslate) {
+      onTranslate(msg);
+      return;
+    }
     if (!msg.content) return;
-    setTranslatingMessageId(msg.id);
+    setInternalTranslatingId(msg.id);
     try {
       const isArabic = /[\u0600-\u06FF]/.test(msg.content);
       const targetLang = isArabic ? 'en' : 'ar';
@@ -123,7 +138,7 @@ export default function ChatBody({
         { timeout: 60000 },
       );
       if (res.data?.status === 'success' && res.data?.data) {
-        setTranslatedMessages((prev) => ({
+        setInternalTranslated((prev) => ({
           ...prev,
           [msg.id]: {
             translatedText: res.data.data,
@@ -137,9 +152,9 @@ export default function ChatBody({
       console.error('Error translating message:', err);
       Alert.alert('Translation Error', err.response?.data?.message || 'Failed to translate message.');
     } finally {
-      setTranslatingMessageId(null);
+      setInternalTranslatingId(null);
     }
-  }, []);
+  }, [onTranslate]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -514,14 +529,14 @@ export default function ChatBody({
               </TouchableOpacity>
             ) : (
               <View style={{ gap: 4 }}>
-                {translatingMessageId === item.id ? (
+                {activeTranslatingId === item.id ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 }}>
                     <ActivityIndicator size="small" color={isMine ? '#fff' : colors.purple} />
                     <Text style={{ fontStyle: 'italic', fontSize: 13, color: isMine ? 'rgba(255,255,255,0.7)' : colors.textMuted }}>
                       Translating...
                     </Text>
                   </View>
-                ) : translatedMessages[item.id] ? (
+                ) : activeTranslated[item.id] ? (
                   <View style={{ gap: 2 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                       <MaterialIcons name="g-translate" size={12} color={isMine ? 'rgba(255,255,255,0.8)' : colors.purple} />
@@ -537,15 +552,19 @@ export default function ChatBody({
                         flexShrink: 1,
                       }}
                     >
-                      {translatedMessages[item.id].translatedText}
+                      {activeTranslated[item.id].translatedText}
                     </Text>
                     <TouchableOpacity
                       onPress={() => {
-                        setTranslatedMessages((prev) => {
-                          const copy = { ...prev };
-                          delete copy[item.id];
-                          return copy;
-                        });
+                        if (onClearTranslation) {
+                          onClearTranslation(item.id);
+                        } else {
+                          setInternalTranslated((prev) => {
+                            const copy = { ...prev };
+                            delete copy[item.id];
+                            return copy;
+                          });
+                        }
                       }}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >

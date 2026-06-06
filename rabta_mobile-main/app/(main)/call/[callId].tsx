@@ -17,11 +17,24 @@
  */
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet, StatusBar, Platform } from 'react-native';
+import { View, StyleSheet, StatusBar, Platform, BackHandler } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../src/store/store';
+
+// Fix for ZegoUIKitPrebuiltCall grantPermissions ReferenceError on New Architecture
+if (typeof (globalThis as any).Platform === 'undefined') {
+  (globalThis as any).Platform = Platform;
+}
+
+// Polyfill BackHandler.removeEventListener for newer React Native versions (0.77+)
+// to prevent crash inside ZegoUIKitPrebuiltCall on unmount.
+if (typeof (BackHandler as any).removeEventListener !== 'function') {
+  (BackHandler as any).removeEventListener = (eventName: string, handler: any) => {
+    // No-op
+  };
+}
 
 import {
   ZegoUIKitPrebuiltCall,
@@ -116,12 +129,18 @@ export default function CallScreen() {
     },
     // ── Callbacks ────────────────────────────────────────────────────────
     onHangUp: () => {
-      // Navigate back to the chat window when the call ends / is hung up.
-      router.back();
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/');
+      }
     },
-    onHangUpConfirmation: async () => {
-      // No confirmation dialog — hang up immediately.
-      return true;
+    onCallEnd: (_callID: string, _reason: string, _duration: number) => {
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/');
+      }
     },
   };
 
@@ -144,8 +163,6 @@ export default function CallScreen() {
         // Server-generated Token04 — required when appSign is blank.
         token={zegoToken as string}
         config={callConfig}
-        // Users in the room (1-on-1: caller + callee)
-        invitees={users.filter((u) => u.userID !== myUserId)}
       />
     </View>
   );

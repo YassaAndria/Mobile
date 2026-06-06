@@ -1,10 +1,18 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, Platform } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, Platform, BackHandler } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 
 // Fix for ZegoUIKitPrebuiltCall grantPermissions ReferenceError on New Architecture
 if (typeof (globalThis as any).Platform === 'undefined') {
   (globalThis as any).Platform = Platform;
+}
+
+// Polyfill BackHandler.removeEventListener for newer React Native versions (0.77+)
+// to prevent crash inside ZegoUIKitPrebuiltCall on unmount.
+if (typeof (BackHandler as any).removeEventListener !== 'function') {
+  (BackHandler as any).removeEventListener = (eventName: string, handler: any) => {
+    // No-op
+  };
 }
 
 import Constants from 'expo-constants';
