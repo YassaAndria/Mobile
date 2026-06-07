@@ -102,7 +102,15 @@ export default function LoginScreen() {
       const hasLoggedInKey = `has_logged_in_${userId}`;
       const hasLoggedInBefore = await AsyncStorage.getItem(hasLoggedInKey);
 
-      const targetScreen = authUser.role === "employer" ? "/employer-dashboard" : "/chats";
+      let targetScreen = "/chats";
+      if (authUser.role === "employer") {
+        targetScreen = "/employer-dashboard";
+      }
+
+      if (authUser.role === "admin") {
+        router.replace(targetScreen);
+        return;
+      }
 
       if (hasLoggedInBefore === "true") {
         router.replace(targetScreen);
@@ -155,8 +163,10 @@ export default function LoginScreen() {
       const hasLoggedInKey = `has_logged_in_${userId}`;
       const hasLoggedInBefore = await AsyncStorage.getItem(hasLoggedInKey);
 
-      if (hasLoggedInBefore === "true") {
+      if (data.data.user.role === "admin") {
         router.replace("/chats");
+      } else if (hasLoggedInBefore === "true") {
+        router.replace(data.data.user.role === "employer" ? "/employer-dashboard" : "/chats");
       } else {
         await AsyncStorage.setItem(hasLoggedInKey, "true");
         if (data.data.user.role === "employer" && data.data.profileComplete) {
@@ -178,6 +188,22 @@ export default function LoginScreen() {
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
+    const isExpoGo = Constants.appOwnership === "expo";
+
+    if (isExpoGo) {
+      try {
+        const result = await promptAsync();
+        if (result.type !== "success") {
+          setGoogleLoading(false);
+        }
+      } catch (err: any) {
+        console.error("Expo Go Google Sign-In error:", err);
+        Toast.show({ type: "error", text1: err?.message || "Google login failed." });
+        setGoogleLoading(false);
+      }
+      return;
+    }
+
     try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
@@ -192,21 +218,19 @@ export default function LoginScreen() {
       } else {
         // Sign in was cancelled by user
         console.log("User cancelled Google Sign-in");
+        setGoogleLoading(false);
       }
     } catch (error: any) {
-      if (isErrorWithCode(error)) {
-        if (error.code === statusCodes.IN_PROGRESS) {
-          // operation (e.g. sign in) is in progress already
-        } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-          Toast.show({ type: "error", text1: "Play services not available or outdated" });
-        } else {
-          Toast.show({ type: "error", text1: error.message || "Google login failed." });
+      console.log("Native Google Sign-In failed, trying AuthSession fallback...", error);
+      try {
+        const result = await promptAsync();
+        if (result.type !== "success") {
+          setGoogleLoading(false);
         }
-      } else {
-        Toast.show({ type: "error", text1: error?.message || "Google login failed." });
+      } catch (err: any) {
+        Toast.show({ type: "error", text1: err?.message || "Google login failed." });
+        setGoogleLoading(false);
       }
-    } finally {
-      setGoogleLoading(false);
     }
   };
 
@@ -220,8 +244,10 @@ export default function LoginScreen() {
       const hasLoggedInKey = `has_logged_in_${userId}`;
       const hasLoggedInBefore = await AsyncStorage.getItem(hasLoggedInKey);
 
-      if (hasLoggedInBefore === "true") {
+      if (responseData.user.role === "admin") {
         router.replace("/chats");
+      } else if (hasLoggedInBefore === "true") {
+        router.replace(responseData.user.role === "employer" ? "/employer-dashboard" : "/chats");
       } else {
         await AsyncStorage.setItem(hasLoggedInKey, "true");
         if (responseData.user.role === "employer" && responseData.profileComplete) {

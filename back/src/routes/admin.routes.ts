@@ -50,4 +50,8 @@ router.delete('/groups/:id', deleteGroup);
 router.get('/logs', getAdminLogs);
 router.put('/logs/:id/revert', revertAiAction);
 
+// Specializations
+import { createSpecialization } from '../controllers/specialization.controller';
+router.post('/specializations', createSpecialization);
+
 export default router;

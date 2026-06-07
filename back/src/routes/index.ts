@@ -126,6 +126,10 @@ router.post(
 // ✅ مسارات الشات والرسائل اتنقلت لـ chatRoutes.ts عشان تكون منظمة ومحمية
 // راجع: routes/chatRoutes.ts + controllers/chat.controller.ts + services/chat.service.ts
 
+// Specializations
+import { getAllSpecializations } from "../controllers/specialization.controller";
+router.get("/specializations", getAllSpecializations);
+
 // مسار البحث (بنحميه بـ protect عشان بس المسجلين في رابطة هما اللي يبحثوا)
 router.get("/users/search/all", protect, searchUsers);
 
@@ -136,10 +140,12 @@ import {
   toggleSaveFreelancer,
   getSavedItems,
   clearSavedItems,
+  getAiUsage,
 } from "../controllers/profile.controller";
 router.put("/users/verify-request", protect, requestVerification);
 
 // Saved Items — MUST be above /users/:id to prevent wildcard capture
+router.get("/users/ai-usage", protect, getAiUsage);
 router.get("/users/my-contacts", protect, getMyContacts);
 router.get("/users/recent-contacts", protect, getRecentContacts);
 router.get("/users/find-by-phone", protect, findByPhone);

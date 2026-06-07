@@ -723,6 +723,16 @@ export default function ChatWindowScreen() {
       );
     };
 
+    const handleBlocked = (data: { message: string }) => {
+      Alert.alert('Blocked', data.message || 'Action is blocked.');
+    };
+
+    const handleBlockStatusChanged = (data: { blockerId: string; blocked: boolean }) => {
+      if (resolvedPartnerId && data.blockerId === resolvedPartnerId) {
+        setBlockedMe(data.blocked);
+      }
+    };
+
     socket.on('receive-message', handleReceiveMessage);
     socket.on('receiveMessage', handleReceiveMessage);
     socket.on('messageReacted', handleReactionUpdate);
@@ -734,6 +744,8 @@ export default function ChatWindowScreen() {
     socket.on('message-deleted', handleMessageDeleted);
     socket.on('messageEdited', handleMessageEdited);
     socket.on('messagePinned', handleMessagePinned);
+    socket.on('blocked', handleBlocked);
+    socket.on('block-status-changed', handleBlockStatusChanged);
 
     return () => {
       socket.emit('leave-room', chatId);
@@ -748,8 +760,10 @@ export default function ChatWindowScreen() {
       socket.off('message-deleted', handleMessageDeleted);
       socket.off('messageEdited', handleMessageEdited);
       socket.off('messagePinned', handleMessagePinned);
+      socket.off('blocked', handleBlocked);
+      socket.off('block-status-changed', handleBlockStatusChanged);
     };
-  }, [socket, chatId, currentUserId, userId, params.chatId, mapBackendMessage]);
+  }, [socket, chatId, currentUserId, userId, params.chatId, mapBackendMessage, resolvedPartnerId]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Typing indicator (unchanged)
@@ -1770,19 +1784,58 @@ export default function ChatWindowScreen() {
               </View>
             )}
 
-            <ChatInputBar
-              value={messageText}
-              onChangeText={handleTextChange}
-              onSend={handleSend}
-              onAttach={() => setAttachmentVisible(true)}
-              onMicPressIn={startRecording}
-              onMicPressOut={stopRecording}
-              isRecording={isRecording}
-              recordingTime={`${Math.floor(recordingSeconds / 60).toString().padStart(2, '0')}:${(recordingSeconds % 60).toString().padStart(2, '0')}`}
-              replyingTo={replyingTo}
-              onCancelReply={() => setReplyingTo(null)}
-              chatId={chatId}
-            />
+            {!isGroup && blockedByMe ? (
+              <View style={{
+                padding: 16,
+                backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEF2F2',
+                borderTopWidth: 1,
+                borderTopColor: colors.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Text style={{ color: '#EF4444', fontWeight: '600', fontSize: 14, textAlign: 'center', marginBottom: 8 }}>
+                  You have blocked this contact.
+                </Text>
+                <TouchableOpacity 
+                  onPress={handleBlockUser}
+                  style={{
+                    backgroundColor: colors.purple,
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    borderRadius: 8,
+                  }}
+                >
+                  <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 13 }}>Unblock</Text>
+                </TouchableOpacity>
+              </View>
+            ) : !isGroup && blockedMe ? (
+              <View style={{
+                padding: 18,
+                backgroundColor: isDark ? '#1F1F1F' : '#F3F4F6',
+                borderTopWidth: 1,
+                borderTopColor: colors.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Text style={{ color: colors.textMuted, fontWeight: '500', fontSize: 14, textAlign: 'center' }}>
+                  You cannot reply to this conversation.
+                </Text>
+              </View>
+            ) : (
+              <ChatInputBar
+                value={messageText}
+                onChangeText={handleTextChange}
+                onSend={handleSend}
+                onAttach={() => setAttachmentVisible(true)}
+                onMicPressIn={startRecording}
+                onMicPressOut={stopRecording}
+                isRecording={isRecording}
+                recordingTime={`${Math.floor(recordingSeconds / 60).toString().padStart(2, '0')}:${(recordingSeconds % 60).toString().padStart(2, '0')}`}
+                replyingTo={replyingTo}
+                onCancelReply={() => setReplyingTo(null)}
+                chatId={chatId}
+              />
+            )}
           </>
         )}
       </KeyboardAvoidingView>

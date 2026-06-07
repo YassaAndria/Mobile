@@ -496,4 +496,19 @@ export const syncContacts = catchAsync(async (req: Request, res: Response, next:
       unregisteredNumbers: unregisteredNumbers
     }
   });
+});
+
+// 14. Get AI Usage & Limits
+export const getAiUsage = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user as any;
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      aiCurrentWindowUsage: user.aiCurrentWindowUsage || {},
+      aiLimitResets: user.aiLimitResets || {},
+      totalTokensUsed: user.totalTokensUsed || 0,
+      tokenUsage: user.tokenUsage || {}
+    }
+  });
 });

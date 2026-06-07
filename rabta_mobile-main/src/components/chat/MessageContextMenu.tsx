@@ -185,13 +185,33 @@ export default function MessageContextMenu({
               </View>
 
               {/* Message Preview */}
-              <View style={[styles.msgPreview, { backgroundColor: isDark ? '#1c1c1e' : '#f8f8f8' }]}>
-                <View style={[styles.msgPreviewAccent, { backgroundColor: colors.purple }]} />
-                <Text style={[styles.msgPreviewText, { color: textColor }]} numberOfLines={2}>
-                  {message.content || '📎 Attachment'}
-                </Text>
-                <Text style={[styles.msgPreviewTime, { color: colors.textMuted }]}>{message.time}</Text>
-              </View>
+              {(() => {
+                let previewText = message.content || '📎 Attachment';
+                if (message.type === 'audio') {
+                  previewText = '🎵 Voice note';
+                } else if (message.type === 'image') {
+                  previewText = '📷 Photo';
+                } else if (message.type === 'file') {
+                  previewText = '📎 File';
+                } else if (previewText.startsWith('https://res.cloudinary.com')) {
+                  if (previewText.includes('/video/upload/') || previewText.endsWith('.mp4') || previewText.endsWith('.webm') || previewText.endsWith('.m4a')) {
+                    previewText = '🎵 Voice note';
+                  } else if (previewText.includes('/image/upload/') || previewText.match(/\.(jpeg|jpg|gif|png|webp)$/)) {
+                    previewText = '📷 Photo';
+                  } else {
+                    previewText = '📎 Attachment';
+                  }
+                }
+                return (
+                  <View style={[styles.msgPreview, { backgroundColor: isDark ? '#1c1c1e' : '#f8f8f8' }]}>
+                    <View style={[styles.msgPreviewAccent, { backgroundColor: colors.purple }]} />
+                    <Text style={[styles.msgPreviewText, { color: textColor }]} numberOfLines={2}>
+                      {previewText}
+                    </Text>
+                    <Text style={[styles.msgPreviewTime, { color: colors.textMuted }]}>{message.time}</Text>
+                  </View>
+                );
+              })()}
 
               {/* Menu Items (2 columns) */}
               <View style={[styles.menuItems, { backgroundColor: menuBg }]}>

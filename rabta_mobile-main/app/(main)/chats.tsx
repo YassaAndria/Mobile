@@ -6,6 +6,7 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axiosInstance from '../../src/api/axiosInstance';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { typography } from '../../src/theme/typography';
@@ -16,6 +17,7 @@ import { formatMessagePreview } from '../../src/utils/chatMessage';
 export default function ChatsScreen() {
   const { colors, isDark } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { socket } = useChat();
   const currentUser = useAppSelector((state: any) => state.auth?.user);
   const currentUserId = currentUser?._id || currentUser?.id || '';
@@ -226,52 +228,61 @@ export default function ChatsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerBackVisible: false,
-          headerTitle: '',
-          headerStyle: { backgroundColor: colors.bg },
-          headerShadowVisible: false,
-          headerLeft: () =>
-            isSearchMode ? (
-              <View style={[styles.searchBarContainer, { backgroundColor: isDark ? '#262626' : '#F3F4F6' }]}>
-                <Ionicons name="search" size={20} color={isDark ? '#888' : '#9CA3AF'} style={{ marginLeft: 10 }} />
-                <TextInput
-                  autoFocus
-                  style={[styles.searchInput, { color: colors.text }]}
-                  placeholder="Search conversations..."
-                  placeholderTextColor={isDark ? '#888' : '#9CA3AF'}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                />
-                <TouchableOpacity
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  onPress={() => {
-                    setIsSearchMode(false);
-                    setSearchQuery('');
-                  }}
-                >
-                  <Ionicons name="close-circle" size={20} color={isDark ? '#888' : '#9CA3AF'} style={{ marginRight: 10 }} />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 5 }}>
-                <Text style={[styles.headerTitle, { color: colors.text }]}>Chats</Text>
-                <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} onPress={() => setIsSearchMode(true)}>
-                  <Ionicons name="search" size={22} color={colors.text} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  onPress={() => router.push('/contacts')}
-                  style={[styles.addBtn, { backgroundColor: '#7C3AED' }]}
-                >
-                  <Ionicons name="add" size={22} color="#FFF" />
-                </TouchableOpacity>
-              </View>
-            ),
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* ── Custom Polished Header ── */}
+      <View style={[
+        styles.customHeader,
+        {
+          paddingTop: Math.max(insets.top, 12),
+          backgroundColor: colors.surface,
+          borderBottomColor: colors.border,
+        }
+      ]}>
+        {isSearchMode ? (
+          <View style={[styles.searchBarContainer, { backgroundColor: isDark ? '#262626' : '#F3F4F6' }]}>
+            <Ionicons name="search" size={20} color={isDark ? '#888' : '#9CA3AF'} style={{ marginLeft: 12 }} />
+            <TextInput
+              autoFocus
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder="Search conversations..."
+              placeholderTextColor={isDark ? '#888' : '#9CA3AF'}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            <TouchableOpacity
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              onPress={() => {
+                setIsSearchMode(false);
+                setSearchQuery('');
+              }}
+              style={{ marginRight: 12 }}
+            >
+              <Ionicons name="close-circle" size={20} color={isDark ? '#888' : '#9CA3AF'} />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.headerTitleRow}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Chats</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <TouchableOpacity 
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} 
+                onPress={() => setIsSearchMode(true)}
+                style={[styles.actionBtn, { backgroundColor: isDark ? '#262626' : '#F3F4F6' }]}
+              >
+                <Ionicons name="search" size={20} color={colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => router.push('/contacts')}
+                style={[styles.actionBtn, { backgroundColor: colors.purple }]}
+              >
+                <Ionicons name="add" size={22} color="#FFF" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </View>
 
       <FlatList
         data={filteredChats}
@@ -303,38 +314,41 @@ export default function ChatsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  headerTitle: { fontSize: 28, fontWeight: '700', letterSpacing: -0.5 },
-  searchBarContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', borderRadius: 20, height: 40 },
-  addBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  header: { 
-    paddingHorizontal: 20, 
-    paddingTop: 20,
+  headerTitle: { fontSize: 26, fontWeight: '800', letterSpacing: -0.5 },
+  customHeader: {
+    paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
   },
-  headerTop: {
+  headerTitleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    height: 48,
   },
-  searchContainer: {
+  actionBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 40,
-    marginTop: 16,
+    borderRadius: 22,
+    height: 44,
+    width: '100%',
   },
-  searchIcon: { marginRight: 8 },
   searchInput: {
     flex: 1,
-    paddingHorizontal: 10,
-    fontSize: 15,
+    paddingHorizontal: 12,
+    fontSize: 16,
     height: '100%',
   },
   listContent: { padding: 16, paddingBottom: 40 },
@@ -343,22 +357,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     padding: 16, 
-    borderRadius: 16, 
+    borderRadius: 18, 
     borderWidth: 1, 
-    marginBottom: 12 
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
   },
   avatarContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
+    position: 'relative',
   },
   avatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 26,
+    borderRadius: 27,
   },
   initials: {
     fontSize: 20,
@@ -372,7 +392,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   messageRow: {
     flexDirection: 'row',
@@ -380,26 +400,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unreadBadge: {
-    minWidth: 22,
-    height: 22,
-    borderRadius: 11,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
     marginLeft: 8,
   },
   unreadText: {
     color: '#fff',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
   },
   onlineDot: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    bottom: 1,
+    right: 1,
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
     borderWidth: 2,
     zIndex: 10,
   },

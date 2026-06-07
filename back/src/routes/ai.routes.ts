@@ -27,6 +27,10 @@ router.post("/create-vector-store", protect, aiController.createVectorStore);
 
 router.post("/ask-global", protect, aiController.askGlobalAi);
 
+router.get("/global-knowledge", protect, aiController.getGlobalKnowledge);
+router.put("/global-knowledge/:id", protect, aiController.updateGlobalKnowledge);
+router.delete("/global-knowledge/:id", protect, aiController.deleteGlobalKnowledge);
+
 router.post("/chat/ingest/:chatId", protect, chatAiController.ingestChat);
 router.post("/chat/ask/:chatId", protect, chatAiController.askChat);
 

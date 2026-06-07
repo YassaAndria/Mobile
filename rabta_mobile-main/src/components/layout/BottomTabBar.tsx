@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { usePathname, useRouter } from "expo-router";
 import React, { useMemo, useState, useEffect } from "react";
-import { Pressable, StyleSheet, Text, View, Keyboard } from "react-native";
+import { Pressable, StyleSheet, View, Keyboard } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
@@ -87,16 +87,15 @@ const BottomTabBar: React.FC = () => {
         styles.container,
         {
           backgroundColor: colors.surface,
-          borderTopColor:  colors.border,
-          // Respect safe-area bottom on notched devices; minimum 12 px padding
-          paddingBottom: Math.max(insets.bottom, 12),
+          borderColor: colors.border,
+          marginBottom: Math.max(insets.bottom, 10),
+          marginTop: 4,
         },
       ]}
     >
       {tabs.map((tab) => {
         const active = isActive(tab.path);
         const iconColor  = active ? colors.purple : colors.textMuted;
-        const labelColor = active ? colors.purple : colors.textMuted;
 
         return (
           <Pressable
@@ -106,19 +105,21 @@ const BottomTabBar: React.FC = () => {
             accessibilityRole="button"
             style={styles.tabItem}
           >
-            <MaterialIcons 
-              name={active && tab.activeIcon ? tab.activeIcon : tab.icon} 
-              size={24} 
-              color={iconColor} 
-            />
-            <Text
+            <View
               style={[
-                styles.tabLabel,
-                { color: labelColor, fontWeight: active ? "700" : "500" },
+                styles.iconWrapper,
+                active && { backgroundColor: colors.purple10 },
               ]}
             >
-              {tab.label}
-            </Text>
+              <MaterialIcons 
+                name={active && tab.activeIcon ? tab.activeIcon : tab.icon} 
+                size={22} 
+                color={iconColor} 
+              />
+              {active && (
+                <View style={[styles.activeDot, { backgroundColor: colors.purple }]} />
+              )}
+            </View>
           </Pressable>
         );
       })}
@@ -131,25 +132,38 @@ export default BottomTabBar;
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: 10,
+    borderWidth: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    marginHorizontal: 16,
+    borderRadius: 24,
     justifyContent: "space-around",
     alignItems: "center",
     // Elevation / shadow so it feels elevated above content
     elevation: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowRadius: 10,
   },
   tabItem: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 4,
   },
-  tabLabel: {
-    fontSize: 10,
-    marginTop: 3,
+  iconWrapper: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  activeDot: {
+    position: "absolute",
+    bottom: 3,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
   },
 });

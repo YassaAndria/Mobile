@@ -29,6 +29,7 @@ import http from 'http';
 import { Server } from 'socket.io'; 
 import jwt from 'jsonwebtoken';
 import Call from './models/Call'; 
+import Notification from './models/Notification';
 import { User } from './models/user';
 import * as chatService from './services/chat.service';
 import { sendPushToUsers } from './services/notification.service';
@@ -320,6 +321,16 @@ io.on('connection', (socket) => {
             chatId: data.chatId
           });
 
+          // Save to notifications collection
+          Notification.create({
+            recipient: receiverId,
+            type: 'chatMessages',
+            title: senderName,
+            body: data.content || 'Sent a new message',
+            read: false,
+            chatId: data.chatId,
+          }).catch(err => console.error('⚠️ DB notification save error:', err));
+
           sendPushToUsers([receiverId], {
             title: senderName,
             body: data.content || 'أرسل لك رسالة جديدة',
@@ -355,6 +366,17 @@ io.on('connection', (socket) => {
         }
 
         if (pushRecipients.length > 0) {
+          // Save to notifications collection for each group member
+          const notificationData = pushRecipients.map(memberId => ({
+            recipient: memberId,
+            type: 'communityMentions',
+            title: chat.name || chat.groupName || 'Group Message',
+            body: `${senderName}: ${data.content || 'Sent a new message'}`,
+            read: false,
+            chatId: data.chatId,
+          }));
+          Notification.insertMany(notificationData).catch(err => console.error('⚠️ DB group notification save error:', err));
+
           sendPushToUsers(pushRecipients, {
             title: chat.name || chat.groupName || 'مجموعة جديدة',
             body: `${senderName}: ${data.content || 'أرسل رسالة جديدة'}`,

@@ -9,9 +9,11 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { io, type Socket } from "socket.io-client";
+import { Alert } from "react-native";
 import type { RootState } from "../store/store";
+import { logout } from "../store/slices/authSlice";
 
 type ChatContextType = {
   socket: Socket | null;
@@ -47,6 +49,7 @@ function getSocketUrl(): string {
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const token = useSelector((s: RootState) => s.auth.token);
+  const dispatch = useDispatch();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const cleanupInProgress = useRef(false);
@@ -89,12 +92,46 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     s.on("connect", () => setIsConnected(true));
     s.on("disconnect", () => setIsConnected(false));
 
+    s.on("forceLogout", (data: any) => {
+      Alert.alert(
+        "Account Suspended",
+        data?.reason || "You have been banned from using Rabta.",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              dispatch(logout());
+            }
+          }
+        ]
+      );
+    });
+
+    s.on("banStatusUpdated", (data: any) => {
+      if (data?.isBanned) {
+        Alert.alert(
+          "Account Suspended",
+          data?.message || "Your account has been banned.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                dispatch(logout());
+              }
+            }
+          ]
+        );
+      }
+    });
+
     setSocket(s);
 
     return () => {
       try {
         s.off("connect");
         s.off("disconnect");
+        s.off("forceLogout");
+        s.off("banStatusUpdated");
         s.disconnect();
       } catch (e) {
         // Ignore cleanup errors

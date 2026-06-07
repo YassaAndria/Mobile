@@ -122,10 +122,23 @@ export default function CallsScreen() {
   }, []);
 
   // Determine Call Status UI
+  // Determine Call Status UI
   const getCallInfo = (item: CallRecord) => {
     if (!item) return { otherUser: {} as CallUser, iconName: "call", iconColor: colors.textMuted, statusText: "Unknown" };
 
-    const isIncoming = item.receiver?._id === currentUser?._id || item.receiver?._id === "me";
+    const myId = (currentUser?._id || currentUser?.id || "").toString();
+
+    // Safely extract receiver ID
+    let receiverId = "";
+    if (item.receiver) {
+      if (typeof item.receiver === "string") {
+        receiverId = item.receiver;
+      } else if (typeof item.receiver === "object") {
+        receiverId = (item.receiver as any)._id || (item.receiver as any).id || "";
+      }
+    }
+
+    const isIncoming = receiverId === myId || receiverId === "me";
     const otherUser = isIncoming ? { ...(item.caller || {} as CallUser) } : { ...(item.receiver || {} as CallUser) };
 
     if (otherUser.avatar) {
@@ -174,7 +187,7 @@ export default function CallsScreen() {
       const q = searchQuery.toLowerCase();
       return matchesFilter && (otherUser?.fullName || "").toLowerCase().includes(q);
     });
-  }, [calls, searchQuery, activeFilter, currentUser?._id]);
+  }, [calls, searchQuery, activeFilter, currentUser?._id, currentUser?.id]);
 
   if (loading) {
     return (

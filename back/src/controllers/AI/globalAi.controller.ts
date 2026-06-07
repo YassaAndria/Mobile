@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import * as vectorStoreService from "../../services/Ai/vectorStore.ai.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { Request, Response } from "express";
@@ -90,6 +91,75 @@ const result = await (vectorStoreService.semanticSearchMessages as any)(
   res.status(200).json({
     status: "success",
     data: result,
+  });
+});
+
+// ==========================================
+// 📚 Admin CRUD for Global AI Knowledge Base
+// ==========================================
+
+export const getGlobalKnowledge = catchAsync(async (req: Request, res: Response) => {
+  const client = mongoose.connection.getClient() as any;
+  const collection = client.db(process.env.DB_NAME || "RabtaDB").collection("global_vectors");
+
+  // Fetch all chunks, omitting the massive embedding arrays
+  const chunks = await collection.find({}, { projection: { embedding: 0 } }).toArray();
+
+  res.status(200).json({
+    status: "success",
+    data: chunks,
+  });
+});
+
+export const updateGlobalKnowledge = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const { text } = req.body;
+
+  if (!text) {
+    res.status(400).json({ status: "error", message: "Text is required to update knowledge chunk." });
+    return;
+  }
+
+  const client = mongoose.connection.getClient() as any;
+  const collection = client.db(process.env.DB_NAME || "RabtaDB").collection("global_vectors");
+
+  const { embeddingsModel } = await import("../../services/Ai/core.ai.service");
+  
+  // Re-calculate embedding for the updated text
+  const newEmbedding = await embeddingsModel.embedQuery(text);
+
+  const result = await collection.updateOne(
+    { _id: new mongoose.Types.ObjectId(id) },
+    { $set: { text, embedding: newEmbedding } }
+  );
+
+  if (result.matchedCount === 0) {
+    res.status(404).json({ status: "error", message: "Knowledge chunk not found." });
+    return;
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Knowledge chunk updated successfully.",
+  });
+});
+
+export const deleteGlobalKnowledge = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+
+  const client = mongoose.connection.getClient() as any;
+  const collection = client.db(process.env.DB_NAME || "RabtaDB").collection("global_vectors");
+
+  const result = await collection.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
+
+  if (result.deletedCount === 0) {
+    res.status(404).json({ status: "error", message: "Knowledge chunk not found." });
+    return;
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Knowledge chunk deleted successfully.",
   });
 });
 

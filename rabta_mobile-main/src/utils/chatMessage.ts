@@ -45,6 +45,14 @@ export function formatMessagePreview(msg: MessageLike): string {
   }
   
   let text = msg.content ?? msg.text ?? msg.body ?? '';
+  const textLower = text.toLowerCase();
+  if (textLower.includes('missed') && textLower.includes('call')) {
+    if (textLower.includes('video')) {
+      return '📹 Missed video call';
+    }
+    return '📞 Missed voice call';
+  }
+  
   // Fallback if type is missing but content is a cloudinary URL
   if (text.includes('res.cloudinary.com')) {
     if (text.includes('/video/upload/') || text.endsWith('.mp4') || text.endsWith('.webm') || text.endsWith('.m4a')) {

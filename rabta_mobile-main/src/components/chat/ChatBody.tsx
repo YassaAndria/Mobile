@@ -16,7 +16,7 @@ import { Image } from 'expo-image';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { createAudioPlayer } from 'expo-audio';
+import { createAudioPlayer, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useTheme } from '../../theme/ThemeContext';
 import type { MessageType } from '../../types';
 import MessageContextMenu from './MessageContextMenu';
@@ -68,6 +68,109 @@ type SeparatorItem = { isSeparator: true; id: string; text: string };
 type BubbleItem = MessageType & { isFirstInGroup: boolean };
 type RenderItem = BubbleItem | SeparatorItem;
 
+// ── Voice Note Player Component ───────────────────────────────────────────────
+
+function AudioMessagePlayer({ uri, isMine, colors, isDark }: { uri: string; isMine: boolean; colors: any; isDark: boolean }) {
+  const player = useAudioPlayer(uri);
+  const status = useAudioPlayerStatus(player);
+
+  const handlePlayPause = () => {
+    if (status.playing) {
+      player.pause();
+    } else {
+      player.play();
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  const duration = status.duration || 0;
+  const currentTime = status.currentTime || 0;
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  // 18 soundwave amplitudes to simulate waves
+  const waveAmplitudes = [10, 22, 16, 28, 14, 8, 20, 26, 12, 18, 24, 10, 14, 20, 12, 16, 8, 12];
+
+  return (
+    <View style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 4,
+      paddingHorizontal: 2,
+      borderRadius: 14,
+      width: 210,
+      gap: 10,
+    }}>
+      {/* Play/Pause Button */}
+      <TouchableOpacity
+        onPress={handlePlayPause}
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: 17,
+          backgroundColor: isMine ? 'rgba(255,255,255,0.25)' : colors.purple,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {status.isBuffering ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Ionicons
+            name={status.playing ? "pause" : "play"}
+            size={18}
+            color="#fff"
+          />
+        )}
+      </TouchableOpacity>
+
+      {/* Waveform Visualizer & Elapsed time */}
+      <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', height: 28, gap: 3 }}>
+          {waveAmplitudes.map((amp, index) => {
+            const barProgress = (index / waveAmplitudes.length) * 100;
+            const isPlayed = progress >= barProgress;
+            
+            const barColor = isMine
+              ? (isPlayed ? '#ffffff' : 'rgba(255, 255, 255, 0.4)')
+              : (isPlayed ? colors.purple : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'));
+
+            return (
+              <View
+                key={index}
+                style={{
+                  width: 3,
+                  height: amp,
+                  borderRadius: 1.5,
+                  backgroundColor: barColor,
+                }}
+              />
+            );
+          })}
+        </View>
+
+        <Text style={{
+          fontSize: 9,
+          color: isMine ? 'rgba(255,255,255,0.75)' : colors.textMuted,
+          fontWeight: '600',
+        }}>
+          {formatTime(currentTime)} / {duration > 0 ? formatTime(duration) : '0:00'}
+        </Text>
+      </View>
+
+      <Ionicons
+        name="mic"
+        size={16}
+        color={isMine ? 'rgba(255,255,255,0.6)' : colors.textMuted}
+      />
+    </View>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function ChatBody({
@@ -112,8 +215,6 @@ export default function ChatBody({
   const [contextMsg, setContextMsg] = useState<MessageType | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
-  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
-  const soundRef = useRef<any>(null);
 
   // Translation states
   const [internalTranslated, setInternalTranslated] = useState<Record<string, { translatedText: string; originalText: string }>>({});
@@ -177,32 +278,7 @@ export default function ChatBody({
     setMenuVisible(true);
   }, []);
 
-  const handlePlayAudio = async (item: BubbleItem) => {
-    if (item.id.startsWith('temp-') || !item.content) return;
-    
-    try {
-      if (playingAudioId === item.id && soundRef.current) {
-        if (soundRef.current.playing) {
-          soundRef.current.pause();
-        } else {
-          soundRef.current.play();
-        }
-        setPlayingAudioId(null);
-        return;
-      }
-      
-      if (soundRef.current) {
-        soundRef.current.release();
-      }
-      
-      const player = createAudioPlayer(item.content);
-      soundRef.current = player;
-      setPlayingAudioId(item.id);
-      player.play();
-    } catch (e) {
-      console.error('Error playing audio', e);
-    }
-  };
+  // Legacy audio state handler removed (moved to local AudioMessagePlayer)
 
   // ── React to message (calls backend) ──────────────────────────────────────
   const handleReact = useCallback(async (messageId: string, emoji: string) => {
@@ -422,8 +498,8 @@ export default function ChatBody({
               borderRadius: 18,
               borderTopRightRadius: isMine ? 4 : 18,
               borderTopLeftRadius: isMine ? 18 : 4,
-              paddingHorizontal: 12,
-              paddingVertical: 8,
+              paddingHorizontal: (item.type === 'audio' || ((item.content || '').toLowerCase().includes('missed') && (item.content || '').toLowerCase().includes('call'))) ? 8 : 12,
+              paddingVertical: (item.type === 'audio' || ((item.content || '').toLowerCase().includes('missed') && (item.content || '').toLowerCase().includes('call'))) ? 6 : 8,
               minWidth: 80,
             }}
           >
@@ -513,20 +589,12 @@ export default function ChatBody({
                 </Text>
               </TouchableOpacity>
             ) : item.type === 'audio' ? (
-              <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.1)', padding: 8, borderRadius: 8, marginBottom: 4, width: 140 }}
-                onPress={() => handlePlayAudio(item)}
-              >
-                <Ionicons
-                  name={playingAudioId === item.id ? "pause" : "play"}
-                  size={24}
-                  color={isMine ? '#fff' : colors.text}
-                />
-                <View style={{ flex: 1, height: 4, backgroundColor: 'rgba(255,255,255,0.3)', marginHorizontal: 8, borderRadius: 2 }}>
-                  <View style={{ width: playingAudioId === item.id ? '50%' : '0%', height: '100%', backgroundColor: isMine ? '#fff' : colors.text, borderRadius: 2 }} />
-                </View>
-                <Text style={{ color: isMine ? '#fff' : colors.text, fontSize: 12 }}>Audio</Text>
-              </TouchableOpacity>
+              <AudioMessagePlayer
+                uri={item.content}
+                isMine={isMine}
+                colors={colors}
+                isDark={isDark}
+              />
             ) : (
               <View style={{ gap: 4 }}>
                 {activeTranslatingId === item.id ? (
@@ -574,16 +642,68 @@ export default function ChatBody({
                     </TouchableOpacity>
                   </View>
                 ) : (
-                  <Text
-                    style={{
-                      color: isMine ? '#ffffff' : colors.text,
-                      fontSize: 15,
-                      lineHeight: 21,
-                      flexShrink: 1,
-                    }}
-                  >
-                    {item.content ?? ''}
-                  </Text>
+                  (() => {
+                    const contentLower = (item.content || '').toLowerCase();
+                    const isMissedCall = contentLower.includes('missed') && contentLower.includes('call');
+                    if (isMissedCall) {
+                      const isVoice = contentLower.includes('voice');
+                      return (
+                        <View style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingVertical: 4,
+                          paddingHorizontal: 2,
+                          gap: 10,
+                          width: 200,
+                        }}>
+                          <View style={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: 17,
+                            backgroundColor: isMine 
+                              ? 'rgba(255,255,255,0.25)' 
+                              : (isDark ? '#3E1F1F' : '#FEE2E2'),
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}>
+                            <Ionicons
+                              name={isVoice ? "call" : "videocam"}
+                              size={18}
+                              color={isMine ? '#FFFFFF' : '#EF4444'}
+                            />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={{
+                              fontSize: 14,
+                              fontWeight: '600',
+                              color: isMine ? '#FFFFFF' : colors.text,
+                            }}>
+                              {item.content}
+                            </Text>
+                            <Text style={{
+                              fontSize: 10,
+                              color: isMine ? 'rgba(255,255,255,0.75)' : colors.textMuted,
+                              marginTop: 1,
+                            }}>
+                              {isVoice ? 'Voice Call' : 'Video Call'}
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    }
+                    return (
+                      <Text
+                        style={{
+                          color: isMine ? '#ffffff' : colors.text,
+                          fontSize: 15,
+                          lineHeight: 21,
+                          flexShrink: 1,
+                        }}
+                      >
+                        {item.content ?? ''}
+                      </Text>
+                    );
+                  })()
                 )}
               </View>
             )}
