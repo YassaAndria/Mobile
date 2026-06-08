@@ -54,9 +54,13 @@ export const addComment = catchAsync(async (req: Request, res: Response, next: N
 
   await post.save();
 
+  const populatedPost = await Post.findById(post._id)
+    .populate('authorId', 'fullName avatar jobTitle')
+    .populate('comments.userId', 'fullName avatar');
+
   res.status(200).json({
     status: 'success',
-    data: { post }
+    data: { post: populatedPost }
   });
 });
 

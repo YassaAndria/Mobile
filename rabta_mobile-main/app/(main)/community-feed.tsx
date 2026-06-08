@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -36,17 +36,18 @@ type Post = {
   authorId?: { _id?: string; fullName?: string };
   media?: { fileUrl: string; fileType: string }[];
   likes?: string[];
-  comments?: { userId?: { fullName?: string }; commentText?: string }[];
+  comments?: { userId?: { _id?: string; fullName?: string; name?: string } | string; commentText?: string }[];
   createdAt?: string;
 };
 
 export default function CommunityFeedScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ communityId?: string; name?: string }>();
+  const params = useLocalSearchParams<{ communityId?: string; name?: string; scrollToPostId?: string }>();
   const communityId = Array.isArray(params.communityId)
     ? params.communityId[0]
     : params.communityId;
   const groupName = Array.isArray(params.name) ? params.name[0] : params.name ?? "Group";
+  const scrollToPostId = Array.isArray(params.scrollToPostId) ? params.scrollToPostId[0] : params.scrollToPostId;
   const { colors, isDark } = useTheme();
   const authUser = useAppSelector((s) => s.auth.user);
   const myId = normalizeId(
@@ -54,6 +55,7 @@ export default function CommunityFeedScreen() {
       (authUser as { _id?: string; id?: string } | null)?.id,
   );
 
+  const flatListRef = useRef<any>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -143,6 +145,16 @@ export default function CommunityFeedScreen() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    if (!scrollToPostId || posts.length === 0) return;
+    const idx = posts.findIndex(p => p._id === scrollToPostId);
+    if (idx >= 0) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({ index: idx, animated: true, viewPosition: 0.3 });
+      }, 500);
+    }
+  }, [scrollToPostId, posts]);
+
   const handleCreatePost = async () => {
     const text = newPost.trim();
     if (!text && attachedFiles.length === 0) return;
@@ -194,6 +206,8 @@ export default function CommunityFeedScreen() {
           minute: "2-digit",
         })
       : "";
+        console.log("COMMENT DATA:", JSON.stringify(item.comments, null, 2));
+
 
     return (
       <Pressable
@@ -268,14 +282,19 @@ export default function CommunityFeedScreen() {
 
         {(item.comments ?? []).length > 0 && (
           <View style={styles.commentsBox}>
-            {item.comments!.map((c, i) => (
-              <Text key={i} style={{ color: colors.textMuted, fontSize: 13, marginBottom: 4 }}>
-                <Text style={{ fontWeight: "700", color: colors.text }}>
-                  {c.userId?.fullName ?? "User"}:{" "}
+            {item.comments!.map((c, i) => {
+              const commentAuthor = typeof c.userId === 'object'
+                ? (c.userId?.fullName ?? c.userId?.name ?? 'User')
+                : 'User';
+              return (
+                <Text key={i} style={{ color: colors.textMuted, fontSize: 13, marginBottom: 4 }}>
+                  <Text style={{ fontWeight: "700", color: colors.text }}>
+                    {commentAuthor}:{" "}
+                  </Text>
+                  {c.commentText}
                 </Text>
-                {c.commentText}
-              </Text>
-            ))}
+              );
+            })}
           </View>
         )}
 
@@ -405,9 +424,11 @@ export default function CommunityFeedScreen() {
         <ActivityIndicator color={colors.purple} style={{ marginTop: 40 }} />
       ) : (
         <FlatList
+          ref={flatListRef}
           data={posts}
           keyExtractor={(p) => p._id}
           renderItem={renderPost}
+          onScrollToIndexFailed={() => {}}
           contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(true); }} />

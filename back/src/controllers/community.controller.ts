@@ -73,7 +73,8 @@ export const listCommunities = catchAsync(
                 finalLatestMessage = await Message.findOne(visibleFilter)
                   .sort({ createdAt: -1 })
                   .populate("senderId", "fullName _id")
-                  .populate("postId", "media content");
+                  .populate("postId", "media content communityId")
+
               }
             }
           }
@@ -577,6 +578,7 @@ export const getCommunityFeed = catchAsync(
   async (req: Request, res: Response) => {
     const posts = await Post.find({ communityId: req.params.id })
       .populate("authorId", "fullName avatar jobTitle")
+      .populate("comments.userId", "fullName avatar")
       .sort({ createdAt: -1 });
 
     res.status(200).json({

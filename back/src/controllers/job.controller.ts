@@ -186,6 +186,29 @@ export const applyToJob = catchAsync(async (req: Request, res: Response, next: N
   })();
 });
 
+export const getEmployerJobs = catchAsync(async (req: Request, res: Response) => {
+  const employerId = (req.user as any)._id;
+  const jobs = await Job.find({ publisherId: employerId }).sort({ createdAt: -1 });
+
+  const jobsForFrontend = jobs.map(job => {
+    const jobObj = job.toObject();
+    return {
+      _id: jobObj._id,
+      title: jobObj.title,
+      status: jobObj.status || 'open',
+      applicantsCount: jobObj.applicants?.length || 0,
+      postedAt: jobObj.createdAt,
+      description: jobObj.description,
+      jobType: jobObj.jobType,
+    };
+  });
+
+  res.status(200).json({
+    status: 'success',
+    data: { jobs: jobsForFrontend }
+  });
+});
+
 export const createJob = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const user = (req as any).user;
   // Also checking user.isVerifiedEmployer for legacy users without verificationStatus field

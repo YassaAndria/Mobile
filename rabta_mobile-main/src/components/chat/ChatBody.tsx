@@ -567,10 +567,11 @@ export default function ChatBody({
                   onPress={() => {
                     const postObj = item.postId;
                     const commId = typeof postObj === 'object' ? postObj?.communityId : undefined;
+                    const postId = typeof postObj === 'object' ? postObj?._id : (typeof postObj === 'string' ? postObj : undefined);
                     if (commId) {
                       router.push({
                         pathname: '/community-feed',
-                        params: { communityId: commId }
+                        params: { communityId: commId, scrollToPostId: postId ?? '' }
                       });
                     }
                   }}
