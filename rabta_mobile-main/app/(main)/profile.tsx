@@ -13,9 +13,9 @@ import { typography } from "../../src/theme/typography";
 
 function FreelancerProfileBody({ user, colors, isDark, router }: any) {
   const getInitials = (name: string) => {
-    if (!name) return "??";
-    const parts = name.trim().split(" ");
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    if (!name) return '??';
+    const parts = name.trim().split(' ').filter(p => p.length > 0);
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     return parts[0].slice(0, 2).toUpperCase();
   };
 
@@ -32,18 +32,7 @@ function FreelancerProfileBody({ user, colors, isDark, router }: any) {
               )}
             </View>
             <Text style={[typography.h2, { color: colors.text, marginBottom: 4 }]}>{user?.fullName || "User Name"}</Text>
-            <Text style={[typography.body, { color: colors.purple, fontWeight: "600", marginBottom: 8 }]}>{user?.jobTitle || "Front-End Engineer"}</Text>
-            {user?.email && (
-              <Text style={[typography.caption, { color: colors.textMuted, marginBottom: 4 }]}>
-                ✉ {user.email}
-              </Text>
-            )}
-            {user?.phoneNumber && (
-              <Text style={[typography.caption, { color: colors.textMuted, marginBottom: 24 }]}>
-                📞 {user.phoneNumber}
-              </Text>
-            )}
-            {!user?.phoneNumber && <View style={{ marginBottom: 24 }} />}
+            <Text style={[typography.body, { color: colors.purple, fontWeight: "600", marginBottom: 24 }]}>{user?.jobTitle || "Front-End Engineer"}</Text>
             <View style={styles.socialRow}>
               {(user?.links || []).map((link: any, index: number) => (
                 <Pressable
@@ -86,6 +75,48 @@ function FreelancerProfileBody({ user, colors, isDark, router }: any) {
                 <MaterialIcons name="chevron-left" size={20} color={colors.purple} style={{ opacity: 0.5 }} />
               </TouchableOpacity>
             ))}
+            {(user?.email || user?.phoneNumber) && (
+              <View style={{
+                width: '100%',
+                marginTop: 16,
+                gap: 10,
+              }}>
+                {user?.email && (
+                  <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                    backgroundColor: colors.surface2,
+                    paddingHorizontal: 16,
+                    paddingVertical: 10,
+                    borderRadius: 10,
+                    width: '100%',
+                  }}>
+                    <MaterialIcons name="email" size={18} color={colors.purple} />
+                    <Text style={[typography.body, { color: colors.text, flex: 1 }]}>
+                      {user.email}
+                    </Text>
+                  </View>
+                )}
+                {user?.phoneNumber && (
+                  <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                    backgroundColor: colors.surface2,
+                    paddingHorizontal: 16,
+                    paddingVertical: 10,
+                    borderRadius: 10,
+                    width: '100%',
+                  }}>
+                    <MaterialIcons name="phone" size={18} color={colors.purple} />
+                    <Text style={[typography.body, { color: colors.text, flex: 1 }]}>
+                      {user.phoneNumber}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
           </View>
 
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
