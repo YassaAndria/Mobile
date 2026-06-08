@@ -249,6 +249,39 @@ export default function GroupDetailsScreen() {
     }
   };
 
+  const handleApproveRequest = async (userId: string, userObj: Member | null) => {
+    if (!communityId) return;
+    try {
+      await axiosInstance.put(`/groups/${communityId}/requests/${userId}`, { action: 'accept' });
+      // Optimistic: remove from joinRequests, add to members
+      setJoinRequests(prev => prev.filter(r => {
+        const rId = typeof r.userId === 'object' ? (r.userId as Member)?._id : r.userId as string;
+        return rId !== userId;
+      }));
+      if (userObj) {
+        setMembers(prev => [...prev, userObj]);
+      }
+      Toast.show({ type: 'success', text1: 'Request approved' });
+    } catch {
+      Toast.show({ type: 'error', text1: 'Failed to approve request' });
+    }
+  };
+
+  const handleRejectRequest = async (userId: string) => {
+    if (!communityId) return;
+    try {
+      await axiosInstance.put(`/groups/${communityId}/requests/${userId}`, { action: 'reject' });
+      // Optimistic: remove from joinRequests
+      setJoinRequests(prev => prev.filter(r => {
+        const rId = typeof r.userId === 'object' ? (r.userId as Member)?._id : r.userId as string;
+        return rId !== userId;
+      }));
+      Toast.show({ type: 'success', text1: 'Request rejected' });
+    } catch {
+      Toast.show({ type: 'error', text1: 'Failed to reject request' });
+    }
+  };
+
   const initiateCall = useCallback(
     async (type: 'voice' | 'video') => {
       if (!resolvedChatId) {
@@ -566,20 +599,70 @@ export default function GroupDetailsScreen() {
             {isAdmin && joinRequests.length > 0 && (
               <>
                 <Text style={styles.sectionLabel}>
-                  Join requests ({joinRequests.length})
+                  Join Requests ({joinRequests.length})
                 </Text>
                 <GlassCard styles={styles}>
                   {joinRequests.map((r, idx) => {
                     const u = requestUser(r);
-                    if (!u) return null;
+                    const reqId = u?._id ?? (typeof r.userId === 'string' ? r.userId : '');
+                    const reqName = u?.fullName ?? 'Unknown User';
+                    const reqAvatar = u?.avatar ?? '';
                     return (
-                      <View key={u._id || idx} style={styles.requestRow}>
-                        <Text style={styles.memberName}>{u.fullName}</Text>
-                        <TouchableOpacity onPress={() => handleRequest(u._id, "accept")}>
-                          <Text style={styles.acceptText}>Accept</Text>
+                      <View
+                        key={reqId || idx}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingVertical: 10,
+                          borderBottomWidth: idx < joinRequests.length - 1 ? 1 : 0,
+                          borderBottomColor: C.divider,
+                          gap: 12,
+                        }}
+                      >
+                        {/* Avatar */}
+                        <View style={[styles.memberAvatar, styles.memberAvatarPh, { backgroundColor: C.accent }]}>
+                          {reqAvatar ? (
+                            <Image
+                              source={{ uri: reqAvatar }}
+                              style={{ width: '100%', height: '100%', borderRadius: 20 }}
+                              contentFit="cover"
+                            />
+                          ) : (
+                            <Text style={styles.memberInitial}>{reqName.charAt(0).toUpperCase()}</Text>
+                          )}
+                        </View>
+
+                        {/* Name */}
+                        <Text style={[styles.memberName, { flex: 1, fontWeight: '600' }]} numberOfLines={1}>
+                          {reqName}
+                        </Text>
+
+                        {/* Approve */}
+                        <TouchableOpacity
+                          onPress={() => handleApproveRequest(reqId, u)}
+                          style={{
+                            backgroundColor: C.accent,
+                            paddingHorizontal: 12,
+                            paddingVertical: 6,
+                            borderRadius: 8,
+                            marginRight: 6,
+                          }}
+                        >
+                          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Approve</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleRequest(u._id, "reject")}>
-                          <Text style={styles.rejectText}>Reject</Text>
+
+                        {/* Reject */}
+                        <TouchableOpacity
+                          onPress={() => handleRejectRequest(reqId)}
+                          style={{
+                            borderWidth: 1,
+                            borderColor: '#EF4444',
+                            paddingHorizontal: 12,
+                            paddingVertical: 6,
+                            borderRadius: 8,
+                          }}
+                        >
+                          <Text style={{ color: '#EF4444', fontWeight: '700', fontSize: 13 }}>Reject</Text>
                         </TouchableOpacity>
                       </View>
                     );
@@ -587,6 +670,7 @@ export default function GroupDetailsScreen() {
                 </GlassCard>
               </>
             )}
+
 
             {/* Participants */}
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, marginTop: 8 }}>

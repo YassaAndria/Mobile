@@ -61,7 +61,12 @@ export default function CommunityScreen() {
       const res = await listCommunities(category || undefined);
       const raw = res.data?.data?.communities ?? [];
       const uid = currentUserId || '';
-      setCommunities(raw.map((c: Record<string, unknown>) => mapCommunityFromApi(c, uid)));
+      const mapped = raw.map((c: Record<string, unknown>) => mapCommunityFromApi(c, uid));
+      setCommunities([...mapped].sort((a, b) => {
+        const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date((a as any).createdAt || 0).getTime();
+        const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date((b as any).createdAt || 0).getTime();
+        return bTime - aTime;
+      }));
     } catch {
       Toast.show({ type: 'error', text1: 'Failed to load communities' });
       setCommunities([]);
@@ -96,8 +101,8 @@ export default function CommunityScreen() {
       );
       const isMine = !!currentUserId && senderId === currentUserId;
 
-      setCommunities(prev =>
-        prev.map(c => {
+      setCommunities(prev => {
+        const updated = prev.map(c => {
           if (c.chatId !== chatId) return c;
           return {
             ...c,
@@ -105,8 +110,13 @@ export default function CommunityScreen() {
             latestPreview: formatMessagePreview(msg as Parameters<typeof formatMessagePreview>[0]),
             updatedAt: String(msg.createdAt ?? new Date().toISOString()),
           };
-        }),
-      );
+        });
+        return [...updated].sort((a, b) => {
+          const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date((a as any).createdAt || 0).getTime();
+          const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date((b as any).createdAt || 0).getTime();
+          return bTime - aTime;
+        });
+      });
     },
     [currentUserId],
   );
@@ -124,8 +134,8 @@ export default function CommunityScreen() {
       if (!payload.communityId) return;
       const senderId = normalizeId(payload.senderId);
       const isMine = !!currentUserId && senderId === currentUserId;
-      setCommunities(prev =>
-        prev.map(c => {
+      setCommunities(prev => {
+        const updated = prev.map(c => {
           if (c._id !== payload.communityId) return c;
           const lm = payload.lastMessage;
           return {
@@ -136,8 +146,13 @@ export default function CommunityScreen() {
             updatedAt: String(payload.timestamp ?? new Date().toISOString()),
             unreadCount: isMine ? 0 : (c.unreadCount || 0) + 1,
           };
-        }),
-      );
+        });
+        return [...updated].sort((a, b) => {
+          const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date((a as any).createdAt || 0).getTime();
+          const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date((b as any).createdAt || 0).getTime();
+          return bTime - aTime;
+        });
+      });
     };
 
     socket.on('receiveMessage', onReceive);
