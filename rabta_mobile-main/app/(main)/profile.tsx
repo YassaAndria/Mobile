@@ -32,7 +32,18 @@ function FreelancerProfileBody({ user, colors, isDark, router }: any) {
               )}
             </View>
             <Text style={[typography.h2, { color: colors.text, marginBottom: 4 }]}>{user?.fullName || "User Name"}</Text>
-            <Text style={[typography.body, { color: colors.purple, fontWeight: "600", marginBottom: 24 }]}>{user?.jobTitle || "Front-End Engineer"}</Text>
+            <Text style={[typography.body, { color: colors.purple, fontWeight: "600", marginBottom: 8 }]}>{user?.jobTitle || "Front-End Engineer"}</Text>
+            {user?.email && (
+              <Text style={[typography.caption, { color: colors.textMuted, marginBottom: 4 }]}>
+                ✉ {user.email}
+              </Text>
+            )}
+            {user?.phoneNumber && (
+              <Text style={[typography.caption, { color: colors.textMuted, marginBottom: 24 }]}>
+                📞 {user.phoneNumber}
+              </Text>
+            )}
+            {!user?.phoneNumber && <View style={{ marginBottom: 24 }} />}
             <View style={styles.socialRow}>
               {(user?.links || []).map((link: any, index: number) => (
                 <Pressable
@@ -168,6 +179,16 @@ function EmployerProfileBody({ user, colors, isDark, router }: any) {
               <MaterialIcons name="verified" size={18} color={colors.purple} />
               <Text style={[typography.bodySmall, { color: colors.purple, fontWeight: "700" }]}>Official Partner</Text>
             </View>
+            {user?.email && (
+              <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6, marginBottom: 2 }]}>
+                ✉ {user.email}
+              </Text>
+            )}
+            {user?.phoneNumber && (
+              <Text style={[typography.caption, { color: colors.textMuted }]}>
+                📞 {user.phoneNumber}
+              </Text>
+            )}
           </View>
         </View>
         <View style={{ flexDirection: "row", gap: 12, flexWrap: "wrap", marginTop: 16 }}>

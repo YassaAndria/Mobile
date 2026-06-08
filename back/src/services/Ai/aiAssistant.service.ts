@@ -251,34 +251,52 @@ export const transcribeAudioDeepgram = async (
 ) => {
   try {
     if (userId) await checkAiLimit(userId, 'voiceToText');
-    const url = `https://api.deepgram.com/v1/listen?model=${DEEPGRAM_MODEL}&language=ar`;
+
+    // m4a files use the MP4 container — Deepgram requires audio/mp4, not audio/m4a.
+    // Always override the mimetype so mobile uploads work correctly.
+    const effectiveMimetype =
+      mimetype === 'audio/m4a' || mimetype === 'audio/x-m4a'
+        ? 'audio/mp4'
+        : mimetype;
+
+    const url =
+      `https://api.deepgram.com/v1/listen` +
+      `?model=nova-3` +
+      `&language=ar` +
+      `&punctuate=true`;
 
     const response = await fetch(url, {
       method: "POST",
       headers: {
         Authorization: `Token ${process.env.DEEPGRAM_API_KEY}`,
-        "Content-Type": mimetype,
+        "Content-Type": effectiveMimetype,
       },
       body: new Uint8Array(audioBuffer),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("❌ [Deepgram API] Transcription failed:", errorData);
-      throw new Error("Failed to transcribe audio using Deepgram.");
+      const errorData = await response.json().catch(() => ({}));
+      console.error(
+        `❌ [Deepgram API] Transcription failed — HTTP ${response.status}:`,
+        errorData,
+      );
+      throw new Error(
+        `Deepgram transcription failed: ${errorData?.err_msg || errorData?.message || response.statusText}`,
+      );
     }
 
     const data = await response.json();
-    const transcriptText = data.results?.channels[0]?.alternatives[0]?.transcript || "";
-    
+    const transcriptText =
+      data.results?.channels[0]?.alternatives[0]?.transcript || "";
+
     const tokens = Math.ceil((transcriptText.length || 0) / 4);
     if (tokens > 0 && userId) await logTokenUsage(userId, 'voiceToText', tokens);
 
     return transcriptText;
-  } catch (error) {
-    console.error("❌ [Deepgram API] Unexpected error:", error);
+  } catch (error: any) {
+    console.error("❌ [Deepgram API] Unexpected error:", error?.message || error);
     throw new Error(
-      "An unexpected error occurred during Deepgram audio processing.",
+      `An unexpected error occurred during Deepgram audio processing: ${error?.message || error}`,
     );
   }
 };

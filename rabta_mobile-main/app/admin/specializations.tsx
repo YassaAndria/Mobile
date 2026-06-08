@@ -1,20 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
   FlatList,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useRouter } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import axiosInstance from "../../src/api/axiosInstance";
-import { useTheme } from "../../src/theme/ThemeContext";
+  StyleSheet,
+  Alert,
+  Pressable,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { Stack } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
+
+import axiosInstance from '../../src/api/axiosInstance';
+import { useTheme } from '../../src/theme/ThemeContext';
+import { typography } from '../../src/theme/typography';
 
 interface Specialization {
   _id: string;
@@ -24,164 +27,169 @@ interface Specialization {
 }
 
 export default function AdminSpecializationsScreen() {
-  const { colors, isDark } = useTheme();
-  const router = useRouter();
+  const { colors } = useTheme();
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newName, setNewName] = useState("");
-
-  const fetchSpecializations = async () => {
-    try {
-      setLoading(true);
-      const { data } = await axiosInstance.get("/specializations");
-      setSpecializations(data.data?.specializations || []);
-    } catch (error) {
-      console.error("Failed to load specializations", error);
-      Alert.alert("Error", "Failed to load specializations");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [newName, setNewName] = useState('');
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     fetchSpecializations();
   }, []);
 
-  const handleAddSpecialization = async () => {
-    if (!newName.trim()) return;
-
+  const fetchSpecializations = async () => {
     try {
-      setIsSubmitting(true);
-      const { data } = await axiosInstance.post("/admin/specializations", {
-        name: newName.trim(),
-      });
-      
-      const added = data.data?.specialization;
-      if (added) {
-        setSpecializations((prev) => [...prev, added]);
-        Alert.alert("Success", "Specialization added successfully!");
-        setNewName("");
-      }
+      setLoading(true);
+      const response = await axiosInstance.get('/specializations');
+      setSpecializations(response.data.data.specializations || []);
     } catch (error: any) {
-      const msg = error.response?.data?.message || "Failed to add specialization";
-      Alert.alert("Error", msg);
+      console.error('Error fetching specializations:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to load specializations',
+      });
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  const cardBg = isDark ? "#1E1E24" : "#FFFFFF";
-  const inputBg = isDark ? "#121214" : "#F9FAFB";
+  const handleAdd = async () => {
+    if (!newName.trim()) return;
+    try {
+      setAdding(true);
+      await axiosInstance.post('/specializations', { name: newName.trim() });
+      await fetchSpecializations();
+      setNewName('');
+      Toast.show({ type: 'success', text1: 'Specialization Added' });
+    } catch (error: any) {
+      console.error('Error adding specialization:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: error.response?.data?.message || 'Failed to add specialization',
+      });
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      'Delete Specialization',
+      'Are you sure you want to delete this specialization?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await axiosInstance.delete(`/specializations/${id}`);
+              setSpecializations((prev) => prev.filter((s) => s._id !== id));
+              Toast.show({ type: 'success', text1: 'Deleted Successfully' });
+            } catch (error: any) {
+              console.error('Error deleting specialization:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2:
+                  error.response?.data?.message ||
+                  'Failed to delete specialization',
+              });
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const renderItem = ({ item }: { item: Specialization }) => (
+    <View
+      style={[
+        styles.itemContainer,
+        { backgroundColor: colors.surface, borderColor: colors.border },
+      ]}
+    >
+      <View style={styles.itemInfo}>
+        <Text style={[typography.h3, { color: colors.text }]}>{item.name}</Text>
+        <Text style={[typography.caption, { color: colors.textSubtle }]}>
+          Added: {new Date(item.createdAt).toLocaleDateString()}
+        </Text>
+      </View>
+      <Pressable
+        style={styles.deleteButton}
+        onPress={() => handleDelete(item._id)}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Ionicons name="trash-outline" size={22} color="#ef4444" />
+      </Pressable>
+    </View>
+  );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={["top"]}>
-      <Stack.Screen options={{ headerShown: false }} />
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.bg }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Stack.Screen options={{ title: 'Specializations' }} />
 
-      {/* Screen Header */}
-      <View style={styles.screenHeader}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={[styles.backBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      {/* Add bar */}
+      <View
+        style={[
+          styles.inputContainer,
+          { backgroundColor: colors.surface, borderBottomColor: colors.border },
+        ]}
+      >
+        <TextInput
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.border },
+          ]}
+          placeholder="New specialization name..."
+          placeholderTextColor={colors.textSubtle}
+          value={newName}
+          onChangeText={setNewName}
+          returnKeyType="done"
+          onSubmitEditing={handleAdd}
+        />
+        <Pressable
+          style={({ pressed }) => [
+            styles.addButton,
+            { backgroundColor: colors.purple, opacity: pressed ? 0.75 : 1 },
+          ]}
+          onPress={handleAdd}
+          disabled={!newName.trim() || adding}
         >
-          <MaterialIcons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Specializations</Text>
-          <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
-            Manage community creation categories
-          </Text>
-        </View>
+          {adding ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={[typography.button, { color: '#fff' }]}>Add</Text>
+          )}
+        </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        {/* Form Card */}
-        <View style={[styles.card, { backgroundColor: cardBg, borderColor: colors.border }]}>
-          <Text style={[styles.cardTitle, { color: colors.text }]}>Add New Specialization</Text>
-          
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Display Name</Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: inputBg,
-                  color: colors.text,
-                  borderColor: colors.border,
-                },
-              ]}
-              placeholder="e.g., Mobile Development"
-              placeholderTextColor={colors.textMuted}
-              value={newName}
-              onChangeText={setNewName}
-            />
-            <Text style={[styles.infoText, { color: colors.textMuted }]}>
-              The database value (e.g. mobile_development) is generated automatically.
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.btnPrimary,
-              {
-                backgroundColor: colors.purple,
-                opacity: isSubmitting || !newName.trim() ? 0.6 : 1,
-              },
-            ]}
-            onPress={handleAddSpecialization}
-            disabled={isSubmitting || !newName.trim()}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <MaterialIcons name="add" size={18} color="#FFFFFF" />
-                <Text style={styles.btnText}>Add Specialization</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+      {/* List */}
+      {loading ? (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={colors.purple} />
         </View>
-
-        {/* List Card */}
-        <View style={[styles.card, { backgroundColor: cardBg, borderColor: colors.border, marginTop: 16 }]}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <Text style={[styles.cardTitle, { color: colors.text, marginBottom: 0 }]}>Existing Specializations</Text>
-            <TouchableOpacity onPress={fetchSpecializations} style={{ padding: 4 }}>
-              <MaterialIcons name="refresh" size={20} color={colors.textMuted} />
-            </TouchableOpacity>
-          </View>
-
-          <View style={[styles.separator, { backgroundColor: colors.border }]} />
-
-          {loading ? (
-            <ActivityIndicator size="small" color={colors.purple} style={{ marginVertical: 20 }} />
-          ) : specializations.length === 0 ? (
-            <View style={{ paddingVertical: 20, alignItems: "center" }}>
-              <MaterialIcons name="local-offer" size={36} color={colors.textMuted} style={{ opacity: 0.5, marginBottom: 8 }} />
-              <Text style={{ color: colors.textMuted, fontSize: 13 }}>No specializations found. Add one above!</Text>
+      ) : (
+        <FlatList
+          data={specializations}
+          keyExtractor={(item) => item._id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={[typography.body, { color: colors.textSubtle }]}>
+                No specializations found.
+              </Text>
             </View>
-          ) : (
-            <View style={{ gap: 12 }}>
-              {specializations.map((spec) => (
-                <View key={spec._id} style={[styles.listItem, { borderColor: colors.border, backgroundColor: colors.surface2 }]}>
-                  <View style={{ flex: 1, gap: 4 }}>
-                    <Text style={[styles.itemName, { color: colors.text }]}>{spec.name}</Text>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                      <View style={[styles.dbValueBadge, { backgroundColor: colors.border }]}>
-                        <Text style={{ color: colors.text, fontSize: 10, fontFamily: "monospace" }}>{spec.value}</Text>
-                      </View>
-                      <Text style={{ color: colors.textMuted, fontSize: 10 }}>
-                        {new Date(spec.createdAt).toLocaleDateString()}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          }
+        />
+      )}
+    </KeyboardAvoidingView>
   );
 }
 
@@ -189,97 +197,58 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  screenHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    gap: 12,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
-  },
-  card: {
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 12,
-  },
-  formGroup: {
-    gap: 6,
-    marginBottom: 14,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: "600",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    gap: 10,
   },
   input: {
+    flex: 1,
+    height: 44,
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
+    fontSize: 16,
   },
-  infoText: {
-    fontSize: 11,
-    lineHeight: 14,
-  },
-  btnPrimary: {
-    paddingVertical: 12,
+  addButton: {
+    height: 44,
+    paddingHorizontal: 20,
     borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 72,
   },
-  btnText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "700",
+  listContent: {
+    padding: 16,
+    paddingBottom: 32,
   },
-  separator: {
-    height: 1,
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
     marginBottom: 12,
   },
-  listItem: {
-    borderWidth: 1,
+  itemInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  deleteButton: {
+    padding: 8,
     borderRadius: 10,
-    padding: 12,
-    flexDirection: "row",
-    alignItems: "center",
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
   },
-  itemName: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  dbValueBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    alignSelf: "flex-start",
+  emptyContainer: {
+    padding: 32,
+    alignItems: 'center',
   },
 });

@@ -14,8 +14,10 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { useTheme } from "../../src/theme/ThemeContext";
 import axiosInstance from "../../src/api/axiosInstance";
+import { useAudioRecorder, AudioModule, RecordingPresets } from "expo-audio";
 
 type AiMessage = {
   id: string;
@@ -36,6 +38,9 @@ export default function GlobalAiChatScreen() {
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
 
   // Scroll to bottom when keyboard opens so latest message stays visible
   useEffect(() => {
@@ -83,6 +88,39 @@ export default function GlobalAiChatScreen() {
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVoiceInput = async () => {
+    try {
+      if (isRecording) {
+        await audioRecorder.stop();
+        setIsRecording(false);
+        setIsTranscribing(true);
+        const uri = audioRecorder.uri;
+        if (!uri) return;
+        const formData = new FormData();
+        formData.append('audio', {
+          uri,
+          type: 'audio/m4a',
+          name: 'voice.m4a',
+        } as any);
+        const res = await axiosInstance.post('/ai/voice/transcribe', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        const transcribed = res.data?.data?.text || '';
+        if (transcribed) setInputText(prev => prev + transcribed);
+      } else {
+        await AudioModule.requestRecordingPermissionsAsync();
+        await audioRecorder.prepareToRecordAsync();
+        audioRecorder.record();
+        setIsRecording(true);
+      }
+    } catch (err) {
+      Toast.show({ type: 'error', text1: 'Voice input failed' });
+      setIsRecording(false);
+    } finally {
+      setIsTranscribing(false);
     }
   };
 
@@ -164,6 +202,29 @@ export default function GlobalAiChatScreen() {
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <MaterialIcons name="send" size={20} color={inputText.trim() ? "#fff" : colors.textMuted} />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleVoiceInput}
+            disabled={isTranscribing}
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              backgroundColor: isRecording ? '#EF4444' : colors.purple,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginLeft: 8,
+            }}
+          >
+            {isTranscribing ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <MaterialIcons
+                name={isRecording ? 'stop' : 'mic'}
+                size={22}
+                color="#fff"
+              />
             )}
           </TouchableOpacity>
         </View>
