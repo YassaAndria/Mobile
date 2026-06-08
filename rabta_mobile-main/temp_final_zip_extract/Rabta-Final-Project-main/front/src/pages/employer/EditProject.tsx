@@ -70,7 +70,7 @@ export const EditProject: React.FC = () => {
             <span className="material-icons-round">arrow_back</span>
           </button>
           <div>
-            <h1 className="text-3xl font-black tracking-tight">Edit Project</h1>
+            <h1 className="text-3xl font-black tracking-tight">Edit Job</h1>
             <p className="text-gray-500 dark:text-gray-400 font-medium">Update the details of your opportunity.</p>
           </div>
         </div>

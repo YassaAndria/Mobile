@@ -59,11 +59,16 @@ export default function EmployerDashboardScreen() {
     (async () => {
       try {
         setIsLoading(true);
-        const response = await axiosInstance.get("/jobs");
-        const allJobs = response.data.data.jobs || [];
-        const myJobs = allJobs.filter(
-          (job: any) => job.publisherId?._id === user?._id || job.publisherId === user?._id,
-        );
+        const response = await axiosInstance.get("/jobs/employer/me");
+        // Handle different API response structures
+        const resData = response.data;
+        const myJobs =
+          resData?.data?.jobs ||
+          resData?.data?.data ||
+          resData?.jobs ||
+          (Array.isArray(resData?.data) ? resData.data : []) ||
+          [];
+        console.log("[EmployerDashboard] jobs fetched:", myJobs.length, "raw:", JSON.stringify(resData).slice(0, 200));
         setJobs(myJobs);
       } catch {
         /* ignore */
@@ -73,8 +78,15 @@ export default function EmployerDashboardScreen() {
     })();
   }, [user?._id]);
 
-  const activeProjects = jobs.length;
-  const totalApplicants = jobs.reduce((sum, job) => sum + (job.applicantsCount || 0), 0);
+  // Count active projects - handle both 'status' field and 'isOpen' field
+  const activeProjects = jobs.filter(job => {
+    if (job.status !== undefined) return job.status !== 'closed';
+    if (job.isOpen !== undefined) return job.isOpen === true;
+    return true; // default: count as active
+  }).length;
+  const totalApplicants = jobs.reduce((sum, job) => {
+    return sum + (job.applicantsCount ?? job.applicants?.length ?? 0);
+  }, 0);
   const currentStatus = user?.verificationStatus || 'pending';
 
   return (

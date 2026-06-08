@@ -200,7 +200,11 @@ export default function JobDetailsScreen() {
       <View style={{ gap: 32 }}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
-            <Text style={[typography.caption, styles.badgeGreen]}>OPEN</Text>
+            {(job as any).status === 'closed' ? (
+              <Text style={[typography.caption, { backgroundColor: '#FEE2E2', color: '#B91C1C', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 }]}>CLOSED</Text>
+            ) : (
+              <Text style={[typography.caption, styles.badgeGreen]}>OPEN</Text>
+            )}
             <Text style={[typography.caption, styles.badgePur, { color: colors.purple, backgroundColor: colors.purple10 }]}>{job.projectType}</Text>
             <Text style={[typography.caption, styles.badgeGray, { color: colors.textMuted, backgroundColor: colors.surface2 }]}>{job.location}</Text>
           </View>
@@ -260,13 +264,13 @@ export default function JobDetailsScreen() {
           {user?.role === "freelancer" && (
             <View style={{ gap: 12, marginTop: 16 }}>
               <TouchableOpacity
-                onPress={() => !hasApplied && setIsModalOpen(true)}
-                disabled={hasApplied}
+                onPress={() => !(hasApplied || (job as any).status === 'closed') && setIsModalOpen(true)}
+                disabled={hasApplied || (job as any).status === 'closed'}
                 activeOpacity={0.7}
                 style={{
                   width: "100%",
-                  backgroundColor: hasApplied 
-                    ? (isDark ? "rgba(107, 114, 128, 0.15)" : "#F3F4F6") 
+                  backgroundColor: (hasApplied || (job as any).status === 'closed')
+                    ? (isDark ? "rgba(107, 114, 128, 0.15)" : "#F3F4F6")
                     : (isDark ? "rgba(139, 92, 246, 0.15)" : "#F3E8FF"),
                   borderRadius: 10,
                   paddingVertical: 14,
@@ -274,25 +278,25 @@ export default function JobDetailsScreen() {
                   flexDirection: "row-reverse",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  opacity: hasApplied ? 0.7 : 1,
+                  opacity: (hasApplied || (job as any).status === 'closed') ? 0.7 : 1,
                 }}
               >
                 <View style={{ flexDirection: "row-reverse", alignItems: "center" }}>
-                  <MaterialIcons 
-                    name={hasApplied ? "check-circle" : "work"} 
-                    size={20} 
-                    color={hasApplied ? colors.textMuted : colors.purple} 
-                    style={{ marginLeft: 12 }} 
+                  <MaterialIcons
+                    name={(job as any).status === 'closed' ? "lock" : hasApplied ? "check-circle" : "work"}
+                    size={20}
+                    color={colors.textMuted}
+                    style={{ marginLeft: 12 }}
                   />
-                  <Text style={{ 
-                    fontSize: 16, 
-                    fontWeight: "700", 
-                    color: hasApplied ? colors.textMuted : colors.purpleDark 
+                  <Text style={{
+                    fontSize: 16,
+                    fontWeight: "700",
+                    color: (hasApplied || (job as any).status === 'closed') ? colors.textMuted : colors.purpleDark
                   }}>
-                    {hasApplied ? "Applied" : "Apply Now"}
+                    {(job as any).status === 'closed' ? "Job Closed" : hasApplied ? "Applied" : "Apply Now"}
                   </Text>
                 </View>
-                {!hasApplied && (
+                {!(hasApplied || (job as any).status === 'closed') && (
                   <MaterialIcons name="chevron-left" size={20} color={colors.purple} style={{ opacity: 0.5 }} />
                 )}
               </TouchableOpacity>

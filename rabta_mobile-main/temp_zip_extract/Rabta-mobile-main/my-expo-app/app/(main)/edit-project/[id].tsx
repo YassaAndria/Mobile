@@ -56,7 +56,7 @@ export default function EditProjectScreen() {
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: 24 }}>
-      <Text style={[typography.h1, { color: colors.text, marginBottom: 24 }]}>Edit Project</Text>
+      <Text style={[typography.h1, { color: colors.text, marginBottom: 24 }]}>Edit Job</Text>
       <Text style={[typography.label, { color: colors.text, marginBottom: 8 }]}>Title</Text>
       <TextInput
         value={title}

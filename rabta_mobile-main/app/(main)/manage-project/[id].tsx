@@ -61,6 +61,17 @@ export default function ManageProjectScreen() {
     ]);
   };
 
+  const handleToggleStatus = async () => {
+    try {
+      const newStatus = project.status === 'closed' ? 'open' : 'closed';
+      await axiosInstance.patch(`/jobs/${id}`, { status: newStatus });
+      setProject({ ...project, status: newStatus });
+      Toast.show({ type: 'success', text1: `Job marked as ${newStatus}` });
+    } catch {
+      Toast.show({ type: 'error', text1: 'Failed to update job status' });
+    }
+  };
+
   const handleReEvaluateMatch = async (applicantUserId: string) => {
     try {
       setReloadingApplicantId(applicantUserId);
@@ -117,9 +128,15 @@ export default function ManageProjectScreen() {
 
         <View style={{ flexDirection: 'row', gap: 12, marginTop: 24 }}>
           <Button
-            title="Edit Project"
+            title="Edit Job"
             variant="secondary"
             onPress={() => router.push(`/edit-project/${id}`)}
+            style={{ flex: 1 }}
+          />
+          <Button
+            title={project.status === 'closed' ? 'Reopen Job' : 'Close Job'}
+            variant="outline"
+            onPress={handleToggleStatus}
             style={{ flex: 1 }}
           />
           <Button

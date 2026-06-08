@@ -95,7 +95,7 @@ const ManageProject: React.FC = () => {
                 className="w-full py-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-xl font-bold transition-all shadow-lg shadow-purple-200 dark:shadow-none flex items-center justify-center gap-2"
               >
                 <span className="material-icons-round text-sm">edit</span>
-                Edit Project
+                Edit Jop
               </button>
               <button 
                 onClick={handleDelete}

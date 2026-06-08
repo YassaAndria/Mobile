@@ -25,9 +25,8 @@ interface Freelancer {
   phoneNumber?: string;
   avatar?: string;
   skills?: string[];
-  socialLinks?: { github?: string; linkedin?: string; mostaql?: string; khamsat?: string };
-  links?: { platform: string; url: string }[];
-  projects?: { title: string; description: string; projectLink?: string; githubLink?: string; _id?: string }[];
+  links?: { platform: string; url: string; _id?: string }[];
+  featuredProjects?: { title: string; description: string; projectLink?: string; githubLink?: string; _id?: string }[];
 }
 
 export default function FreelancerProfileScreen() {
@@ -169,7 +168,7 @@ export default function FreelancerProfileScreen() {
       
       {/* Profile Header */}
       <View style={styles.header}>
-        {freelancer.avatar ? (
+        {freelancer.avatar && freelancer.avatar.length > 0 ? (
           <Image 
             source={{ uri: freelancer.avatar }} 
             style={styles.avatar} 
@@ -191,6 +190,27 @@ export default function FreelancerProfileScreen() {
             {freelancer.jobTitle}
           </Text>
         )}
+        <TouchableOpacity
+          onPress={() => router.push({
+            pathname: '/(main)/ChatWindowScreen',
+            params: { userId: freelancer._id, name: freelancer.fullName, avatar: freelancer.avatar }
+          } as any)}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            backgroundColor: colors.purple,
+            paddingVertical: 12,
+            paddingHorizontal: 24,
+            borderRadius: 12,
+            marginTop: 16,
+            width: '100%',
+          }}
+        >
+          <MaterialIcons name="chat" size={20} color="#fff" />
+          <Text style={{ color: '#fff', fontWeight: '800', fontSize: 16 }}>Send Message</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Social Links */}
@@ -209,28 +229,28 @@ export default function FreelancerProfileScreen() {
       )}
 
       {/* About Me */}
-      {(freelancer.aboutMe || freelancer.bioHeadline) && (
-        <View style={styles.section}>
-          <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>About Me</Text>
-          <Text style={[typography.body, { color: colors.textSubtle, lineHeight: 24 }]}>
-            {freelancer.aboutMe || freelancer.bioHeadline}
-          </Text>
-        </View>
-      )}
+      <View style={styles.section}>
+        <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>About Me</Text>
+        <Text style={[typography.body, { color: colors.textSubtle, lineHeight: 24 }]}>
+          {freelancer.aboutMe || freelancer.bioHeadline || 'No description provided yet.'}
+        </Text>
+      </View>
 
       {/* Technical Skills */}
-      {freelancer.skills && freelancer.skills.length > 0 && (
-        <View style={styles.section}>
-          <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>Technical Skills</Text>
+      <View style={styles.section}>
+        <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>Technical Skills</Text>
+        {freelancer.skills && freelancer.skills.length > 0 ? (
           <View style={styles.skillsContainer}>
             {freelancer.skills.map((skill, index) => (
-              <View key={index} style={[styles.skillBadge, { backgroundColor: colors.purple + '20' }]}>
+              <View key={index} style={[styles.skillBadge, { backgroundColor: colors.purpleSoft }]}>
                 <Text style={[typography.caption, { color: colors.purple }]}>{skill}</Text>
               </View>
             ))}
           </View>
-        </View>
-      )}
+        ) : (
+          <Text style={[typography.body, { color: colors.textMuted, fontStyle: 'italic' }]}>No skills listed yet.</Text>
+        )}
+      </View>
 
       {/* Contact Info */}
       {(freelancer.email || freelancer.phoneNumber) && (
@@ -250,10 +270,10 @@ export default function FreelancerProfileScreen() {
       )}
 
       {/* Featured Projects */}
-      {freelancer.projects && freelancer.projects.length > 0 && (
-        <View style={styles.section}>
-          <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>Featured Projects</Text>
-          {freelancer.projects.map((project, index) => (
+      <View style={styles.section}>
+        <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>Featured Projects</Text>
+        {freelancer.featuredProjects && freelancer.featuredProjects.length > 0 ? (
+          freelancer.featuredProjects.map((project, index) => (
             <View key={project._id || index} style={[styles.projectCard, { backgroundColor: colors.surface }]}>
               <Text style={[typography.subtitle1, { color: colors.text, marginBottom: 8 }]}>
                 {project.title}
@@ -282,9 +302,11 @@ export default function FreelancerProfileScreen() {
                 )}
               </View>
             </View>
-          ))}
-        </View>
-      )}
+          ))
+        ) : (
+          <Text style={[typography.body, { color: colors.textMuted, fontStyle: 'italic' }]}>No projects added yet.</Text>
+        )}
+      </View>
       
       <View style={{ height: 40 }} />
     </ScrollView>

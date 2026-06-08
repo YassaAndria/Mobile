@@ -26897,7 +26897,7 @@ export default function EditProjectScreen() {
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: 24 }}>
-      <Text style={[typography.h1, { color: colors.text, marginBottom: 24 }]}>Edit Project</Text>
+      <Text style={[typography.h1, { color: colors.text, marginBottom: 24 }]}>Edit Jop</Text>
       <Text style={[typography.label, { color: colors.text, marginBottom: 8 }]}>Title</Text>
       <TextInput
         value={title}
@@ -28426,7 +28426,7 @@ export default function ManageProjectScreen() {
       ))}
 
       <Button
-        title="Edit Project"
+        title="Edit Jop"
         variant="primary"
         onPress={() => router.push(`/edit-project/${id}`)}
         style={{ marginTop: 24 }}

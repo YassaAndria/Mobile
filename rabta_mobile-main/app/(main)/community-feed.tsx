@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
   StyleSheet,
   ActivityIndicator,
   FlatList,
@@ -195,7 +196,8 @@ export default function CommunityFeedScreen() {
       : "";
 
     return (
-      <View
+      <Pressable
+        onPress={() => router.push(`/post-detail/${item._id}` as any)}
         style={[
           styles.card,
           { backgroundColor: colors.surface, borderColor: colors.border },
@@ -292,7 +294,7 @@ export default function CommunityFeedScreen() {
             <Text style={{ color: colors.purple, fontWeight: "700" }}>Send</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </Pressable>
     );
   };
 

@@ -90,7 +90,7 @@ export default function ManageProjectScreen() {
       ))}
 
       <Button
-        title="Edit Project"
+        title="Edit Job"
         variant="primary"
         onPress={() => router.push(`/edit-project/${id}`)}
         style={{ marginTop: 24 }}
