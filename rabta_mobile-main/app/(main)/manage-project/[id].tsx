@@ -19,6 +19,7 @@ export default function ManageProjectScreen() {
   const [applicants, setApplicants] = useState<any[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [sortByScore, setSortByScore] = useState(false);
+  const [reloadingApplicantId, setReloadingApplicantId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -58,6 +59,24 @@ export default function ManageProjectScreen() {
         },
       },
     ]);
+  };
+
+  const handleReEvaluateMatch = async (applicantUserId: string) => {
+    try {
+      setReloadingApplicantId(applicantUserId);
+      const res = await axiosInstance.post(`/jobs/${id}/applicants/${applicantUserId}/re-evaluate`);
+      const { matchScore, matchReason } = res.data.data;
+      setApplicants(prev => prev.map(app => {
+        const appUserId = app.userId?._id || app.userId;
+        if (appUserId === applicantUserId) return { ...app, matchScore, matchReason };
+        return app;
+      }));
+      Toast.show({ type: 'success', text1: 'Match score updated!' });
+    } catch {
+      Toast.show({ type: 'error', text1: 'Failed to re-evaluate match' });
+    } finally {
+      setReloadingApplicantId(null);
+    }
   };
 
   if (isLoading || !project) {
@@ -162,7 +181,12 @@ export default function ManageProjectScreen() {
                 
                 <View style={styles.applicantActions}>
                   <View style={{ alignItems: 'flex-start' }}>
-                    <MatchScoreBadge score={applicant.matchScore} reason={applicant.matchReason} />
+                    <MatchScoreBadge 
+                      score={applicant.matchScore} 
+                      reason={applicant.matchReason} 
+                      isReloading={reloadingApplicantId === (applicant.userId?._id || applicant.userId)}
+                      onReload={() => handleReEvaluateMatch(applicant.userId?._id || applicant.userId)}
+                    />
                     <Text style={[typography.caption, { color: colors.textSubtle, marginTop: 4, marginLeft: 4 }]}>
                       Applied {new Date(applicant.appliedAt).toLocaleDateString()}
                     </Text>

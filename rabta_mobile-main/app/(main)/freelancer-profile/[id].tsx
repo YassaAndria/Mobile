@@ -18,12 +18,16 @@ interface Freelancer {
   _id: string;
   fullName: string;
   jobTitle?: string;
-  bio?: string;
-  about?: string;
-  profilePicture?: string;
+  bioHeadline?: string;
+  aboutMe?: string;
+  location?: string;
+  email?: string;
+  phoneNumber?: string;
+  avatar?: string;
   skills?: string[];
+  socialLinks?: { github?: string; linkedin?: string; mostaql?: string; khamsat?: string };
   links?: { platform: string; url: string }[];
-  projects?: { _id: string; title: string; description: string; viewLink?: string; githubLink?: string }[];
+  projects?: { title: string; description: string; projectLink?: string; githubLink?: string; _id?: string }[];
 }
 
 export default function FreelancerProfileScreen() {
@@ -150,15 +154,24 @@ export default function FreelancerProfileScreen() {
         options={{ 
           title: freelancer.fullName || 'Freelancer Profile',
           headerBackTitleVisible: false,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{ paddingLeft: 8 }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+          ),
           headerRight: renderHeaderRight,
         }} 
       />
       
       {/* Profile Header */}
       <View style={styles.header}>
-        {freelancer.profilePicture ? (
+        {freelancer.avatar ? (
           <Image 
-            source={{ uri: freelancer.profilePicture }} 
+            source={{ uri: freelancer.avatar }} 
             style={styles.avatar} 
             contentFit="cover"
             transition={200}
@@ -196,11 +209,11 @@ export default function FreelancerProfileScreen() {
       )}
 
       {/* About Me */}
-      {(freelancer.bio || freelancer.about) && (
+      {(freelancer.aboutMe || freelancer.bioHeadline) && (
         <View style={styles.section}>
           <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>About Me</Text>
           <Text style={[typography.body, { color: colors.textSubtle, lineHeight: 24 }]}>
-            {freelancer.bio || freelancer.about}
+            {freelancer.aboutMe || freelancer.bioHeadline}
           </Text>
         </View>
       )}
@@ -219,6 +232,23 @@ export default function FreelancerProfileScreen() {
         </View>
       )}
 
+      {/* Contact Info */}
+      {(freelancer.email || freelancer.phoneNumber) && (
+        <View style={styles.section}>
+          <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>Contact</Text>
+          {freelancer.email && (
+            <TouchableOpacity onPress={() => Linking.openURL(`mailto:${freelancer.email}`)}>
+              <Text style={[typography.body, { color: colors.purple, marginBottom: 8 }]}>✉ {freelancer.email}</Text>
+            </TouchableOpacity>
+          )}
+          {freelancer.phoneNumber && (
+            <TouchableOpacity onPress={() => Linking.openURL(`tel:${freelancer.phoneNumber}`)}>
+              <Text style={[typography.body, { color: colors.purple }]}>📞 {freelancer.phoneNumber}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
       {/* Featured Projects */}
       {freelancer.projects && freelancer.projects.length > 0 && (
         <View style={styles.section}>
@@ -232,10 +262,10 @@ export default function FreelancerProfileScreen() {
                 {project.description}
               </Text>
               <View style={styles.projectActions}>
-                {project.viewLink && (
+                {project.projectLink && (
                   <TouchableOpacity 
                     style={[styles.projectBtn, { backgroundColor: colors.purple }]}
-                    onPress={() => Linking.openURL(project.viewLink!)}
+                    onPress={() => Linking.openURL(project.projectLink!)}
                   >
                     <Ionicons name="eye-outline" size={16} color="#fff" style={{ marginRight: 4 }} />
                     <Text style={[typography.button, { color: '#fff' }]}>View</Text>
@@ -243,7 +273,7 @@ export default function FreelancerProfileScreen() {
                 )}
                 {project.githubLink && (
                   <TouchableOpacity 
-                    style={[styles.projectBtn, { backgroundColor: colors.text, marginLeft: project.viewLink ? 10 : 0 }]}
+                    style={[styles.projectBtn, { backgroundColor: colors.text, marginLeft: project.projectLink ? 10 : 0 }]}
                     onPress={() => Linking.openURL(project.githubLink!)}
                   >
                     <Ionicons name="logo-github" size={16} color={colors.bg} style={{ marginRight: 4 }} />
