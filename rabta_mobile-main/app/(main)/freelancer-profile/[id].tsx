@@ -1,231 +1,349 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter, Stack } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Toast from "react-native-toast-message";
-import { useSelector } from "react-redux";
-import axiosInstance from "../../../src/api/axiosInstance";
-import { useAppDispatch } from "../../../src/store/hooks";
-import { updateProfile } from "../../../src/store/slices/authSlice";
-import type { RootState } from "../../../src/store/store";
-import { useTheme } from "../../../src/theme/ThemeContext";
-import { Button } from "../../../src/components/ui/Button";
-import { typography } from "../../../src/theme/typography";
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Linking } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useSelector } from 'react-redux';
+import { Image } from 'expo-image';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 
-export default function FreelancerProfileViewScreen() {
+import axiosInstance from '../../../src/api/axiosInstance';
+import { useTheme } from '../../../src/theme/ThemeContext';
+import { typography } from '../../../src/theme/typography';
+import Button from '../../../src/components/ui/Button';
+import { RootState } from '../../../src/store/store';
+import { updateProfile } from '../../../src/store/slices/authSlice';
+import { useAppDispatch } from '../../../src/store/hooks';
+
+interface Freelancer {
+  _id: string;
+  fullName: string;
+  jobTitle?: string;
+  bio?: string;
+  about?: string;
+  profilePicture?: string;
+  skills?: string[];
+  links?: { platform: string; url: string }[];
+  projects?: { _id: string; title: string; description: string; viewLink?: string; githubLink?: string }[];
+}
+
+export default function FreelancerProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const { colors, isDark } = useTheme();
+  const dispatch = useAppDispatch();
   
   const currentUser = useSelector((s: RootState) => s.auth.user);
-  const [user, setUser] = useState<any>(null);
+  
+  const [freelancer, setFreelancer] = useState<Freelancer | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
-    (async () => {
+    const fetchFreelancer = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await axiosInstance.get(`/users/${id}`);
-        setUser(response.data.data.user);
-      } catch {
-        Toast.show({ type: "error", text1: "Failed to load profile" });
+        setFreelancer(response.data.data.user);
+      } catch (err: any) {
+        console.error('Error fetching freelancer:', err);
+        setError(err.response?.data?.message || 'Failed to load freelancer profile');
       } finally {
         setLoading(false);
       }
-    })();
+    };
+
+    if (id) {
+      fetchFreelancer();
+    }
   }, [id]);
 
-  const isSaved = currentUser?.savedFreelancers?.some(
-    (fid: any) => fid.toString() === id || fid === id || (fid?._id && fid._id.toString() === id)
-  );
-
-  const toggleSave = async () => {
+  const handleToggleSave = async () => {
+    if (!currentUser || !id) return;
+    
     try {
       setSaving(true);
-      const res = await axiosInstance.post(`/users/toggle-save-freelancer/${id}`);
-      dispatch(updateProfile(res.data.data.user));
-      Toast.show({ type: "success", text1: res.data.message });
-    } catch (e: any) {
-      Toast.show({ type: "error", text1: e.response?.data?.message || "Failed to update saved freelancers" });
+      const response = await axiosInstance.post(`/users/toggle-save-freelancer/${id}`);
+      const updatedUser = response.data.data.user;
+      
+      dispatch(updateProfile(updatedUser));
+      
+      const isSaved = updatedUser.savedFreelancers?.includes(id);
+      Toast.show({
+        type: 'success',
+        text1: isSaved ? 'Freelancer Saved' : 'Freelancer Removed',
+        text2: isSaved ? 'Added to your saved freelancers.' : 'Removed from your saved freelancers.',
+      });
+    } catch (err: any) {
+      console.error('Error toggling save freelancer:', err);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: err.response?.data?.message || 'Failed to update saved status',
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  const getInitials = (name: string) => {
-    if (!name) return "??";
-    const parts = name.trim().split(" ");
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-    return parts[0].slice(0, 2).toUpperCase();
+  const isEmployer = currentUser?.role === 'employer';
+  const isSaved = currentUser?.savedFreelancers?.includes(id as string);
+
+  const renderHeaderRight = () => {
+    if (!isEmployer) return null;
+    
+    return (
+      <TouchableOpacity 
+        onPress={handleToggleSave} 
+        disabled={saving}
+        style={{ marginRight: 15 }}
+      >
+        <Ionicons 
+          name={isSaved ? "bookmark" : "bookmark-outline"} 
+          size={24} 
+          color={colors.purple} 
+        />
+      </TouchableOpacity>
+    );
   };
 
-  if (loading || !user) {
+  if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: colors.bg }]}>
-        <ActivityIndicator color={colors.purple} size="large" />
+      <View style={[styles.centerContainer, { backgroundColor: colors.bg }]}>
+        <Stack.Screen options={{ title: 'Loading...', headerRight: () => null }} />
+        <ActivityIndicator size="large" color={colors.purple} />
       </View>
     );
   }
 
-  return (
-    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.scroll}>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: "Freelancer Profile",
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <Ionicons name="arrow-back" size={24} color={colors.text} />
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity onPress={toggleSave} disabled={saving} style={{ marginRight: 8 }}>
-              {saving ? (
-                <ActivityIndicator color={colors.purple} size="small" />
-              ) : (
-                <MaterialIcons
-                  name={isSaved ? "star" : "star-border"}
-                  size={26}
-                  color={isSaved ? "#F59E0B" : colors.text}
-                />
-              )}
-            </TouchableOpacity>
-          ),
-        }}
-      />
-
-      <View style={styles.cols}>
-        <View style={[styles.card, styles.headerCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <View style={[styles.bigAvatar, { backgroundColor: colors.purple }]}>
-            {user.avatar ? (
-              <Image source={{ uri: user.avatar }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
-            ) : (
-              <Text style={styles.bigAvatarText}>{getInitials(user.fullName)}</Text>
-            )}
-          </View>
-          <Text style={[typography.h2, { color: colors.text, marginBottom: 4, textAlign: 'center' }]}>{user.fullName}</Text>
-          <Text style={[typography.body, { color: colors.purple, fontWeight: "600", marginBottom: 16, textAlign: 'center' }]}>
-            {user.jobTitle || "Freelancer"}
-          </Text>
-
-          {user.location && (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 12 }}>
-              <MaterialIcons name="location-on" size={16} color={colors.purple} />
-              <Text style={[typography.bodySmall, { color: colors.textSubtle }]}>{user.location}</Text>
-            </View>
-          )}
-
-          {user.email && (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
-              <MaterialIcons name="email" size={16} color={colors.textMuted} />
-              <Text style={[typography.bodySmall, { color: colors.textSubtle }]}>{user.email}</Text>
-            </View>
-          )}
-
-          {user.phoneNumber && (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 }}>
-              <MaterialIcons name="phone" size={16} color={colors.textMuted} />
-              <Text style={[typography.bodySmall, { color: colors.textSubtle }]}>{user.phoneNumber}</Text>
-            </View>
-          )}
-
-          <View style={styles.socialRow}>
-            {(user.links || []).map((link: any, index: number) => (
-              <Pressable
-                key={index}
-                onPress={() => link.url && Linking.openURL(link.url)}
-                style={[styles.socialBtn, { borderColor: colors.border, backgroundColor: colors.surface2 }]}
-              >
-                <MaterialIcons name="link" size={18} color="#6B7280" />
-              </Pressable>
-            ))}
-          </View>
-        </View>
-
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[typography.h3, { color: colors.text, marginBottom: 12 }]}>About Me</Text>
-          <View style={[styles.underline, { backgroundColor: colors.purple }]} />
-          <Text style={[styles.bio, { color: colors.text, lineHeight: 22 }]}>
-            {user.bio || user.about || user.aboutMe || "No bio provided by this freelancer."}
-          </Text>
-        </View>
-
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[typography.h3, { color: colors.text, marginBottom: 12 }]}>Technical Skills</Text>
-          <View style={styles.skills}>
-            {(user.skills || []).map((skill: string, index: number) => (
-              <View key={index} style={[styles.skill, { backgroundColor: colors.purpleSoft }]}>
-                <Text style={{ color: colors.purple, fontSize: 12, fontWeight: "700" }}>{skill}</Text>
-              </View>
-            ))}
-            {(!user.skills || user.skills.length === 0) && (
-              <Text style={[typography.caption, { color: colors.textMuted, fontStyle: "italic" }]}>No skills listed</Text>
-            )}
-          </View>
-        </View>
-
-        <View style={{ gap: 16 }}>
-          <Text style={[typography.h3, { color: colors.text, paddingHorizontal: 8, marginBottom: 4 }]}>Featured Projects</Text>
-          <View style={[styles.underline, { backgroundColor: colors.purple, marginLeft: 8, marginBottom: 8 }]} />
-          
-          {(user.projects || []).length > 0 ? (
-            (user.projects || []).map((project: any, index: number) => (
-              <View
-                key={index}
-                style={[
-                  styles.card,
-                  { backgroundColor: colors.surface, borderColor: colors.border },
-                ]}
-              >
-                <Text style={[typography.h3, { color: colors.text, marginBottom: 8 }]}>{project.title}</Text>
-                <Text style={[typography.bodySmall, { color: colors.textSubtle, lineHeight: 22 }]}>{project.description}</Text>
-                <View style={{ flexDirection: "row", gap: 12, marginTop: 12 }}>
-                  {project.viewLink ? (
-                    <Button
-                      title="View Project"
-                      size="sm"
-                      onPress={() => Linking.openURL(project.viewLink)}
-                    />
-                  ) : null}
-                  {project.githubLink ? (
-                    <Button
-                      title="GitHub"
-                      variant="outline"
-                      size="sm"
-                      onPress={() => Linking.openURL(project.githubLink)}
-                    />
-                  ) : null}
-                </View>
-              </View>
-            ))
-          ) : (
-            <Text style={[typography.body, { textAlign: "center", color: colors.textMuted, fontStyle: "italic", paddingVertical: 20 }]}>
-              No projects added yet.
-            </Text>
-          )}
-        </View>
+  if (error || !freelancer) {
+    return (
+      <View style={[styles.centerContainer, { backgroundColor: colors.bg }]}>
+        <Stack.Screen options={{ title: 'Error', headerRight: () => null }} />
+        <Text style={[typography.body, { color: colors.textMuted, marginBottom: 20 }]}>
+          {error || 'Freelancer not found'}
+        </Text>
+        <Button title="Go Back" onPress={() => router.back()} />
       </View>
+    );
+  }
+
+  const getInitials = (name: string) => {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  };
+
+  const renderSocialIcon = (platform: string) => {
+    const platformLower = platform.toLowerCase();
+    if (platformLower.includes('github')) return <Ionicons name="logo-github" size={24} color={colors.text} />;
+    if (platformLower.includes('linkedin')) return <Ionicons name="logo-linkedin" size={24} color={colors.text} />;
+    if (platformLower.includes('twitter') || platformLower.includes('x')) return <Ionicons name="logo-twitter" size={24} color={colors.text} />;
+    if (platformLower.includes('behance')) return <Ionicons name="logo-behance" size={24} color={colors.text} />;
+    if (platformLower.includes('dribbble')) return <Ionicons name="logo-dribbble" size={24} color={colors.text} />;
+    return <Ionicons name="link-outline" size={24} color={colors.text} />;
+  };
+
+  return (
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]}>
+      <Stack.Screen 
+        options={{ 
+          title: freelancer.fullName || 'Freelancer Profile',
+          headerBackTitleVisible: false,
+          headerRight: renderHeaderRight,
+        }} 
+      />
+      
+      {/* Profile Header */}
+      <View style={styles.header}>
+        {freelancer.profilePicture ? (
+          <Image 
+            source={{ uri: freelancer.profilePicture }} 
+            style={styles.avatar} 
+            contentFit="cover"
+            transition={200}
+          />
+        ) : (
+          <View style={[styles.avatarPlaceholder, { backgroundColor: colors.border }]}>
+            <Text style={[typography.h2, { color: colors.text }]}>
+              {getInitials(freelancer.fullName)}
+            </Text>
+          </View>
+        )}
+        <Text style={[typography.h3, styles.name, { color: colors.text }]}>
+          {freelancer.fullName}
+        </Text>
+        {freelancer.jobTitle && (
+          <Text style={[typography.body, styles.jobTitle, { color: colors.textSubtle }]}>
+            {freelancer.jobTitle}
+          </Text>
+        )}
+      </View>
+
+      {/* Social Links */}
+      {freelancer.links && freelancer.links.length > 0 && (
+        <View style={styles.linksContainer}>
+          {freelancer.links.map((link, index) => (
+            <TouchableOpacity 
+              key={index} 
+              style={[styles.linkIcon, { backgroundColor: colors.surface }]}
+              onPress={() => link.url && Linking.openURL(link.url)}
+            >
+              {renderSocialIcon(link.platform)}
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* About Me */}
+      {(freelancer.bio || freelancer.about) && (
+        <View style={styles.section}>
+          <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>About Me</Text>
+          <Text style={[typography.body, { color: colors.textSubtle, lineHeight: 24 }]}>
+            {freelancer.bio || freelancer.about}
+          </Text>
+        </View>
+      )}
+
+      {/* Technical Skills */}
+      {freelancer.skills && freelancer.skills.length > 0 && (
+        <View style={styles.section}>
+          <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>Technical Skills</Text>
+          <View style={styles.skillsContainer}>
+            {freelancer.skills.map((skill, index) => (
+              <View key={index} style={[styles.skillBadge, { backgroundColor: colors.purple + '20' }]}>
+                <Text style={[typography.caption, { color: colors.purple }]}>{skill}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Featured Projects */}
+      {freelancer.projects && freelancer.projects.length > 0 && (
+        <View style={styles.section}>
+          <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>Featured Projects</Text>
+          {freelancer.projects.map((project, index) => (
+            <View key={project._id || index} style={[styles.projectCard, { backgroundColor: colors.surface }]}>
+              <Text style={[typography.subtitle1, { color: colors.text, marginBottom: 8 }]}>
+                {project.title}
+              </Text>
+              <Text style={[typography.body2, { color: colors.textSubtle, marginBottom: 16 }]}>
+                {project.description}
+              </Text>
+              <View style={styles.projectActions}>
+                {project.viewLink && (
+                  <TouchableOpacity 
+                    style={[styles.projectBtn, { backgroundColor: colors.purple }]}
+                    onPress={() => Linking.openURL(project.viewLink!)}
+                  >
+                    <Ionicons name="eye-outline" size={16} color="#fff" style={{ marginRight: 4 }} />
+                    <Text style={[typography.button, { color: '#fff' }]}>View</Text>
+                  </TouchableOpacity>
+                )}
+                {project.githubLink && (
+                  <TouchableOpacity 
+                    style={[styles.projectBtn, { backgroundColor: colors.text, marginLeft: project.viewLink ? 10 : 0 }]}
+                    onPress={() => Linking.openURL(project.githubLink!)}
+                  >
+                    <Ionicons name="logo-github" size={16} color={colors.bg} style={{ marginRight: 4 }} />
+                    <Text style={[typography.button, { color: colors.bg }]}>GitHub</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+      
+      <View style={{ height: 40 }} />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  scroll: { padding: 16, paddingBottom: 48 },
-  cols: { gap: 24 },
-  card: { borderRadius: 12, padding: 24, borderWidth: 1, shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 8, elevation: 1 },
-  headerCard: { alignItems: "center" },
-  bigAvatar: { width: 100, height: 100, borderRadius: 50, overflow: "hidden", alignItems: "center", justifyContent: "center", marginBottom: 16 },
-  bigAvatarText: { color: "#fff", fontSize: 32, fontWeight: "900" },
-  socialRow: { flexDirection: "row", gap: 12, marginTop: 8 },
-  socialBtn: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, alignItems: "center", justifyContent: "center" },
-  underline: { width: 32, height: 3, borderRadius: 2, marginBottom: 16 },
-  skills: { flexDirection: "row", flexWrap: "wrap", gap: 8, width: "100%" },
-  skill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  bio: { lineHeight: 22 },
+  container: {
+    flex: 1,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  header: {
+    alignItems: 'center',
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
+  },
+  avatarPlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  name: {
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  jobTitle: {
+    textAlign: 'center',
+  },
+  linksContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  linkIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 8,
+    marginBottom: 8,
+  },
+  section: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    marginBottom: 12,
+  },
+  skillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  skillBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  projectCard: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  projectActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  projectBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
 });

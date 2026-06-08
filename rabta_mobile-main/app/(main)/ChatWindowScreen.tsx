@@ -470,8 +470,13 @@ export default function ChatWindowScreen() {
 
   const handleViewProfile = () => {
     setThreeDotsMenuVisible(false);
+    const targetId = resolvedPartnerId || userId;
+    if (!targetId) return;
     setTimeout(() => {
-      setContactDetailsVisible(true);
+      router.push({
+        pathname: '/(main)/freelancer-profile/[id]',
+        params: { id: targetId },
+      } as any);
     }, 200);
   };
 
