@@ -25,16 +25,7 @@ import { getApiErrorMessage } from "../../src/api/getApiErrorMessage";
 
 const { width } = Dimensions.get("window");
 
-const SPECIALIZATIONS = [
-  "Front-End Development",
-  "Back-End Development",
-  "Mobile App Development",
-  "UI/UX Design",
-  "Data Science",
-  "DevOps & Cloud",
-  "Cybersecurity",
-  "Product Management",
-];
+
 
 type ContactRow = { id: string; name: string; avatar?: string; role?: string };
 
@@ -45,7 +36,9 @@ export default function CreateGroupScreen() {
   const [groupName, setGroupName] = useState("");
   const [description, setDescription] = useState("");
   const [specialization, setSpecialization] = useState("");
+  const [specializationLabel, setSpecializationLabel] = useState("");
   const [isSpecModalVisible, setSpecModalVisible] = useState(false);
+  const [specializations, setSpecializations] = useState<{ _id: string; name: string; value: string }[]>([]);
   
   const [skills, setSkills] = useState<string[]>([]);
   const [currentSkill, setCurrentSkill] = useState("");
@@ -77,6 +70,18 @@ export default function CreateGroupScreen() {
         setLoadingContacts(false);
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    const loadSpecializations = async () => {
+      try {
+        const { data } = await axiosInstance.get('/specializations');
+        setSpecializations(data.data?.specializations || []);
+      } catch (err) {
+        console.error('Failed to load specializations', err);
+      }
+    };
+    loadSpecializations();
   }, []);
 
   const inputBg = isDark ? colors.surface : "#F9FAFB";
@@ -298,7 +303,7 @@ export default function CreateGroupScreen() {
                   { color: specialization ? colors.text : colors.textMuted },
                 ]}
               >
-                {specialization || "Select a specialization"}
+                {specializationLabel || "Select a specialization"}
               </Text>
               <Ionicons name="chevron-down" size={20} color={colors.textMuted} />
             </TouchableOpacity>
@@ -505,8 +510,8 @@ export default function CreateGroupScreen() {
                   </TouchableOpacity>
                 </View>
                 <FlatList
-                  data={SPECIALIZATIONS}
-                  keyExtractor={(item) => item}
+                  data={specializations.map(s => ({ label: s.name, value: s.value }))}
+                  keyExtractor={(item) => item.value}
                   showsVerticalScrollIndicator={false}
                   renderItem={({ item }) => (
                     <TouchableOpacity
@@ -514,11 +519,12 @@ export default function CreateGroupScreen() {
                         styles.modalOption,
                         {
                           borderBottomColor: colors.border,
-                          backgroundColor: specialization === item ? colors.purple10 : "transparent",
+                          backgroundColor: specialization === item.value ? colors.purple10 : "transparent",
                         },
                       ]}
                       onPress={() => {
-                        setSpecialization(item);
+                        setSpecialization(item.value);
+                        setSpecializationLabel(item.label);
                         setSpecModalVisible(false);
                       }}
                     >
@@ -526,14 +532,14 @@ export default function CreateGroupScreen() {
                         style={[
                           typography.body,
                           {
-                            color: specialization === item ? colors.purple : colors.text,
-                            fontWeight: specialization === item ? "700" : "400",
+                            color: specialization === item.value ? colors.purple : colors.text,
+                            fontWeight: specialization === item.value ? "700" : "400",
                           },
                         ]}
                       >
-                        {item}
+                        {item.label}
                       </Text>
-                      {specialization === item && (
+                      {specialization === item.value && (
                         <Ionicons name="checkmark" size={20} color={colors.purple} />
                       )}
                     </TouchableOpacity>

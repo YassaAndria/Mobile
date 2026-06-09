@@ -366,6 +366,30 @@ export default function GroupDetailsScreen() {
     );
   };
 
+  const handleDeleteGroup = () => {
+    if (!communityId) return;
+    Alert.alert(
+      'Delete Group',
+      `Are you sure you want to permanently delete "${name}"? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await axiosInstance.delete(`/groups/${communityId}`);
+              Toast.show({ type: 'success', text1: 'Group deleted successfully' });
+              router.replace('/community');
+            } catch (e) {
+              Toast.show({ type: 'error', text1: getApiErrorMessage(e, 'Could not delete group.') });
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleRemoveMember = (userId: string, displayName: string) => {
     if (!communityId) return;
     Alert.alert("Remove member", `Remove ${displayName} from the group?`, [
@@ -861,6 +885,12 @@ export default function GroupDetailsScreen() {
             {/* Danger zone */}
             <Text style={[styles.sectionLabel, { color: C.mahoganyLight }]}>Danger zone</Text>
             <GlassCard style={styles.dangerCard} styles={styles}>
+              {isAdmin && (
+                <TouchableOpacity style={styles.dangerBtn} onPress={handleDeleteGroup}>
+                  <Ionicons name="trash-outline" size={20} color={C.mahoganyLight} />
+                  <Text style={styles.dangerBtnText}>Delete group</Text>
+                </TouchableOpacity>
+              )}
               {!isOwner && (
                 <TouchableOpacity style={styles.dangerBtn} onPress={handleLeave}>
                   <Ionicons name="exit-outline" size={20} color={C.mahoganyLight} />

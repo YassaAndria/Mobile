@@ -27,6 +27,7 @@ import { getApiErrorMessage } from '../../src/api/getApiErrorMessage';
 import { markChatAsRead } from '../../src/api/chat';
 import { formatMessagePreview, normalizeId } from '../../src/utils/chatMessage';
 import { mapCommunityFromApi, type CommunityRow, getCommunityChatId } from '../../src/utils/community';
+import axiosInstance from '../../src/api/axiosInstance';
 
 
 export default function CommunityScreen() {
@@ -34,16 +35,20 @@ export default function CommunityScreen() {
   const router = useRouter();
   const { socket } = useChat();
 
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState('all');
   const [communities, setCommunities] = useState<CommunityRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [currentUserId, setCurrentUserId] = useState('');
+  const [specializations, setSpecializations] = useState<{ _id: string; name: string; value: string }[]>([]);
 
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filters = ['All', 'Programming', 'UI/UX', 'Data', 'Cyber', 'Cloud'];
+  const filters = [
+    { name: 'All', value: 'all' },
+    ...specializations.map(s => ({ name: s.name, value: s.value })),
+  ];
 
   useEffect(() => {
     AsyncStorage.getItem('user').then(stored => {
@@ -54,14 +59,30 @@ export default function CommunityScreen() {
     });
   }, []);
 
+  useEffect(() => {
+    const loadSpecializations = async () => {
+      try {
+        const { data } = await axiosInstance.get('/specializations');
+        setSpecializations(data.data?.specializations || []);
+      } catch (err) {
+        console.error('Failed to load specializations', err);
+      }
+    };
+    loadSpecializations();
+  }, []);
+
   const fetchCommunities = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true);
     try {
-      const category = activeFilter === 'All' ? '' : activeFilter.toLowerCase();
+      const category = activeFilter === 'all' ? '' : activeFilter.toLowerCase();
       const res = await listCommunities(category || undefined);
-      const raw = res.data?.data?.communities ?? [];
+      const raw = res.data?.data?.communities ?? res.data?.communities ?? [];
       const uid = currentUserId || '';
-      const mapped = raw.map((c: Record<string, unknown>) => mapCommunityFromApi(c, uid));
+      const mapped = raw.map((c: Record<string, unknown>) => ({
+        ...mapCommunityFromApi(c, uid),
+        name: (c.name as string) || (c.communityName as string) || '',
+        category: (c.category as string) ?? '',
+      }));
       setCommunities([...mapped].sort((a, b) => {
         const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date((a as any).createdAt || 0).getTime();
         const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date((b as any).createdAt || 0).getTime();
@@ -272,7 +293,16 @@ export default function CommunityScreen() {
   const invitedCommunities = communities.filter(c => c.isInvited);
   const memberCommunities = communities.filter(c => c.isMember);
 
-  const filteredCommunities = memberCommunities.filter(c => {
+
+
+  const categoryFiltered =
+    activeFilter === 'all'
+      ? memberCommunities
+      : memberCommunities.filter(
+          c => (c as any).category?.toLowerCase() === activeFilter.toLowerCase(),
+        );
+
+  const filteredCommunities = categoryFiltered.filter(c => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -336,11 +366,11 @@ export default function CommunityScreen() {
       <View style={styles.filterContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
           {filters.map(filter => {
-            const isActive = activeFilter === filter;
+            const isActive = activeFilter === filter.value;
             return (
               <TouchableOpacity
-                key={filter}
-                onPress={() => setActiveFilter(filter)}
+                key={filter.value}
+                onPress={() => setActiveFilter(filter.value)}
                 style={[
                   styles.filterBtn,
                   {
@@ -350,7 +380,7 @@ export default function CommunityScreen() {
                 ]}
               >
                 <Text style={{ color: isActive ? '#FFF' : colors.text, fontSize: 13, fontWeight: '600' }}>
-                  {filter}
+                  {filter.name}
                 </Text>
               </TouchableOpacity>
             );
