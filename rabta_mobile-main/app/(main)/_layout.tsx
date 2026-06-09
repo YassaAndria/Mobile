@@ -11,12 +11,16 @@ import {
   registerDeviceTokenWithBackend,
   unregisterDeviceTokenWithBackend
 } from "../../src/utils/notifications";
+import axiosInstance from "../../src/api/axiosInstance";
+import { useChat } from "../../src/context/ChatContext";
 
 const PENDING_INVITE_KEY = "pendingGroupInviteToken";
 
 export default function MainGroupLayout() {
   const isAuthenticated = useSelector((s: RootState) => s.auth.isAuthenticated);
+  const user = useSelector((s: RootState) => s.auth.user);
   const { isDark } = useTheme();
+  const { socket } = useChat();
   const segments = useSegments();
   const router = useRouter();
 
@@ -69,6 +73,11 @@ export default function MainGroupLayout() {
         console.log('[MainLayout] Got push token:', token);
         await AsyncStorage.setItem('pushToken', token);
         await registerDeviceTokenWithBackend(token);
+        try {
+          await axiosInstance.post('/users/fcm-token', { token });
+        } catch (e) {
+          console.log('[PushNotifications] Failed to save token', e);
+        }
       }
     });
 
@@ -100,6 +109,21 @@ export default function MainGroupLayout() {
       AsyncStorage.removeItem('pushToken');
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!socket || !user?._id) return;
+    const handleConnect = () => {
+      socket.emit('user-online', { userId: user._id });
+    };
+    socket.on('connect', handleConnect);
+    // Emit immediately if already connected
+    if (socket.connected) {
+      socket.emit('user-online', { userId: user._id });
+    }
+    return () => {
+      socket.off('connect', handleConnect);
+    };
+  }, [socket, user?._id]);
 
   if (!isAuthenticated && !isAuthRoute) {
     return null;
