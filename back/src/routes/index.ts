@@ -243,4 +243,7 @@ router.put("/messages/:id/edit", protect, editMessage);
 router.put("/messages/:id/pin", protect, togglePinMessage);
 router.post("/messages/:id/react", protect, reactToMessage);
 
+import { getAllJobCategories } from "../controllers/jobCategory.controller";
+router.get("/job-categories", getAllJobCategories);
+
 export default router;

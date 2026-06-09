@@ -186,6 +186,15 @@ export const applyToJob = catchAsync(async (req: Request, res: Response, next: N
   })();
 });
 
+export const getMyEmployerJobs = catchAsync(async (req: Request, res: Response) => {
+  const employerId = (req.user as any)._id;
+  const jobs = await Job.find({ publisherId: employerId }).sort({ createdAt: -1 });
+  res.status(200).json({
+    status: 'success',
+    data: { jobs }
+  });
+});
+
 export const getEmployerJobs = catchAsync(async (req: Request, res: Response) => {
   const employerId = (req.user as any)._id;
   const jobs = await Job.find({ publisherId: employerId }).sort({ createdAt: -1 });
