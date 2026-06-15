@@ -125,7 +125,7 @@ export default function AdminTokensScreen() {
           </Text>
         </View>
         <Text style={[typography.h3, { color: colors.text, marginTop: 4 }]}>
-          {val.toLocaleString()}
+          {val.toLocaleString("en-US")}
         </Text>
       </View>
     );
@@ -155,7 +155,7 @@ export default function AdminTokensScreen() {
               <Ionicons name="hardware-chip-outline" size={20} color="#FFF" style={{ opacity: 0.8 }} />
             </View>
             <Text style={[styles.statValueLarge, { color: "#FFF" }]}>
-              {totalPlatformTokens.toLocaleString()}
+              {totalPlatformTokens.toLocaleString("en-US")}
             </Text>
           </View>
 
@@ -178,7 +178,7 @@ export default function AdminTokensScreen() {
               {topUser?.fullName || "N/A"}
             </Text>
             <Text style={[typography.caption, { color: colors.purple, fontWeight: "600", marginTop: 2 }]}>
-              {topUser?.totalTokensUsed?.toLocaleString() || 0} Tokens
+              {topUser?.totalTokensUsed?.toLocaleString("en-US") || 0} Tokens
             </Text>
           </View>
         </View>
@@ -255,7 +255,7 @@ export default function AdminTokensScreen() {
                       USED
                     </Text>
                     <Text style={[typography.h3, { color: colors.purple, fontWeight: "800", textAlign: "right" }]}>
-                      {(user.totalTokensUsed || 0).toLocaleString()}
+                      {(user.totalTokensUsed || 0).toLocaleString("en-US")}
                     </Text>
                   </View>
                 </TouchableOpacity>
