@@ -69,6 +69,7 @@ export default function ChatWindowScreen() {
   const params = useLocalSearchParams<{
     chatId?: string;
     chatName?: string;
+    name?: string;
     isGroup?: string;
     userId?: string;
     avatar?: string;
@@ -78,13 +79,16 @@ export default function ChatWindowScreen() {
   }>();
 
   const {
-    chatName = 'Chat',
+    chatName: paramChatName,
+    name: paramName,
     isGroup: paramIsGroup,
     userId,
     avatar: paramAvatar,
     isOnline: paramIsOnline,
     communityId,
   } = params;
+
+  const chatName = paramChatName || paramName || 'Chat';
 
   const isGroup = paramIsGroup === 'true';
 
@@ -470,13 +474,11 @@ export default function ChatWindowScreen() {
 
   const handleViewProfile = () => {
     setThreeDotsMenuVisible(false);
+    setContactDetailsVisible(false);
     const targetId = resolvedPartnerId || userId;
     if (!targetId) return;
     setTimeout(() => {
-      router.push({
-        pathname: '/(main)/freelancer-profile/[id]',
-        params: { id: targetId },
-      } as any);
+      router.push(`/freelancer-profile/${targetId}` as any);
     }, 200);
   };
 
@@ -2226,6 +2228,22 @@ export default function ChatWindowScreen() {
                     }}
                   >
                     <Ionicons name="videocam-outline" size={22} color={colors.purple} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setContactDetailsVisible(false);
+                      handleViewProfile();
+                    }}
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                      backgroundColor: isDark ? '#2D2D2D' : '#F3F4F6',
+                    }}
+                  >
+                    <Ionicons name="person-outline" size={22} color={colors.purple} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {

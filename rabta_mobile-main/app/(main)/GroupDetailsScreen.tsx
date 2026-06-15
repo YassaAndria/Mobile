@@ -444,7 +444,21 @@ export default function GroupDetailsScreen() {
             <Ionicons name="chevron-back" size={28} color={C.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Group info</Text>
-          <View style={{ width: 28 }} />
+          {isAdmin ? (
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: "/EditGroupScreen",
+                  params: { communityId: communityId ?? "" },
+                } as any)
+              }
+              hitSlop={12}
+            >
+              <Ionicons name="create-outline" size={24} color={C.accent} />
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: 28 }} />
+          )}
         </View>
 
         {loading ? (

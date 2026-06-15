@@ -834,7 +834,7 @@ io.on('connection', (socket) => {
 // ==========================================
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
-  max: 100, 
+  max: process.env.NODE_ENV === 'production' ? 100 : 10000, 
   message: { 
     status: 'error',
     message: "The allowed request limit has been exceeded, please try again after 15 minutes." 

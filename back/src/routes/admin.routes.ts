@@ -54,4 +54,9 @@ router.put('/logs/:id/revert', revertAiAction);
 import { createSpecialization } from '../controllers/specialization.controller';
 router.post('/specializations', createSpecialization);
 
+// Job Categories
+import { createJobCategory, deleteJobCategory } from '../controllers/jobCategory.controller';
+router.post('/job-categories', createJobCategory);
+router.delete('/job-categories/:id', deleteJobCategory);
+
 export default router;

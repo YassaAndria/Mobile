@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { protect } from "../middlewares/auth.middleware";
 import { restrictTo } from "../middlewares/authorize.middleware";
+import { updateCommunity } from "../controllers/chat.controller";
 import {
   listCommunities,
   searchCommunities,
@@ -30,6 +31,7 @@ router.post("/", createCommunity);
 router.get("/invite/:token", previewInviteGroup);
 router.post("/invite/:token/join", joinGroupViaInviteLink);
 router.get("/:id", getCommunityById);
+router.put("/:communityId", updateCommunity);
 router.post("/:id/invite-link", generateInviteLink);
 router.post("/:id/join", joinCommunity);
 router.post("/:id/leave", leaveCommunity);

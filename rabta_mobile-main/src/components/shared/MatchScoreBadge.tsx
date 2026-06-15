@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
 import { typography } from '../../theme/typography';
@@ -7,17 +7,19 @@ import { typography } from '../../theme/typography';
 interface MatchScoreBadgeProps {
   score?: number | null;
   reason?: string | null;
+  isReloading?: boolean;
+  onReload?: () => void;
 }
 
-export const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({ score, reason }) => {
+export const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({ score, reason, isReloading, onReload }) => {
   const { colors, mode } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
-  if (score === undefined || score === null) {
+  if (score === undefined || score === null || isReloading) {
     return (
       <View style={[styles.badge, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <MaterialIcons name="psychology" size={16} color={colors.textSubtle} />
-        <Text style={[typography.caption, { color: colors.textSubtle, fontWeight: '700' }]}>
+        <ActivityIndicator size="small" color={colors.textMuted} style={{ marginRight: 4 }} />
+        <Text style={[typography.caption, { color: colors.textMuted, fontWeight: '700' }]}>
           AI Calculating...
         </Text>
       </View>
@@ -86,6 +88,29 @@ export const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({ score, reason 
                 <Text style={[typography.body, { color: colors.text, lineHeight: 24, marginTop: 16 }]}>
                   {reason}
                 </Text>
+                {onReload && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setModalVisible(false);
+                      onReload();
+                    }}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: colors.purple + '20',
+                      padding: 12,
+                      borderRadius: 12,
+                      marginTop: 20,
+                      gap: 8,
+                    }}
+                  >
+                    <MaterialIcons name="autorenew" size={18} color={colors.purple} />
+                    <Text style={{ color: colors.purple, fontWeight: '800', fontSize: 14 }}>
+                      Re-evaluate Match
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </TouchableWithoutFeedback>
           </View>

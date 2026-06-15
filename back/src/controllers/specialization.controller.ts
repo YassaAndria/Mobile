@@ -51,3 +51,31 @@ export const createSpecialization = catchAsync(async (req: Request, res: Respons
     data: { specialization },
   });
 });
+
+export const deleteSpecialization = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  const specialization = await Specialization.findById(id);
+  if (!specialization) {
+    return next(new AppError("Specialization not found", 404));
+  }
+
+  await Specialization.findByIdAndDelete(id);
+
+  if (req.user) {
+    const adminName = (req.user as any).fullName || 'Admin';
+      
+    await AdminLog.create({
+      adminId: req.user._id,
+      adminName: adminName,
+      actionType: 'Delete Specialization',
+      targetName: specialization.name,
+      category: 'Manual',
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Specialization deleted successfully",
+  });
+});

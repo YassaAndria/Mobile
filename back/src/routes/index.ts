@@ -127,8 +127,10 @@ router.post(
 // راجع: routes/chatRoutes.ts + controllers/chat.controller.ts + services/chat.service.ts
 
 // Specializations
-import { getAllSpecializations } from "../controllers/specialization.controller";
+import { getAllSpecializations, createSpecialization, deleteSpecialization } from "../controllers/specialization.controller";
 router.get("/specializations", getAllSpecializations);
+router.post("/specializations", protect, restrictTo("admin"), createSpecialization);
+router.delete("/specializations/:id", protect, restrictTo("admin"), deleteSpecialization);
 
 // مسار البحث (بنحميه بـ protect عشان بس المسجلين في رابطة هما اللي يبحثوا)
 router.get("/users/search/all", protect, searchUsers);

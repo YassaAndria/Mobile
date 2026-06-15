@@ -18,18 +18,19 @@ const sections: SidebarSection[] = [
     key: "platform",
     items: [
       { path: "/admin/users",         label: "Users",         icon: "people"        },
-      { path: "/admin/jobs",          label: "Jobs",          icon: "work"          },
       { path: "/admin/groups",        label: "Communities",   icon: "layers"        },
-      { path: "/admin/verifications", label: "Verifications", icon: "verified-user" },
       { path: "/admin/specializations", label: "Specializations", icon: "local-offer"  },
+      { path: "/admin/job-categories",  label: "Job Categories",  icon: "category"     },
+      { path: "/admin/jobs",          label: "Jobs",          icon: "work"          },
+      { path: "/admin/verifications", label: "Verifications", icon: "verified-user" },
     ]
   },
   {
     title: "SYSTEM & ADMINISTRATION",
     key: "system",
     items: [
-      { path: "/admin/add-admin",     label: "Add Admin",     icon: "person-add"    },
       { path: "/admin/logs",          label: "Activity Logs", icon: "history"       },
+      { path: "/admin/add-admin",     label: "Add Admin",     icon: "person-add"    },
     ]
   },
   {
@@ -37,6 +38,7 @@ const sections: SidebarSection[] = [
     key: "ai",
     items: [
       { path: "/admin/ai-training",   label: "AI Training",   icon: "psychology"    },
+      { path: "/admin/tokens",        label: "Token Usage",   icon: "toll"          },
     ]
   }
 ];

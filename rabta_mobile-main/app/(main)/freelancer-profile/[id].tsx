@@ -9,7 +9,7 @@ import Toast from 'react-native-toast-message';
 import axiosInstance from '../../../src/api/axiosInstance';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { typography } from '../../../src/theme/typography';
-import Button from '../../../src/components/ui/Button';
+import { Button } from '../../../src/components/ui/Button';
 import { RootState } from '../../../src/store/store';
 import { updateProfile } from '../../../src/store/slices/authSlice';
 import { useAppDispatch } from '../../../src/store/hooks';
@@ -152,7 +152,6 @@ export default function FreelancerProfileScreen() {
       <Stack.Screen 
         options={{ 
           title: freelancer.fullName || 'Freelancer Profile',
-          headerBackTitleVisible: false,
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => router.back()}
@@ -193,7 +192,7 @@ export default function FreelancerProfileScreen() {
         <TouchableOpacity
           onPress={() => router.push({
             pathname: '/(main)/ChatWindowScreen',
-            params: { userId: freelancer._id, name: freelancer.fullName, avatar: freelancer.avatar }
+            params: { userId: freelancer._id, chatName: freelancer.fullName, avatar: freelancer.avatar }
           } as any)}
           style={{
             flexDirection: 'row',
@@ -230,7 +229,7 @@ export default function FreelancerProfileScreen() {
 
       {/* About Me */}
       <View style={styles.section}>
-        <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>About Me</Text>
+        <Text style={[typography.h3, styles.sectionTitle, { color: colors.text }]}>About Me</Text>
         <Text style={[typography.body, { color: colors.textSubtle, lineHeight: 24 }]}>
           {freelancer.aboutMe || freelancer.bioHeadline || 'No description provided yet.'}
         </Text>
@@ -238,7 +237,7 @@ export default function FreelancerProfileScreen() {
 
       {/* Technical Skills */}
       <View style={styles.section}>
-        <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>Technical Skills</Text>
+        <Text style={[typography.h3, styles.sectionTitle, { color: colors.text }]}>Technical Skills</Text>
         {freelancer.skills && freelancer.skills.length > 0 ? (
           <View style={styles.skillsContainer}>
             {freelancer.skills.map((skill, index) => (
@@ -255,7 +254,7 @@ export default function FreelancerProfileScreen() {
       {/* Contact Info */}
       {(freelancer.email || freelancer.phoneNumber) && (
         <View style={styles.section}>
-          <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>Contact</Text>
+          <Text style={[typography.h3, styles.sectionTitle, { color: colors.text }]}>Contact</Text>
           {freelancer.email && (
             <TouchableOpacity onPress={() => Linking.openURL(`mailto:${freelancer.email}`)}>
               <Text style={[typography.body, { color: colors.purple, marginBottom: 8 }]}>✉ {freelancer.email}</Text>
@@ -271,14 +270,14 @@ export default function FreelancerProfileScreen() {
 
       {/* Featured Projects */}
       <View style={styles.section}>
-        <Text style={[typography.h4, styles.sectionTitle, { color: colors.text }]}>Featured Projects</Text>
+        <Text style={[typography.h3, styles.sectionTitle, { color: colors.text }]}>Featured Projects</Text>
         {freelancer.featuredProjects && freelancer.featuredProjects.length > 0 ? (
           freelancer.featuredProjects.map((project, index) => (
             <View key={project._id || index} style={[styles.projectCard, { backgroundColor: colors.surface }]}>
-              <Text style={[typography.subtitle1, { color: colors.text, marginBottom: 8 }]}>
+              <Text style={[typography.body, { color: colors.text, marginBottom: 8, fontWeight: '700' }]}>
                 {project.title}
               </Text>
-              <Text style={[typography.body2, { color: colors.textSubtle, marginBottom: 16 }]}>
+              <Text style={[typography.body, { color: colors.textSubtle, marginBottom: 16 }]}>
                 {project.description}
               </Text>
               <View style={styles.projectActions}>

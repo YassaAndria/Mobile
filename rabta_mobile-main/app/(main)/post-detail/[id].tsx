@@ -369,7 +369,6 @@ export default function PostDetailScreen() {
       <Stack.Screen
         options={{
           title: 'Post',
-          headerBackTitleVisible: false,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()} style={{ paddingLeft: 8 }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />

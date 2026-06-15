@@ -453,41 +453,66 @@ export const syncContacts = catchAsync(async (req: Request, res: Response, next:
 
   const defaultRegion = (regionCode || 'EG') as CountryCode;
   
-  const standardizedNumbers: string[] = [];
-  const rawToStandardizedMap = new Map<string, string>();
+  const searchVariants: string[] = [];
+  const variantToE164 = new Map<string, string>();
+  const e164ToRaw = new Map<string, string>();
+  const uniqueE164s = new Set<string>();
 
-  // Sanitize and format each number to E.164
   contacts.forEach((phone: string) => {
     const phoneNumber = parsePhoneNumberFromString(phone, defaultRegion);
     if (phoneNumber && phoneNumber.isValid()) {
       const e164 = phoneNumber.format('E.164');
-      if (!standardizedNumbers.includes(e164)) {
-        standardizedNumbers.push(e164);
-        rawToStandardizedMap.set(e164, phone); // Store raw mapping for display
+      if (!uniqueE164s.has(e164)) {
+        uniqueE164s.add(e164);
+        e164ToRaw.set(e164, phone);
+
+        const national = phoneNumber.nationalNumber;
+        const localZero = '0' + national;
+        const noPlus = e164.replace('+', '');
+        const rawClean = phone.replace(/[^\d+]/g, '');
+
+        const variants = [e164, national, localZero, noPlus, rawClean];
+        variants.forEach(variant => {
+          searchVariants.push(variant);
+          variantToE164.set(variant, e164);
+        });
+      }
+    } else {
+      const rawClean = phone.replace(/[^\d+]/g, '');
+      if (rawClean && !uniqueE164s.has(rawClean)) {
+        uniqueE164s.add(rawClean);
+        e164ToRaw.set(rawClean, phone);
+        searchVariants.push(rawClean);
+        variantToE164.set(rawClean, rawClean);
       }
     }
   });
 
-  // Query database for matched standardized numbers
   const registeredUsers = await User.find({
-    phoneNumber: { $in: standardizedNumbers }
+    phoneNumber: { $in: searchVariants }
   }).select('fullName avatar phoneNumber jobTitle status role');
 
-  const registeredNumbers = registeredUsers.map(user => user.phoneNumber as string);
+  const registeredE164s = new Set<string>();
+  const registeredContacts = registeredUsers.map(user => {
+    const dbPhone = user.phoneNumber as string;
+    const matchedE164 = variantToE164.get(dbPhone) || dbPhone;
+    registeredE164s.add(matchedE164);
+    
+    return {
+      ...user.toObject(),
+      originalNumber: e164ToRaw.get(matchedE164) || dbPhone
+    };
+  });
 
-  // Unregistered numbers are those not found in the DB (return original format for display)
-  const unregisteredNumbers = standardizedNumbers
-    .filter(num => !registeredNumbers.includes(num))
-    .map(num => ({
-      originalNumber: rawToStandardizedMap.get(num) || num,
-      standardizedNumber: num
-    }));
-
-  // Attach originalNumber to registered users so frontend can map them back to local phonebook
-  const registeredContacts = registeredUsers.map(user => ({
-    ...user.toObject(),
-    originalNumber: rawToStandardizedMap.get(user.phoneNumber as string) || user.phoneNumber
-  }));
+  const unregisteredNumbers: any[] = [];
+  uniqueE164s.forEach(e164 => {
+    if (!registeredE164s.has(e164)) {
+      unregisteredNumbers.push({
+        originalNumber: e164ToRaw.get(e164) || e164,
+        standardizedNumber: e164
+      });
+    }
+  });
 
   res.status(200).json({
     status: 'success',

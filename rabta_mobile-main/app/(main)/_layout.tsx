@@ -25,7 +25,7 @@ export default function MainGroupLayout() {
   const router = useRouter();
 
   const authRoutes = ["login", "signup", "forgot-password", "login-success", "setup-profile", "index"];
-  const chatRoutes = ["ChatWindowScreen", "call", "GroupDetailsScreen", "chat-info", "community-feed", "JoinGroupScreen", "create-group"];
+  const chatRoutes = ["ChatWindowScreen", "call", "GroupDetailsScreen", "chat-info", "community-feed", "JoinGroupScreen", "create-group", "EditGroupScreen"];
 
   const isAuthRoute = segments.includes("index") || authRoutes.some(r => segments.includes(r));
   const isChatRoute = chatRoutes.some(r => segments.includes(r));
